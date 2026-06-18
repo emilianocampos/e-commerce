@@ -15,7 +15,7 @@ export function BuyNowButton({ productId }: BuyNowButtonProps) {
   const handleBuy = async () => {
     setIsLoading(true);
     try {
-      const response = await createCheckoutPreference(productId, 1);
+      const response = await createCheckoutPreference([{ productId, quantity: 1 }]);
 
       if (response.error) {
         showToast.error(response.error, { position: 'top-center' });
