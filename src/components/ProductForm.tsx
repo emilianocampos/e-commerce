@@ -1,12 +1,13 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { createProduct, updateProduct } from '@/actions/products';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Product } from '@/types/product';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { showToast } from 'nextjs-toast-notify';
 
 interface ProductFormProps {
   action: (state: any, formData: FormData) => Promise<any>;
@@ -17,10 +18,24 @@ export function ProductForm({ action, initialData }: ProductFormProps) {
   // 2. useActionState (Nuevo hook de React 19 / Next 15)
   // Maneja de forma nativa los estados de carga y error de un Server Action.
   const [state, formAction, isPending] = useActionState(action, null);
-  
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state?.success) {
+      if (initialData) {
+        showToast.success('Producto actualizado correctamente', { position: 'top-center' });
+      } else {
+        showToast.success('Producto creado correctamente', { position: 'top-center' });
+      }
+      router.push('/admin/productos');
+    } else if (state?.error) {
+      showToast.error(`Error: ${state.error}`, { position: 'top-center' });
+    }
+  }, [state, initialData, router]);
+
   // 3. Estado local para poder mostrar en pantalla la imagen que el usuario selecciona
   // antes de enviar el formulario a Supabase.
-  const [previewImage, setPreviewImage] = useState<string | null>(initialData?.image || null);
+  const [previewImage, setPreviewImage] = useState<string | null>(initialData?.image ?? null);
 
   // 4. Se ejecuta cada vez que el usuario selecciona un archivo en el input de tipo 'file'
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +50,7 @@ export function ProductForm({ action, initialData }: ProductFormProps) {
   return (
     // 5. Vinculamos nuestro formulario al action state proporcionado por useActionState
     <form action={formAction} className="space-y-6">
-      
+
       {/* Si el Server Action devuelve un error (ej. faltan campos), lo mostramos en rojo */}
       {state?.error && (
         <div className="rounded-md bg-red-50 p-4 text-sm text-red-500">
@@ -57,7 +72,7 @@ export function ProductForm({ action, initialData }: ProductFormProps) {
           label="Categoría"
           name="category"
           required
-          defaultValue={initialData?.category}
+          defaultValue={initialData?.category ?? undefined}
           placeholder="Ej: Calzado"
         />
 
@@ -91,7 +106,7 @@ export function ProductForm({ action, initialData }: ProductFormProps) {
           name="description"
           rows={4}
           required
-          defaultValue={initialData?.description}
+          defaultValue={initialData?.description ?? undefined}
           className="block w-full rounded-xl border-zinc-300 shadow-sm focus:border-zinc-900 focus:ring-zinc-900 sm:text-sm p-3 border"
           placeholder="Describe las características principales del producto..."
         />
@@ -102,7 +117,7 @@ export function ProductForm({ action, initialData }: ProductFormProps) {
         <label htmlFor="image" className="block text-sm font-medium text-zinc-900">
           Imagen del producto {initialData ? '(Opcional)' : '(Obligatorio)'}
         </label>
-        
+
         {/* Contenedor flexible para mostrar botón + previsualización lado a lado */}
         <div className="flex items-center gap-6">
           <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-xl border border-dashed border-zinc-300 bg-zinc-50">
@@ -112,6 +127,7 @@ export function ProductForm({ action, initialData }: ProductFormProps) {
                 src={previewImage}
                 alt="Vista previa"
                 fill
+                unoptimized
                 className="object-cover"
               />
             ) : (
@@ -121,7 +137,7 @@ export function ProductForm({ action, initialData }: ProductFormProps) {
               </div>
             )}
           </div>
-          
+
           {/* El input tipo 'file' oculto pero clickeable (estilizado nativamente) */}
           <input
             type="file"

@@ -62,7 +62,7 @@ export default async function AdminProductsPage() {
                     <div className="flex items-center gap-4">
                       <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md border border-zinc-200 bg-zinc-100">
                         {product.image && (
-                          <Image src={product.image} alt={product.title} fill className="object-cover" sizes="40px" />
+                          <Image src={product.image} alt={product.title} fill unoptimized className="object-cover" sizes="40px" />
                         )}
                       </div>
                       <div>
@@ -92,7 +92,7 @@ export default async function AdminProductsPage() {
                         Editar
                       </Link>
                       {/* DeleteProductButton usa un Server Action por debajo para eliminar sin JS si es necesario */}
-                      <DeleteProductButton id={product.id} />
+                      <DeleteProductButton id={product.id} title={product.title} />
                     </div>
                   </td>
                 </tr>

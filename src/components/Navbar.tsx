@@ -24,7 +24,7 @@ export function Navbar({ user, role }: NavbarProps) {
   const cartItems = useCartStore((state) => state.items);
   // Reducimos el array de items a un solo número sumando sus cantidades
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  
+
   // 2. Estado local para saber si el menú móvil (hamburguesa) está abierto
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -41,7 +41,7 @@ export function Navbar({ user, role }: NavbarProps) {
 
         {/* Lado derecho: Acciones (Carrito, Login/Perfil, Menú Móvil) */}
         <div className="flex items-center gap-2 md:gap-4">
-          
+
           {/* Lógica si es Admin: Mostrar un botón rojo hacia el Panel */}
           {role === 'admin' && (
             <Link href="/admin" className="hidden md:flex">
@@ -116,7 +116,7 @@ export function Navbar({ user, role }: NavbarProps) {
                 </Button>
               </Link>
             )}
-            
+
             {user ? (
               <>
                 <div className="flex items-center gap-2 px-2 text-sm text-zinc-600">

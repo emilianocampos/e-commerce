@@ -6,18 +6,22 @@ import { createClient } from './supabase-server';
  */
 export async function uploadProductImage(file: File): Promise<string | null> {
   const supabase = await createClient();
-  
+
   // Generar un nombre único para el archivo
   const fileExt = file.name.split('.').pop();
   const fileName = `${crypto.randomUUID()}.${fileExt}`;
-  
+
+  const buffer = Buffer.from(await file.arrayBuffer());
   const { error } = await supabase.storage
     .from('products')
-    .upload(fileName, file);
+    .upload(fileName, buffer, {
+      contentType: file.type,
+      upsert: false
+    });
 
   if (error) {
     console.error('Error al subir la imagen:', error.message);
-    return null;
+    throw new Error('No se pudo subir la imagen al storage: ' + error.message);
   }
 
   // Obtener URL pública
@@ -33,11 +37,11 @@ export async function uploadProductImage(file: File): Promise<string | null> {
  */
 export async function deleteProductImage(imageUrl: string) {
   const supabase = await createClient();
-  
+
   // Extraer el nombre del archivo de la URL
   const urlParts = imageUrl.split('/');
   const fileName = urlParts[urlParts.length - 1];
-  
+
   const { error } = await supabase.storage
     .from('products')
     .remove([fileName]);

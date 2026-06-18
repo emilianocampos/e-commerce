@@ -11,6 +11,8 @@ import { Minus, Plus, Trash2 } from 'lucide-react';
 import { Button } from './Button';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
+import { CheckoutButton } from './CheckoutButton';
+import { showToast } from 'nextjs-toast-notify';
 
 export function Cart() {
   // 1. Extraemos las propiedades y funciones que necesitamos de nuestro estado global (Zustand)
@@ -46,7 +48,7 @@ export function Cart() {
                 {/* 4.a: Imagen miniatura */}
                 <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-xl bg-zinc-100">
                   {item.product.image && (
-                    <Image src={item.product.image} alt={item.product.title} fill className="object-cover" />
+                    <Image src={item.product.image} alt={item.product.title} fill unoptimized className="object-cover" />
                   )}
                 </div>
 
@@ -80,7 +82,10 @@ export function Cart() {
                     </div>
                     {/* Botón para eliminar totalmente del carrito */}
                     <button
-                      onClick={() => removeItem(item.product.id)}
+                      onClick={() => {
+                        removeItem(item.product.id);
+                        showToast.error('Producto eliminado', { position: 'bottom-right', duration: 3000 });
+                      }}
                       className="text-sm font-medium text-red-500 hover:text-red-600 transition-colors"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -125,10 +130,8 @@ export function Cart() {
             </div>
           </dl>
 
-          {/* Botón de Checkout (Solo UI, no funcional en este ejemplo) */}
-          <Button className="mt-6 w-full" size="lg">
-            Proceder al pago
-          </Button>
+          {/* Botón de Checkout Integrado con Mercado Pago */}
+          <CheckoutButton />
           <div className="mt-4 text-center text-xs text-zinc-500">
             Pagos seguros. SSL Encriptado.
           </div>

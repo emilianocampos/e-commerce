@@ -26,7 +26,7 @@ export async function login(formData: FormData) {
 
   // 3. Inicializamos nuestro cliente de Supabase (específico para el servidor)
   const supabase = await createClient();
-  
+
   // 4. Intentamos iniciar sesión utilizando el método de Supabase con email y password
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -59,7 +59,7 @@ export async function register(formData: FormData) {
 
   // 3. Inicializamos el cliente de Supabase
   const supabase = await createClient();
-  
+
   // 4. Utilizamos la función signUp de Supabase para registrar al usuario
   const { error } = await supabase.auth.signUp({
     email,
@@ -82,10 +82,10 @@ export async function register(formData: FormData) {
 export async function logout() {
   // 1. Obtenemos el cliente de Supabase
   const supabase = await createClient();
-  
+
   // 2. Le pedimos a Supabase que destruya la sesión actual del usuario en la base de datos
   await supabase.auth.signOut();
-  
+
   // 3. Redirigimos de vuelta a la página de inicio de sesión
   redirect('/login');
 }

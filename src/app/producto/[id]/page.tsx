@@ -47,7 +47,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         {/* Columna Izquierda: Imagen del producto */}
         <div className="relative aspect-square overflow-hidden rounded-3xl bg-zinc-100">
           {product.image ? (
-            <Image src={product.image} alt={product.title} fill className="object-cover" />
+            <Image src={product.image} alt={product.title} fill unoptimized className="object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-zinc-400">
               Sin imagen
@@ -72,9 +72,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           </div>
 
           <div className="mt-10">
-            {/* Si el stock es mayor a 0, mostramos el botón Client Component que hicimos para interactuar con Zustand */}
+            {/* Si el stock es mayor a 0, mostramos los botones de compra */}
             {product.stock > 0 ? (
-              <AddToCartButton product={product as any} />
+              <div className="flex flex-col gap-4">
+                <AddToCartButton product={product as any} />
+              </div>
             ) : (
               // Si no hay stock, mostramos un botón deshabilitado
               <div className="rounded-lg bg-zinc-100 px-4 py-3 text-center text-sm font-medium text-zinc-500">

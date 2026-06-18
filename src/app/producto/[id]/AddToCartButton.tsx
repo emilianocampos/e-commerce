@@ -10,6 +10,7 @@ import { Product } from '@/types/product';
 import { Button } from '@/components/Button';
 import { ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
+import { showToast } from 'nextjs-toast-notify';
 
 // 1. Definimos las props que recibirá el componente desde la página del servidor
 interface AddToCartButtonProps {
@@ -28,6 +29,12 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
   const handleAdd = () => {
     // a. Agregamos 1 unidad del producto al carrito global
     addItem(product, 1);
+    
+    // Mostramos toast lateral derecho
+    showToast.success('Producto agregado al carrito', {
+      position: 'bottom-right',
+      duration: 3000,
+    });
     
     // b. Cambiamos el estado local para cambiar el texto del botón a "¡Agregado!"
     setAdded(true);

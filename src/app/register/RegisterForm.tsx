@@ -20,6 +20,7 @@ export function RegisterForm() {
           {state.error}
         </div>
       )}
+
       <div className="space-y-2">
         <label className="text-sm font-medium" htmlFor="email">
           Email
@@ -32,6 +33,49 @@ export function RegisterForm() {
         </label>
         <Input id="password" name="password" type="password" required minLength={6} />
       </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium" htmlFor="nombre">Nombre</label>
+          <Input id="nombre" name="nombre" placeholder="Juan" required />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium" htmlFor="apellido">Apellido</label>
+          <Input id="apellido" name="apellido" placeholder="Pérez" required />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium" htmlFor="dni">DNI</label>
+          <Input id="dni" name="dni" placeholder="12345678" required />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium" htmlFor="telefono">Teléfono</label>
+          <Input id="telefono" name="telefono" type="tel" placeholder="1122334455" required />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium" htmlFor="direccion">Dirección</label>
+        <Input id="direccion" name="direccion" placeholder="Calle Falsa 123" required />
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium" htmlFor="ciudad">Ciudad</label>
+          <Input id="ciudad" name="ciudad" placeholder="CABA" required />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium" htmlFor="provincia">Provincia</label>
+          <Input id="provincia" name="provincia" placeholder="Buenos Aires" required />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium" htmlFor="codigo_postal">CP</label>
+          <Input id="codigo_postal" name="codigo_postal" placeholder="1000" required />
+        </div>
+      </div>
+
       <Button type="submit" className="w-full" disabled={isPending}>
         {isPending ? 'Creando cuenta...' : 'Crear Cuenta'}
       </Button>

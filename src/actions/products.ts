@@ -38,13 +38,17 @@ export async function createProduct(_prevState: any, formData: FormData) {
   let imageUrl = null;
   // Verificamos si el usuario seleccionó un archivo válido
   if (imageFile && imageFile.size > 0) {
-    // Usamos nuestra función utilitaria para subir el archivo a Supabase Storage y obtener la URL
-    imageUrl = await uploadProductImage(imageFile);
+    try {
+      // Usamos nuestra función utilitaria para subir el archivo a Supabase Storage y obtener la URL
+      imageUrl = await uploadProductImage(imageFile);
+    } catch (e: any) {
+      return { error: e.message };
+    }
   }
 
   // 5. Inicializamos Supabase
   const supabase = await createClient();
-  
+
   // 6. Insertamos un nuevo registro en la tabla 'products'
   const { error } = await supabase.from('products').insert({
     title,
@@ -64,7 +68,7 @@ export async function createProduct(_prevState: any, formData: FormData) {
   // limpie el caché del home y del listado de admin para que el nuevo producto aparezca inmediatamente.
   revalidatePath('/');
   revalidatePath('/admin/productos');
-  
+
   return { success: true };
 }
 
@@ -98,9 +102,13 @@ export async function updateProduct(id: string, formData: FormData) {
   // 5. Gestión de actualización de imagen (Si es que el admin subió una imagen nueva)
   let imageUrl = undefined;
   if (imageFile && imageFile.size > 0) {
-    // Si subió una imagen, primero subimos la nueva a Storage
-    imageUrl = await uploadProductImage(imageFile);
-    
+    try {
+      // Si subió una imagen, primero subimos la nueva a Storage
+      imageUrl = await uploadProductImage(imageFile);
+    } catch (e: any) {
+      return { error: e.message };
+    }
+
     // Y luego buscamos la imagen antigua en la base de datos para eliminarla y no ocupar espacio basura
     const { data: oldProduct } = await supabase.from('products').select('image').eq('id', id).single();
     if (oldProduct?.image) {
@@ -134,7 +142,7 @@ export async function updateProduct(id: string, formData: FormData) {
   revalidatePath('/');
   revalidatePath('/admin/productos');
   revalidatePath(`/producto/${id}`); // Invalidamos específicamente la ruta de ese producto
-  
+
   return { success: true };
 }
 
@@ -154,7 +162,7 @@ export async function deleteProduct(id: string) {
 
   // 3. Antes de eliminar el producto, tenemos que obtener qué imagen tenía asociada para borrarla de Storage
   const { data: product } = await supabase.from('products').select('image').eq('id', id).single();
-  
+
   if (product?.image) {
     await deleteProductImage(product.image); // Borramos la imagen en el Storage
   }
