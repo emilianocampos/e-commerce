@@ -79,7 +79,7 @@ export async function createProduct(_prevState: any, formData: FormData) {
  * @param {FormData} formData - Nuevos valores.
  * @returns {Promise<{error?: string, success?: boolean}>} Éxito o el mensaje de error.
  */
-export async function updateProduct(id: string, formData: FormData) {
+export async function updateProduct(id: string, _prevState: any, formData: FormData) {
   // 1. Verificamos que sea administrador
   await requireAdmin();
 
