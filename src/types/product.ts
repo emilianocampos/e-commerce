@@ -55,6 +55,8 @@ export interface SupplementInfo {
   ingredients: string | null;
   nutrition: any | null; // JSONB
   warnings: string | null;
+  entrada?: number | null;
+  salida?: number | null;
 }
 
 export interface Product {
