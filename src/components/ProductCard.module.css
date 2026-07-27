@@ -1,0 +1,75 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: var(--shop-black);
+  text-align: left;
+}
+.imageWrapper {
+  background-color: #F0EEED;
+  border-radius: 20px;
+  aspect-ratio: 1;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.image {
+  object-fit: contain; /* Changed from cover to contain for clothes on grey background */
+  transition: transform 0.3s;
+}
+.card:hover .image {
+  transform: scale(1.05);
+}
+.title {
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #000000;
+}
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.stars {
+  color: #FFC633;
+  display: flex;
+  gap: 2px;
+}
+.ratingText {
+  font-size: 14px;
+  color: #000000;
+  opacity: 0.6;
+}
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.price {
+  font-weight: 700;
+  font-size: 24px;
+  color: #000000;
+}
+.oldPrice {
+  font-weight: 700;
+  font-size: 24px;
+  color: #000000;
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+.discount {
+  background-color: rgba(255, 51, 51, 0.1);
+  color: #FF3333;
+  padding: 6px 14px;
+  border-radius: 62px;
+  font-size: 12px;
+  font-weight: 500;
+}

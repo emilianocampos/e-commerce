@@ -1,9 +1,4 @@
-/**
- * Archivo: src/app/producto/[id]/AddToCartButton.tsx
- * Responsabilidad: Es un "Client Component" que renderiza un botón interactivo para agregar el
- * producto seleccionado al estado global de Zustand.
- */
-'use client'; // Requerido para componentes que manejan estado de React (useState) o hooks como Zustand.
+'use client';
 
 import { useCartStore } from '@/store/cartStore';
 import { Product } from '@/types/product';
@@ -12,47 +7,97 @@ import { ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import { showToast } from 'nextjs-toast-notify';
 
-// 1. Definimos las props que recibirá el componente desde la página del servidor
 interface AddToCartButtonProps {
   product: Product;
 }
 
 export function AddToCartButton({ product }: AddToCartButtonProps) {
-  // 2. Extraemos ÚNICAMENTE la función 'addItem' de nuestro store global
-  // Hacerlo así asegura que el botón solo se vuelva a renderizar si cambia 'addItem'
   const addItem = useCartStore((state) => state.addItem);
-  
-  // 3. Estado local para dar un feedback visual de que el producto se agregó
   const [added, setAdded] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
-  // 4. Función manejadora del clic del botón
+  const [quantity, setQuantity] = useState(1);
+
   const handleAdd = () => {
-    // a. Agregamos 1 unidad del producto al carrito global
-    addItem(product, 1);
+    // Si el producto tiene talles y el usuario no seleccionó ninguno
+    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+      showToast.error('Debes seleccionar un talle antes de continuar.', {
+        position: 'top-center',
+        duration: 3000,
+      });
+      return;
+    }
+
+    const sizeToUse = selectedSize || 'Único';
+    addItem(product, sizeToUse, quantity);
     
-    // Mostramos toast lateral derecho
     showToast.success('Producto agregado al carrito', {
       position: 'bottom-right',
       duration: 3000,
     });
     
-    // b. Cambiamos el estado local para cambiar el texto del botón a "¡Agregado!"
     setAdded(true);
-    
-    // c. Después de 2 segundos, volvemos el botón a su texto original "Agregar al carrito"
     setTimeout(() => setAdded(false), 2000);
   };
 
   return (
-    <Button 
-      size="lg" 
-      onClick={handleAdd} // Vinculamos nuestro evento onClick
-      variant={added ? 'secondary' : 'primary'} // Si ya se agregó, cambiamos el color a modo secundario
-      className="w-full gap-2"
-    >
-      <ShoppingCart className="h-4 w-4" />
-      {/* 5. Renderizado condicional del texto del botón */}
-      {added ? '¡Agregado!' : 'Agregar al carrito'}
-    </Button>
+    <div className="space-y-6">
+      
+      {/* Selector de talles */}
+      {product.sizes && product.sizes.length > 0 && (
+        <div className="space-y-3 pb-6 border-b border-zinc-200">
+          <label className="text-zinc-500 text-sm">Elegir Talle</label>
+          <div className="flex flex-wrap gap-3">
+            {product.sizes.map((size) => (
+              <label
+                key={size}
+                className={`relative flex px-6 h-12 cursor-pointer items-center justify-center rounded-full text-sm transition-all ${
+                  selectedSize === size
+                    ? 'bg-zinc-900 text-white font-medium'
+                    : 'bg-[#F0F0F0] text-zinc-600 hover:bg-zinc-200'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="size"
+                  value={size}
+                  className="sr-only"
+                  onChange={() => setSelectedSize(size)}
+                  checked={selectedSize === size}
+                />
+                {size}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Botones de cantidad y agregar */}
+      <div className="flex gap-4 pt-2">
+        {/* Quantity Selector */}
+        <div className="flex items-center justify-between bg-[#F0F0F0] rounded-full px-5 w-[140px] h-14">
+          <button 
+            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+            className="text-2xl font-medium text-zinc-900 leading-none pb-1"
+          >
+            -
+          </button>
+          <span className="font-medium text-zinc-900">{quantity}</span>
+          <button 
+            onClick={() => setQuantity(quantity + 1)}
+            className="text-2xl font-medium text-zinc-900 leading-none pb-1"
+          >
+            +
+          </button>
+        </div>
+
+        <button 
+          onClick={handleAdd}
+          className="flex-1 bg-zinc-900 text-white rounded-full font-medium text-sm transition-colors hover:bg-zinc-800 h-14 flex items-center justify-center gap-2"
+        >
+          {added ? '¡Agregado!' : 'Add to Cart'}
+        </button>
+      </div>
+    </div>
   );
 }

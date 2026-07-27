@@ -14,7 +14,7 @@ import { createClient } from '@/lib/supabase-server';
  *                   únicamente los IDs de los productos y la cantidad elegida, pero NO los precios 
  *                   por cuestiones de seguridad.
  */
-export async function createCheckoutPreference(cartItems: { productId: string, quantity: number }[]) {
+export async function createCheckoutPreference(cartItems: { productId: string, quantity: number, selectedSize?: string }[]) {
   try {
     // supabase: Instancia del cliente de base de datos para ejecutar queries con nuestros permisos.
     // Viene de nuestra función helper en lib/supabase-server.ts
@@ -61,7 +61,7 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
       if (product) {
         acc.push({
           id: product.id,
-          title: product.title,
+          title: `${product.title} ${cartItem.selectedSize ? `(Talle: ${cartItem.selectedSize})` : ''}`,
           quantity: Number(cartItem.quantity), // MP requiere un Number estricto
           unit_price: Number(product.price),   // Precio sacado de la BD, NO del frontend
           currency_id: 'ARS', // Moneda en Pesos Argentinos
@@ -82,6 +82,11 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
     const preferencePayload = {
       body: {
         items, // Lista de productos armados arriba
+        // Pasamos metadata con el id del usuario y un json del carrito para poder procesarlo en el webhook
+        metadata: {
+          profile_id: user.id,
+          cart_items: cartItems,
+        },
         // back_urls: Adonde debe volver el usuario luego de pagar (éxito, fallo o pendiente)
         back_urls: {
           success: `${siteUrl}/pago/exito`,
@@ -92,7 +97,7 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
         // Ojo: Solo lo activamos si NO estamos en localhost, ya que MP rechaza "localhost" como URL válida de retorno automático.
         ...(siteUrl.includes('localhost') ? {} : { auto_return: 'approved' }),
         // notification_url: (Webhooks) URL donde MercadoPago nos enviará POSTs silenciosos avisándonos si un pago se concretó
-        notification_url: `${siteUrl}/api/webhooks/mercadopago`,
+        notification_url: `${siteUrl}/api/mercadopago/webhook`,
       }
     };
 

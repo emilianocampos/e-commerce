@@ -50,7 +50,7 @@ export async function getProfile() {
     .from('profiles') // De la tabla 'profiles'
     .select('*')      // Seleccionamos todas las columnas
     .eq('id', user.id) // Donde la columna 'id' sea igual al 'id' de nuestro usuario
-    .single();        // Esperamos un único resultado (no un array)
+    .maybeSingle();        // Esperamos un único resultado o null si no existe
 
   // 5. Si ocurre algún error en la consulta (ej. la tabla no existe), lo imprimimos en consola
   if (error) {

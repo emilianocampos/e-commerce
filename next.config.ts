@@ -8,10 +8,17 @@ const nextConfig: NextConfig = {
         hostname: 'uptfdcaubsbjazhysdqf.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
     ],
   },
-  serverActions: {
-    bodySizeLimit: '5mb',
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
   },
 };
 

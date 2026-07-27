@@ -10,22 +10,19 @@ export const metadata = {
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
 
-  // Verificar que el usuario sea admin
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  // La verificación de admin ahora se hace de forma global en src/app/admin/layout.tsx
+  // por lo que no es necesario repetir la carga lenta aquí.
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  if (profile?.role !== 'admin') redirect('/');
-
-  // Obtener estadísticas
-  // 1. Órdenes
-  const { data: orders } = await supabase.from('orders').select('status, total');
-  
-  // 2. Clientes
-  const { count: clientsCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-
-  // 3. Productos vendidos (order_items)
-  const { count: soldProductsCount } = await supabase.from('order_items').select('*', { count: 'exact', head: true });
+  // Obtener estadísticas en paralelo para mejorar velocidad de carga
+  const [
+    { data: orders },
+    { count: clientsCount },
+    { count: soldProductsCount }
+  ] = await Promise.all([
+    supabase.from('orders').select('status, total'),
+    supabase.from('profiles').select('*', { count: 'exact', head: true }),
+    supabase.from('order_items').select('*', { count: 'exact', head: true })
+  ]);
 
   const totalOrders = orders?.length || 0;
   const approvedOrders = orders?.filter(o => o.status === 'approved') || [];

@@ -56,9 +56,31 @@ export function RegisterForm() {
         </div>
       </div>
 
+      <div className="grid grid-cols-4 gap-4">
+        <div className="col-span-2 space-y-2">
+          <label className="text-sm font-medium" htmlFor="calle">Calle</label>
+          <Input id="calle" name="calle" placeholder="Falsa" required />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium" htmlFor="numero">Número</label>
+          <Input id="numero" name="numero" placeholder="123" required />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium" htmlFor="piso">Piso <span className="text-zinc-400 font-normal">(Opcional)</span></label>
+          <Input id="piso" name="piso" placeholder="3" />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium" htmlFor="departamento">Depto <span className="text-zinc-400 font-normal">(Opcional)</span></label>
+          <Input id="departamento" name="departamento" placeholder="A" />
+        </div>
+      </div>
+
       <div className="space-y-2">
-        <label className="text-sm font-medium" htmlFor="direccion">Dirección</label>
-        <Input id="direccion" name="direccion" placeholder="Calle Falsa 123" required />
+        <label className="text-sm font-medium" htmlFor="referencias">Referencias <span className="text-zinc-400 font-normal">(Opcional)</span></label>
+        <Input id="referencias" name="referencias" placeholder="Entre calles, color de casa..." />
       </div>
 
       <div className="grid grid-cols-3 gap-4">

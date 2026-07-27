@@ -6,6 +6,8 @@ import { createCheckoutPreference } from '@/actions/mercadopago';
 import { useCartStore } from '@/store/cartStore';
 import { useRouter } from 'next/navigation';
 import { showToast } from 'nextjs-toast-notify';
+import { ArrowRight } from 'lucide-react';
+import styles from './Cart.module.css';
 
 export function CheckoutButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +21,8 @@ export function CheckoutButton() {
     try {
       const cartItems = items.map(item => ({
         productId: item.product.id,
-        quantity: item.quantity
+        quantity: item.quantity,
+        selectedSize: item.selectedSize,
       }));
       
       const response = await createCheckoutPreference(cartItems);
@@ -48,13 +51,16 @@ export function CheckoutButton() {
   };
 
   return (
-    <Button
-      size="lg"
+    <button
       onClick={handleBuy}
       disabled={isLoading || items.length === 0}
-      className="mt-6 w-full bg-[#009ee3] hover:bg-[#0086c9] text-white transition-colors"
+      className={styles.checkoutBtn}
     >
-      {isLoading ? 'Conectando con Mercado Pago...' : 'Pagar con Mercado Pago'}
-    </Button>
+      {isLoading ? 'Conectando...' : (
+        <>
+          Pagar con Mercado Pago <ArrowRight size={20} />
+        </>
+      )}
+    </button>
   );
 }

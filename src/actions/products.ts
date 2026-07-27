@@ -1,180 +1,322 @@
-/**
- * Archivo: src/actions/products.ts
- * Responsabilidad: Albergar las Server Actions que realizan operaciones de CRUD de productos.
- * Todos estos métodos aseguran primero que el usuario activo tenga el rol 'admin'
- * antes de efectuar cualquier cambio en Supabase (base de datos o storage).
- */
-'use server'; // Indica a Next.js que todas estas funciones se corren en el servidor y no en el cliente.
+'use server';
 
 import { createClient } from '@/lib/supabase-server';
 import { requireAdmin } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { uploadProductImage, deleteProductImage } from '@/lib/storage';
 
-/**
- * Crea un nuevo producto en la base de datos de Supabase y sube su imagen asociada.
- * Únicamente ejecutable por un administrador autorizado.
- * @param {FormData} formData - Datos del formulario de creación de producto.
- * @returns {Promise<{error?: string, success?: boolean}>} Éxito o el mensaje de error.
- */
-export async function createProduct(_prevState: any, formData: FormData) {
-  // 1. Validar que quien intenta ejecutar esto sea realmente un administrador
-  await requireAdmin(); // Si no lo es, esta función lanzará un error y detendrá la ejecución aquí mismo.
+function generateSKU(type: string, gender: string | null): string {
+  let prefix = 'PROD';
+  if (type === 'CLOTHES') {
+    if (gender === 'MEN') prefix = 'HOMB';
+    else if (gender === 'WOMEN') prefix = 'MUJE';
+    else prefix = 'URBA';
+  } else if (type === 'SUPPLEMENT') {
+    prefix = 'SUPP';
+  }
+  const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `${prefix}-${randomPart}`;
+}
 
-  // 2. Extraer todos los valores de los campos del formulario, y forzarlos a ser de su tipo correcto
+export async function createProduct(_prevState: any, formData: FormData) {
+  await requireAdmin();
+
   const title = formData.get('title') as string;
   const description = formData.get('description') as string;
-  const price = parseFloat(formData.get('price') as string); // Convertimos el precio a número flotante
-  const stock = parseInt(formData.get('stock') as string, 10); // Convertimos el stock a entero base 10
-  const category = formData.get('category') as string;
-  const imageFile = formData.get('image') as File | null; // El archivo de imagen (si el usuario subió una)
+  const price = parseFloat(formData.get('price') as string);
+  const stock = parseInt(formData.get('stock') as string, 10);
+  const sizes = formData.getAll('sizes') as string[];
 
-  // 3. Validación de datos: asegurarnos de que los valores numéricos y campos obligatorios estén presentes
+  const type = formData.get('type') as string;
+  const gender = formData.get('gender') as string || null;
+  
+  // Autogenerate SKU
+  const sku = generateSKU(type, gender);
+
+  const sale_price_str = formData.get('sale_price') as string;
+  const sale_price = sale_price_str ? parseFloat(sale_price_str) : null;
+  const brand_name = formData.get('brand_name') as string;
+
   if (!title || isNaN(price) || isNaN(stock)) {
     return { error: 'Faltan campos requeridos o son inválidos' };
   }
 
-  // 4. Gestión de subida de la imagen
+  const supabase = await createClient();
+
+  let brand_id = null;
+  if (brand_name) {
+    const { data: existingBrand } = await supabase
+      .from('brands')
+      .select('id')
+      .ilike('name', brand_name.trim())
+      .maybeSingle();
+
+    if (existingBrand) {
+      brand_id = existingBrand.id;
+    } else {
+      const { data: newBrand } = await supabase
+        .from('brands')
+        .insert({ name: brand_name.trim(), active: true })
+        .select('id')
+        .single();
+      if (newBrand) brand_id = newBrand.id;
+    }
+  }
+
+  // Handle Images
+  const imageMainFile = formData.get('image_main') as File | null;
   let imageUrl = null;
-  // Verificamos si el usuario seleccionó un archivo válido
-  if (imageFile && imageFile.size > 0) {
+  if (imageMainFile && imageMainFile.size > 0) {
     try {
-      // Usamos nuestra función utilitaria para subir el archivo a Supabase Storage y obtener la URL
-      imageUrl = await uploadProductImage(imageFile);
+      imageUrl = await uploadProductImage(imageMainFile);
     } catch (e: any) {
       return { error: e.message };
     }
   }
 
-  // 5. Inicializamos Supabase
-  const supabase = await createClient();
+  const optFiles = [
+    formData.get('image_opt_1') as File | null,
+    formData.get('image_opt_2') as File | null,
+    formData.get('image_opt_3') as File | null
+  ];
 
-  // 6. Insertamos un nuevo registro en la tabla 'products'
-  const { error } = await supabase.from('products').insert({
+  const { data: newProduct, error } = await supabase.from('products').insert({
     title,
     description,
     price,
     stock,
-    category,
-    image: imageUrl, // Guardamos la URL pública de la imagen (o null si no hay)
-  });
+    sizes: type === 'CLOTHES' ? sizes : [],
+    image: imageUrl,
+    type,
+    gender: type === 'CLOTHES' ? gender : null,
+    sku,
+    sale_price,
+    brand_id,
+    active: true,
+  }).select('id').single();
 
-  // 7. Si falló la inserción en base de datos, retornamos el error
   if (error) {
     return { error: error.message };
   }
 
-  // 8. En Next.js App Router la cache es agresiva. Con esto le decimos a Next.js que 
-  // limpie el caché del home y del listado de admin para que el nuevo producto aparezca inmediatamente.
+  // Upload and insert optional images
+  for (let i = 0; i < optFiles.length; i++) {
+    const file = optFiles[i];
+    if (file && file.size > 0) {
+      try {
+        const url = await uploadProductImage(file);
+        await supabase.from('product_images').insert({
+          product_id: newProduct.id,
+          url: url,
+          order: i + 1
+        });
+      } catch (e: any) {
+        console.error("Error uploading optional image:", e);
+      }
+    }
+  }
+
+  // Insertar supplement_information si es suplemento
+  if (type === 'SUPPLEMENT' && newProduct) {
+    const servingsStr = formData.get('supp_servings') as string;
+    const netWeightStr = formData.get('supp_net_weight') as string;
+    const gramsStr = formData.get('supp_grams') as string;
+    const entradaStr = formData.get('supp_entrada') as string;
+    const salidaStr = formData.get('supp_salida') as string;
+
+    const suppData = {
+      product_id: newProduct.id,
+      servings: servingsStr ? parseInt(servingsStr, 10) : null,
+      flavor: formData.get('supp_flavor') as string || null,
+      net_weight: netWeightStr ? parseFloat(netWeightStr) : null,
+      grams: gramsStr ? parseFloat(gramsStr) : null,
+      ingredients: formData.get('supp_ingredients') as string || null,
+      entrada: entradaStr ? parseInt(entradaStr, 10) : null,
+      salida: salidaStr ? parseInt(salidaStr, 10) : null,
+    };
+    
+    await supabase.from('supplement_information').insert(suppData);
+  }
+
   revalidatePath('/');
   revalidatePath('/admin/productos');
 
   return { success: true };
 }
 
-/**
- * Actualiza los datos de un producto existente. Si se provee una imagen nueva, 
- * reemplaza la anterior en Storage. Requiere permisos de administrador.
- * @param {string} id - Identificador único del producto a modificar.
- * @param {FormData} formData - Nuevos valores.
- * @returns {Promise<{error?: string, success?: boolean}>} Éxito o el mensaje de error.
- */
 export async function updateProduct(id: string, _prevState: any, formData: FormData) {
-  // 1. Verificamos que sea administrador
   await requireAdmin();
 
-  // 2. Extraemos todos los valores actualizados del formulario
   const title = formData.get('title') as string;
   const description = formData.get('description') as string;
   const price = parseFloat(formData.get('price') as string);
   const stock = parseInt(formData.get('stock') as string, 10);
-  const category = formData.get('category') as string;
-  const imageFile = formData.get('image') as File | null;
+  const sizes = formData.getAll('sizes') as string[];
 
-  // 3. Validamos que el administrador no haya borrado el título o puesto precios inválidos
+  const type = formData.get('type') as string;
+  const gender = formData.get('gender') as string || null;
+  
+  const sale_price_str = formData.get('sale_price') as string;
+  const sale_price = sale_price_str ? parseFloat(sale_price_str) : null;
+  const brand_name = formData.get('brand_name') as string;
+
   if (!title || isNaN(price) || isNaN(stock)) {
     return { error: 'Faltan campos requeridos o son inválidos' };
   }
 
-  // 4. Inicializamos Supabase
   const supabase = await createClient();
 
-  // 5. Gestión de actualización de imagen (Si es que el admin subió una imagen nueva)
-  let imageUrl = undefined;
-  if (imageFile && imageFile.size > 0) {
-    try {
-      // Si subió una imagen, primero subimos la nueva a Storage
-      imageUrl = await uploadProductImage(imageFile);
-    } catch (e: any) {
-      return { error: e.message };
-    }
+  let brand_id = null;
+  if (brand_name) {
+    const { data: existingBrand } = await supabase
+      .from('brands')
+      .select('id')
+      .ilike('name', brand_name.trim())
+      .maybeSingle();
 
-    // Y luego buscamos la imagen antigua en la base de datos para eliminarla y no ocupar espacio basura
-    const { data: oldProduct } = await supabase.from('products').select('image').eq('id', id).single();
-    if (oldProduct?.image) {
-      // Borramos físicamente la imagen antigua de Supabase Storage
-      await deleteProductImage(oldProduct.image);
+    if (existingBrand) {
+      brand_id = existingBrand.id;
+    } else {
+      const { data: newBrand } = await supabase
+        .from('brands')
+        .insert({ name: brand_name.trim(), active: true })
+        .select('id')
+        .single();
+      if (newBrand) brand_id = newBrand.id;
     }
   }
 
-  // 6. Preparamos el objeto con los datos a actualizar
+  const imageMainFile = formData.get('image_main') as File | null;
+  let imageUrl = undefined;
+  if (imageMainFile && imageMainFile.size > 0) {
+    try {
+      imageUrl = await uploadProductImage(imageMainFile);
+      const { data: oldProduct } = await supabase.from('products').select('image').eq('id', id).single();
+      if (oldProduct?.image) {
+        await deleteProductImage(oldProduct.image);
+      }
+    } catch (e: any) {
+      return { error: e.message };
+    }
+  }
+
+  // We are skipping deletion of optional images here for simplicity,
+  // but we can upload new optional images that replace or add.
+  const optFiles = [
+    formData.get('image_opt_1') as File | null,
+    formData.get('image_opt_2') as File | null,
+    formData.get('image_opt_3') as File | null
+  ];
+
+  for (let i = 0; i < optFiles.length; i++) {
+    const file = optFiles[i];
+    if (file && file.size > 0) {
+      try {
+        const url = await uploadProductImage(file);
+        await supabase.from('product_images').insert({
+          product_id: id,
+          url: url,
+          order: i + 1
+        });
+      } catch (e: any) {
+        console.error("Error uploading optional image:", e);
+      }
+    }
+  }
+
   const updateData: any = {
     title,
     description,
     price,
     stock,
-    category,
+    sizes: type === 'CLOTHES' ? sizes : [],
+    type,
+    gender: type === 'CLOTHES' ? gender : null,
+    sale_price,
+    brand_id,
+    updated_at: new Date().toISOString(),
   };
 
-  // Solo incluimos la imagen en la actualización si se generó una nueva URL
   if (imageUrl) {
     updateData.image = imageUrl;
   }
 
-  // 7. Ejecutamos la actualización (UPDATE) sobre la tabla de productos donde el id coincida
   const { error } = await supabase.from('products').update(updateData).eq('id', id);
 
   if (error) {
     return { error: error.message };
   }
 
-  // 8. Volvemos a limpiar la cache para que se vea la actualización
+  if (type === 'SUPPLEMENT') {
+    const servingsStr = formData.get('supp_servings') as string;
+    const netWeightStr = formData.get('supp_net_weight') as string;
+    const gramsStr = formData.get('supp_grams') as string;
+    const entradaStr = formData.get('supp_entrada') as string;
+    const salidaStr = formData.get('supp_salida') as string;
+
+    const suppData = {
+      product_id: id,
+      servings: servingsStr ? parseInt(servingsStr, 10) : null,
+      flavor: formData.get('supp_flavor') as string || null,
+      net_weight: netWeightStr ? parseFloat(netWeightStr) : null,
+      grams: gramsStr ? parseFloat(gramsStr) : null,
+      ingredients: formData.get('supp_ingredients') as string || null,
+      entrada: entradaStr ? parseInt(entradaStr, 10) : null,
+      salida: salidaStr ? parseInt(salidaStr, 10) : null,
+    };
+    
+    await supabase.from('supplement_information').upsert(suppData);
+  }
+
   revalidatePath('/');
   revalidatePath('/admin/productos');
-  revalidatePath(`/producto/${id}`); // Invalidamos específicamente la ruta de ese producto
+  revalidatePath(`/producto/${id}`);
 
   return { success: true };
 }
 
-/**
- * Elimina un producto y purga de igual modo su imagen vinculada en Storage.
- * Requiere permisos de administrador. 
- * Invoca `revalidatePath` al finalizar para reflejar los cambios globalmente sin recargar.
- * @param {string} id - Identificador del producto a eliminar.
- * @returns {Promise<{error?: string, success?: boolean}>} Éxito o el mensaje de error.
- */
 export async function deleteProduct(id: string) {
-  // 1. Verificamos rol
   await requireAdmin();
-
-  // 2. Inicializamos cliente
   const supabase = await createClient();
 
-  // 3. Antes de eliminar el producto, tenemos que obtener qué imagen tenía asociada para borrarla de Storage
   const { data: product } = await supabase.from('products').select('image').eq('id', id).single();
-
   if (product?.image) {
-    await deleteProductImage(product.image); // Borramos la imagen en el Storage
+    await deleteProductImage(product.image);
   }
 
-  // 4. Una vez la imagen no está, borramos la fila en la base de datos (DELETE)
   const { error } = await supabase.from('products').delete().eq('id', id);
-
   if (error) {
     return { error: error.message };
   }
 
-  // 5. Invalidamos cache
+  revalidatePath('/');
+  revalidatePath('/admin/productos');
+  return { success: true };
+}
+
+export async function deleteAllProducts() {
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const { data: products } = await supabase.from('products').select('image');
+  
+  if (products && products.length > 0) {
+    for (const p of products) {
+      if (p.image) {
+        try {
+          await deleteProductImage(p.image);
+        } catch (e) {
+          console.error("Error deleting image:", e);
+        }
+      }
+    }
+  }
+
+  const { error } = await supabase.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000'); // delete all
+  if (error) {
+    return { error: error.message };
+  }
+
   revalidatePath('/');
   revalidatePath('/admin/productos');
   return { success: true };

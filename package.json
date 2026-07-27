@@ -16,10 +16,12 @@
     "mercadopago": "^3.1.0",
     "next": "16.2.9",
     "nextjs-toast-notify": "^1.62.0",
+    "nextjs-toploader": "^3.9.17",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "sweetalert2": "^11.26.25",
     "tailwind-merge": "^3.6.0",
+    "xlsx": "^0.18.5",
     "zustand": "^5.0.14"
   },
   "devDependencies": {

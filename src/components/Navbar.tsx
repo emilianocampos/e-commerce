@@ -1,145 +1,206 @@
-/**
- * Archivo: src/components/Navbar.tsx
- * Responsabilidad: Es el componente de navegación principal de la app.
- * Al usar estado (como para abrir/cerrar menú móvil) se declara como 'use client'.
- * Recibe por props los datos de la sesión obtenidos del servidor para mostrar menús condicionalmente.
- */
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, LogOut, User as UserIcon, Menu, X, ShieldAlert } from 'lucide-react';
+import { ShoppingBag, User as UserIcon, Menu, X, Search, ShieldAlert } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { User } from '@supabase/supabase-js';
 import { logout } from '@/actions/auth';
-import { useState } from 'react';
-import { Button } from './Button';
+import { useState, useEffect, useRef } from 'react';
+import styles from './Navbar.module.css';
 
 interface NavbarProps {
-  user: User | null; // El usuario actualmente autenticado (o null si es anónimo)
-  role: string | null; // El rol de este usuario (ej. 'admin')
+  user: User | null;
+  role: string | null;
+  settings?: any;
 }
 
-export function Navbar({ user, role }: NavbarProps) {
-  // 1. Usamos nuestro Store global de Zustand para contar cuántos elementos hay en el carrito
+export function Navbar({ user, role, settings }: NavbarProps) {
   const cartItems = useCartStore((state) => state.items);
-  // Reducimos el array de items a un solo número sumando sus cantidades
+  const openCart = useCartStore((state) => state.openCart);
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  // 2. Estado local para saber si el menú móvil (hamburguesa) está abierto
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-md">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Lado izquierdo: Logo */}
-        <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight text-zinc-900">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-white">
-            E
-          </div>
-          <span>Commerce</span>
-        </Link>
-
-        {/* Lado derecho: Acciones (Carrito, Login/Perfil, Menú Móvil) */}
-        <div className="flex items-center gap-2 md:gap-4">
-
-          {/* Lógica si es Admin: Mostrar un botón rojo hacia el Panel */}
-          {role === 'admin' && (
-            <Link href="/admin" className="hidden md:flex">
-              <Button variant="danger" size="sm" className="gap-2">
-                <ShieldAlert className="h-4 w-4" />
-                Panel Admin
-              </Button>
-            </Link>
-          )}
-
-          {/* Icono del Carrito (Solo visible si no es admin) */}
-          {role !== 'admin' && (
-            <Link
-              href="/carrito"
-              className="relative rounded-full p-2 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {/* Si hay items, renderizamos la "burbuja" roja con la cantidad */}
-              {totalItems > 0 && (
-                <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                  {totalItems}
-                </span>
-              )}
-            </Link>
-          )}
-
-          {/* Lógica de sesión: Si está logueado mostramos su email y botón de logout */}
-          {user ? (
-            <div className="hidden items-center gap-4 md:flex">
-              <div className="flex items-center gap-2 text-sm font-medium text-zinc-600">
-                <UserIcon className="h-4 w-4" />
-                <span className="hidden lg:inline">{user.email}</span>
-              </div>
-              {/* Al hacer clic en salir, llamamos a la Server Action 'logout' */}
-              <form action={logout}>
-                <Button variant="ghost" size="sm" type="submit" className="gap-2 text-zinc-500 hover:text-red-600">
-                  <LogOut className="h-4 w-4" />
-                  Salir
-                </Button>
-              </form>
-            </div>
-          ) : (
-            /* Si NO está logueado, mostramos el botón de iniciar sesión */
-            <div className="hidden md:flex">
-              <Link href="/login">
-                <Button variant="primary" size="sm">
-                  Iniciar Sesión
-                </Button>
-              </Link>
-            </div>
-          )}
-
-          {/* Botón menú hamburguesa en mobile */}
-          <button
-            className="md:hidden rounded-full p-2 text-zinc-500 hover:bg-zinc-100"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+    <>
+      {showBanner && (
+        <div className={styles.banner}>
+          {settings?.top_banner_text || 'Sign up and get 20% off to your first order.'}
+          <button className={styles.bannerClose} onClick={() => setShowBanner(false)}>
+            <X size={16} />
           </button>
         </div>
-      </div>
+      )}
+      <header className={`${styles.header} ${isScrolled ? styles.headerScrolled : ''}`}>
+        <div className={styles.container}>
+          
+          {/* Left: Hamburger (Mobile) + Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              className={styles.mobileMenuBtn}
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Abrir menú"
+            >
+              <Menu size={24} />
+            </button>
+            <Link href="/" className={styles.logo}>
+              {settings?.store_logo_url ? (
+                <img src={settings.store_logo_url} alt={settings?.store_logo_text || 'Logo'} style={{ height: '32px', objectFit: 'contain' }} />
+              ) : (
+                settings?.store_logo_text || 'SHOP.CO'
+              )}
+            </Link>
+          </div>
 
-      {/* Menú Móvil Expandido */}
-      {isMobileMenuOpen && (
-        <div className="border-t border-zinc-200 bg-white px-4 py-4 md:hidden">
-          <div className="flex flex-col gap-4">
+          {/* Desktop Nav */}
+          <nav className={styles.nav}>
+            <Link href="/shop?type=SUPPLEMENT" className={styles.navLink}>Suplementos</Link>
+            <Link href="/shop?gender=MEN" className={styles.navLink}>Hombre</Link>
+            <Link href="/shop?gender=WOMEN" className={styles.navLink}>Mujer</Link>
+            <Link href="/shop?category_name=urbano" className={styles.navLink}>Urbano</Link>
+          </nav>
+
+          {/* Center: Search */}
+          <div className={styles.searchContainer}>
+            <Search size={20} className={styles.searchIcon} />
+            <input 
+              type="text" 
+              placeholder="Buscar productos..." 
+              className={styles.searchInput}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const val = e.currentTarget.value;
+                  if (val.trim()) {
+                    window.location.href = `/shop?q=${encodeURIComponent(val.trim())}`;
+                  }
+                }
+              }}
+            />
+          </div>
+
+          {/* Right: Actions */}
+          <div className={styles.actions}>
             {role === 'admin' && (
-              <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="danger" className="w-full justify-center gap-2">
-                  <ShieldAlert className="h-4 w-4" />
-                  Panel Administrador
-                </Button>
+              <Link href="/admin" className={styles.actionBtn} style={{ color: 'var(--shop-red)' }}>
+                <ShieldAlert size={24} />
               </Link>
             )}
 
             {user ? (
-              <>
-                <div className="flex items-center gap-2 px-2 text-sm text-zinc-600">
-                  <UserIcon className="h-4 w-4" />
-                  {user.email}
-                </div>
-                <form action={logout} className="w-full" onSubmit={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="outline" type="submit" className="w-full justify-center gap-2 text-zinc-600">
-                    <LogOut className="h-4 w-4" />
-                    Cerrar Sesión
-                  </Button>
-                </form>
-              </>
+              <div style={{ position: 'relative' }} ref={userMenuRef}>
+                <button 
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className={styles.actionBtn}
+                >
+                  <UserIcon size={24} />
+                </button>
+                {isUserMenuOpen && (
+                  <div style={{ position: 'absolute', right: 0, top: '40px', background: 'white', border: '1px solid #ddd', borderRadius: '8px', padding: '8px', width: '200px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+                    <div style={{ padding: '8px', borderBottom: '1px solid #eee', fontSize: '12px' }}>
+                      {user.email}
+                    </div>
+                    {role !== 'admin' && (
+                      <Link href="/mis-pedidos" style={{ display: 'block', padding: '8px', textDecoration: 'none', color: 'black' }}>
+                        Mis Pedidos
+                      </Link>
+                    )}
+                    <form action={logout}>
+                      <button type="submit" style={{ width: '100%', textAlign: 'left', padding: '8px', background: 'none', border: 'none', cursor: 'pointer' }}>
+                        Cerrar Sesión
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </div>
             ) : (
-              <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="primary" className="w-full justify-center">
-                  Iniciar Sesión
-                </Button>
+              <Link href="/login" className={styles.actionBtn}>
+                <UserIcon size={24} />
+              </Link>
+            )}
+
+            {role !== 'admin' && (
+              <Link
+                href="/carrito"
+                className={styles.actionBtn}
+                aria-label="Ver carrito"
+              >
+                <ShoppingBag size={24} />
+                {totalItems > 0 && (
+                  <span className={styles.badge}>{totalItems}</span>
+                )}
               </Link>
             )}
           </div>
         </div>
-      )}
-    </header>
+
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex' }}>
+            <div style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={() => setIsMobileMenuOpen(false)}></div>
+            <div style={{ width: '80%', maxWidth: '300px', backgroundColor: 'white', height: '100%', position: 'absolute', left: 0, top: 0, padding: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <span className={styles.logo}>
+                  {settings?.store_logo_url ? (
+                    <img src={settings.store_logo_url} alt={settings?.store_logo_text || 'Logo'} style={{ height: '24px', objectFit: 'contain' }} />
+                  ) : (
+                    settings?.store_logo_text || 'SHOP.CO'
+                  )}
+                </span>
+                <button onClick={() => setIsMobileMenuOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <X size={24} />
+                </button>
+              </div>
+              <div className={styles.mobileSearchContainer}>
+                <Search size={20} className={styles.searchIcon} />
+                <input 
+                  type="text" 
+                  placeholder="Buscar productos..." 
+                  className={styles.searchInput}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const val = e.currentTarget.value;
+                      if (val.trim()) {
+                        setIsMobileMenuOpen(false);
+                        window.location.href = `/shop?q=${encodeURIComponent(val.trim())}`;
+                      }
+                    }
+                  }}
+                />
+              </div>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <Link href="/shop?type=SUPPLEMENT" onClick={() => setIsMobileMenuOpen(false)} className={styles.navLink}>Suplementos</Link>
+                <Link href="/shop?gender=MEN" onClick={() => setIsMobileMenuOpen(false)} className={styles.navLink}>Hombre</Link>
+                <Link href="/shop?gender=WOMEN" onClick={() => setIsMobileMenuOpen(false)} className={styles.navLink}>Mujer</Link>
+                <Link href="/shop?category_name=urbano" onClick={() => setIsMobileMenuOpen(false)} className={styles.navLink}>Urbano</Link>
+              </nav>
+            </div>
+          </div>
+        )}
+      </header>
+    </>
   );
 }

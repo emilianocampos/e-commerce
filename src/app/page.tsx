@@ -1,59 +1,60 @@
-/**
- * Archivo: src/app/page.tsx
- * Responsabilidad: Es el "Home" de la aplicación. Al ser un Server Component,
- * se conecta directamente a la base de datos para obtener el listado de productos,
- * sin necesidad de llamadas a APIs REST o carga (loading states) en el cliente.
- */
 import { createClient } from '@/lib/supabase-server';
-import { ProductCard } from '@/components/ProductCard';
+import { Hero } from '@/components/Hero';
+import { BrandsBanner } from '@/components/BrandsBanner';
+import { ProductSection } from '@/components/ProductSection';
+import { BrowseStyle } from '@/components/BrowseStyle';
 
-// Instrucción de Next.js para que esta página no se guarde en caché permanentemente,
-// sino que busque la versión más fresca siempre (útil para un catálogo en constante cambio).
-export const revalidate = 0; 
+import { getStoreSettings } from '@/actions/settings';
+
+export const revalidate = 0;
 
 export default async function Home() {
-  // 1. Inicializamos el cliente de Supabase para poder hacer queries a la DB
   const supabase = await createClient();
+  const settings = await getStoreSettings();
   
-  // 2. Ejecutamos la consulta: Seleccionar todo de 'products' ordenados del más nuevo al más antiguo
   const { data: products, error } = await supabase
     .from('products')
-    .select('*')
+    .select('*, reviews(rating)')
     .order('created_at', { ascending: false });
 
-  // 3. Manejo de error si la base de datos falla
   if (error) {
     return (
-      <div className="container mx-auto py-12 text-center text-red-500">
+      <div className="container mx-auto py-24 text-center text-red-500">
         Error al cargar los productos: {error.message}
       </div>
     );
   }
 
-  // 4. Si la consulta fue exitosa, renderizamos el HTML
-  return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Encabezado del catálogo */}
-      <div className="mb-8 flex items-end justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Catálogo</h1>
-          <p className="mt-2 text-sm text-zinc-500">Encuentra los mejores productos a un click.</p>
-        </div>
-      </div>
+  // Mocking New Arrivals and Top Selling usando los productos. 
+  // Si hay pocos productos, repetimos para que la UI no quede vacía y el usuario pueda ver las secciones.
+  const newArrivals = products?.slice(0, 4) || [];
+  const topSelling = products && products.length > 4 ? products.slice(4, 8) : newArrivals;
 
-      {/* 5. Verificamos si la tienda tiene o no productos para mostrar un mensaje vacío o la grilla */}
-      {products.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 py-24 text-zinc-500">
-          <p>No hay productos disponibles por ahora.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {/* Iteramos por cada producto usando map() y renderizamos un ProductCard */}
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+  return (
+    <div className="flex flex-col w-full bg-white">
+      <Hero settings={settings} />
+      <BrandsBanner settings={settings} />
+      
+      {newArrivals.length > 0 && (
+        <div style={{ marginTop: '32px' }}>
+          <ProductSection 
+            title="NUEVOS INGRESOS" 
+            products={newArrivals} 
+            viewAllLink="/shop?sort=newest" 
+            showDivider={true}
+          />
         </div>
       )}
+
+      {topSelling.length > 0 && (
+        <ProductSection 
+          title="MÁS VENDIDOS" 
+          products={topSelling} 
+          viewAllLink="/shop?sort=popular" 
+        />
+      )}
+
+      <BrowseStyle settings={settings} />
     </div>
   );
 }

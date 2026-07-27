@@ -48,27 +48,51 @@ export async function login(formData: FormData) {
  * @returns {Promise<{error: string} | void>} Un error en caso de fallo, o redirige en éxito.
  */
 export async function register(formData: FormData) {
-  // 1. Extraemos los campos del formulario de registro
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
+  const nombre = formData.get('nombre') as string;
+  const apellido = formData.get('apellido') as string;
+  const dni = formData.get('dni') as string;
+  const telefono = formData.get('telefono') as string;
+  const calle = formData.get('calle') as string;
+  const numero = formData.get('numero') as string;
+  const piso = formData.get('piso') as string;
+  const departamento = formData.get('departamento') as string;
+  const ciudad = formData.get('ciudad') as string;
+  const provincia = formData.get('provincia') as string;
+  const codigo_postal = formData.get('codigo_postal') as string;
+  const referencias = formData.get('referencias') as string;
 
-  // 2. Validación básica de campos
-  if (!email || !password) {
-    return { error: 'Email y contraseña requeridos' };
+  if (!email || !password || !nombre || !apellido || !dni || !telefono || !calle || !numero || !ciudad || !provincia || !codigo_postal) {
+    return { error: 'Por favor completa todos los campos obligatorios.' };
   }
 
-  // 3. Inicializamos el cliente de Supabase
   const supabase = await createClient();
 
-  // 4. Utilizamos la función signUp de Supabase para registrar al usuario
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
   });
 
-  // 5. Si la contraseña es débil o el email ya existe, devolvemos el error al usuario
   if (error) {
     return { error: error.message };
+  }
+
+  if (data.user) {
+    await supabase.from('profiles').update({
+      nombre,
+      apellido,
+      dni,
+      telefono,
+      calle,
+      numero,
+      piso: piso || null,
+      departamento: departamento || null,
+      ciudad,
+      provincia,
+      codigo_postal,
+      referencias: referencias || null,
+    }).eq('id', data.user.id);
   }
 
   // 6. En caso de éxito, redirigimos al inicio de sesión con un mensaje de éxito

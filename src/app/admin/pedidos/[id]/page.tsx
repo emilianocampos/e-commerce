@@ -12,12 +12,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
   const orderId = resolvedParams.id;
   const supabase = await createClient();
 
-  // Verificar admin
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-
-  const { data: currentUserProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  if (currentUserProfile?.role !== 'admin') redirect('/');
+  // La verificación de admin ahora se hace de forma global en src/app/admin/layout.tsx
 
   // Traer la orden con sus items y los datos del perfil del cliente
   const { data: order, error } = await supabase

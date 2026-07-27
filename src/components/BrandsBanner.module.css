@@ -1,0 +1,58 @@
+.banner {
+  background-color: var(--shop-black);
+  padding: 32px 0;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+.marqueeContainer {
+  display: flex;
+  white-space: nowrap;
+  width: max-content;
+  animation: scroll 30s linear infinite;
+}
+.marqueeContainer:hover {
+  animation-play-state: paused;
+}
+.marqueeContent {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  padding: 0 24px;
+}
+@media (min-width: 768px) {
+  .marqueeContent {
+    gap: 96px;
+    padding: 0 48px;
+  }
+}
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+.brand {
+  font-family: var(--font-display), sans-serif;
+  color: var(--shop-white);
+  font-size: 24px;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+@media (min-width: 768px) {
+  .brand {
+    font-size: 36px;
+  }
+}
+.brandImage {
+  height: 30px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+@media (min-width: 768px) {
+  .brandImage {
+    height: 40px;
+  }
+}

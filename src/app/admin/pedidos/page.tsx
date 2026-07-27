@@ -10,12 +10,7 @@ export const metadata = {
 export default async function AdminPedidosPage() {
   const supabase = await createClient();
 
-  // Verificar admin
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-
-  const { data: currentUserProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  if (currentUserProfile?.role !== 'admin') redirect('/');
+  // La verificación de admin ahora se hace de forma global en src/app/admin/layout.tsx
 
   // Obtener todas las órdenes junto con el perfil del comprador
   const { data: orders, error } = await supabase
