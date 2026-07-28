@@ -25,7 +25,6 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
       return b;
     });
   });
-  const [newBrandFiles, setNewBrandFiles] = useState<File[]>([]);
   const [newTextBrand, setNewTextBrand] = useState('');
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'hero' | 'style1' | 'style2' | 'style3' | 'style4') => {
@@ -41,20 +40,10 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
     }
   };
 
-  const handleAddBrandFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const newFilesArray = Array.from(files);
-      setNewBrandFiles(prev => [...prev, ...newFilesArray]);
-    }
-  };
+
 
   const removeExistingBrand = (index: number) => {
     setBrands(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const removeNewBrandFile = (index: number) => {
-    setNewBrandFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleAddTextBrand = () => {
@@ -66,20 +55,21 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (brands.length > 0 && brands.length < 5) {
+      setMessage('Error: Debes agregar al menos 5 marcas (o ninguna para usar las predeterminadas).');
+      return;
+    }
+
     setSaving(true);
     setMessage('');
     
     const formData = new FormData(e.currentTarget);
     formData.append('brands_images_json', JSON.stringify(brands));
-    
-    newBrandFiles.forEach(file => {
-      formData.append('new_brand_files', file);
-    });
 
     const res = await updateStoreSettings(null, formData);
     if (res?.success) {
       setMessage('¡Configuración guardada exitosamente!');
-      setNewBrandFiles([]); // Reset new files
       // Reload settings to get updated URLs
       const data = await getStoreSettings();
       if (data) {
@@ -193,10 +183,6 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
           <p className="text-sm text-gray-500 mb-4">Estas imágenes o textos aparecerán en la barra en movimiento debajo del Hero.</p>
           
           <div className="mb-6 flex flex-wrap items-end gap-4">
-            <label className="flex items-center gap-2 cursor-pointer bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition h-[42px]">
-              <Plus size={16} /> Subir Imagen
-              <input type="file" multiple accept="image/*" onChange={handleAddBrandFile} className="hidden" />
-            </label>
             <div className="flex items-center gap-2">
               <div>
                 <input 
@@ -227,22 +213,8 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
                 </button>
               </div>
             ))}
-            
-            {/* New files to upload */}
-            {newBrandFiles.map((file, index) => (
-              <div key={`new-${index}`} className="relative border-2 border-dashed border-blue-300 rounded-lg p-4 bg-blue-50 flex flex-col items-center justify-center h-24 group">
-                <ImageIcon size={24} className="text-blue-400 mb-1" />
-                <span className="text-xs text-blue-600 truncate w-full text-center">{file.name}</span>
-                <button type="button" onClick={() => removeNewBrandFile(index)} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Trash size={12} />
-                </button>
-                <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center text-xs font-bold text-blue-800 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
-                  Por Subir
-                </div>
-              </div>
-            ))}
           </div>
-          {brands.length === 0 && newBrandFiles.length === 0 && (
+          {brands.length === 0 && (
             <div className="text-center p-8 text-gray-400 border-2 border-dashed rounded-lg">
               No hay marcas personalizadas. Se mostrarán los textos por defecto (VERSACE, ZARA...).
             </div>

@@ -17,7 +17,7 @@
   justify-content: center;
 }
 .image {
-  object-fit: contain; /* Changed from cover to contain for clothes on grey background */
+  object-fit: cover;
   transition: transform 0.3s;
 }
 .card:hover .image {

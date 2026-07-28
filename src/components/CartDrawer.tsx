@@ -152,7 +152,7 @@ export function CartDrawer() {
                       <p>Subtotal</p>
                       <p>{formatCurrency(total())}</p>
                     </div>
-                    <p className="mt-1 text-sm text-zinc-500">Envío calculado en el checkout.</p>
+
                     <div className="mt-6">
                       <CheckoutButton />
                     </div>

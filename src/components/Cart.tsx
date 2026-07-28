@@ -29,11 +29,8 @@ export function Cart() {
     );
   }
 
-  // Delivery fee from the mockup
-  const deliveryFee = 15;
   const currentSubtotal = subtotal();
-  const currentDiscount = currentSubtotal * 0.2; // -20% from mockup
-  const currentTotal = currentSubtotal - currentDiscount + deliveryFee;
+  const currentTotal = currentSubtotal;
 
   return (
     <div className={styles.container}>
@@ -104,15 +101,7 @@ export function Cart() {
             <span className={styles.summaryValue}>{formatCurrency(currentSubtotal)}</span>
           </div>
           
-          <div className={styles.summaryRow}>
-            <span className={styles.summaryLabel}>Descuento (-20%)</span>
-            <span className={styles.summaryValueRed}>-{formatCurrency(currentDiscount)}</span>
-          </div>
-          
-          <div className={styles.summaryRow}>
-            <span className={styles.summaryLabel}>Envío</span>
-            <span className={styles.summaryValue}>{formatCurrency(deliveryFee)}</span>
-          </div>
+
           
           <hr className={styles.summaryDivider} />
           
@@ -121,13 +110,7 @@ export function Cart() {
             <span className={styles.totalValue}>{formatCurrency(currentTotal)}</span>
           </div>
           
-          <div className={styles.promoCode}>
-            <div className={styles.promoInputWrapper}>
-              <Tag size={20} color="#999" />
-              <input type="text" placeholder="Código de descuento" className={styles.promoInput} />
-            </div>
-            <button className={styles.promoBtn}>Aplicar</button>
-          </div>
+
           
           <CheckoutButton />
         </div>

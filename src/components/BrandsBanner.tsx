@@ -8,16 +8,12 @@ export function BrandsBanner({ settings }: { settings?: any }) {
   
   const renderItems = () => {
     if (hasCustomBrands) {
-      return settings.brands_images.map((item: any, i: number) => {
-        // Fallback for older string-only databases
-        if (typeof item === 'string') {
-          return <img key={i} src={item} alt={`Brand ${i}`} className={styles.brandImage} />;
-        }
-        if (item.type === 'text') {
-          return <div key={i} className={styles.brand}>{item.value}</div>;
-        }
-        return <img key={i} src={item.value} alt={`Brand ${i}`} className={styles.brandImage} />;
-      });
+      const textBrands = settings.brands_images.filter((item: any) => item?.type === 'text');
+      if (textBrands.length > 0) {
+        return textBrands.map((item: any, i: number) => (
+          <div key={i} className={styles.brand}>{item.value}</div>
+        ));
+      }
     }
     return defaultBrands.map((brand, i) => (
       <div key={i} className={styles.brand}>{brand}</div>

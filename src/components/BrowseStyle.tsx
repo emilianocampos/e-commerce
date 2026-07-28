@@ -61,18 +61,18 @@ export function BrowseStyle({ settings }: { settings?: any }) {
                 <span className={styles.cardTitle}>{style.title}</span>
                 
                 {style.image ? (
-                  <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1 }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}>
                     <Image 
                       src={style.image} 
                       alt={style.title} 
                       fill 
-                      className="object-cover" 
+                      className={styles.image} 
                     />
                     {/* Overlay sutil para oscurecer la imagen y que el texto se lea mejor */}
-                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.15)' }}></div>
+                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.15)', zIndex: 1 }}></div>
                   </div>
                 ) : (
-                  <div style={{ background: style.defaultGradient, width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: -1 }}></div>
+                  <div style={{ background: style.defaultGradient, width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 0 }}></div>
                 )}
               </Link>
             );
