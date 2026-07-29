@@ -13,10 +13,25 @@ interface AddToCartButtonProps {
 
 export function AddToCartButton({ product }: AddToCartButtonProps) {
   const addItem = useCartStore((state) => state.addItem);
+  const cartItems = useCartStore((state) => state.items);
   const [added, setAdded] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   const [quantity, setQuantity] = useState(1);
+
+  // Calculamos cuánto stock queda realmente (restando lo que ya está en el carrito para ese talle)
+  const sizeToUse = selectedSize || 'Único';
+  const itemInCart = cartItems.find(
+    (item) => item.product.id === product.id && item.selectedSize === sizeToUse
+  );
+  const quantityInCart = itemInCart ? itemInCart.quantity : 0;
+  const availableStock = Math.max(0, (product.stock || 0) - quantityInCart);
+
+  // Si no hay stock general, marcamos agotado
+  const isOutOfStock = product.stock === 0;
+  
+  // Si no hay stock disponible (considerando carrito) para el talle actual
+  const isMaxReached = quantity > availableStock;
 
   const handleAdd = () => {
     // Si el producto tiene talles y el usuario no seleccionó ninguno
@@ -28,7 +43,14 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
       return;
     }
 
-    const sizeToUse = selectedSize || 'Único';
+    if (quantity > availableStock) {
+      showToast.error('No hay suficiente stock disponible.', {
+        position: 'top-center',
+        duration: 3000,
+      });
+      return;
+    }
+
     addItem(product, sizeToUse, quantity);
     
     showToast.success('Producto agregado al carrito', {
@@ -38,7 +60,19 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+    // Reiniciar cantidad a 1, pero verificar que quede stock
+    if (availableStock - quantity > 0) {
+      setQuantity(1);
+    }
   };
+
+  if (isOutOfStock) {
+    return (
+      <div className="w-full bg-zinc-200 text-zinc-500 rounded-full font-medium text-sm h-14 flex items-center justify-center">
+        Agotado
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -84,8 +118,15 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
           </button>
           <span className="font-medium text-zinc-900">{quantity}</span>
           <button 
-            onClick={() => setQuantity(quantity + 1)}
-            className="text-2xl font-medium text-zinc-900 leading-none pb-1"
+            onClick={() => {
+              if (quantity < availableStock) {
+                setQuantity(quantity + 1);
+              }
+            }}
+            disabled={quantity >= availableStock}
+            className={`text-2xl font-medium leading-none pb-1 ${
+              quantity >= availableStock ? 'text-zinc-400 cursor-not-allowed' : 'text-zinc-900'
+            }`}
           >
             +
           </button>
@@ -93,9 +134,14 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
 
         <button 
           onClick={handleAdd}
-          className="flex-1 bg-zinc-900 text-white rounded-full font-medium text-sm transition-colors hover:bg-zinc-800 h-14 flex items-center justify-center gap-2"
+          disabled={availableStock === 0 || isMaxReached}
+          className={`flex-1 rounded-full font-medium text-sm transition-colors h-14 flex items-center justify-center gap-2 ${
+            availableStock === 0 || isMaxReached
+              ? 'bg-zinc-300 text-zinc-500 cursor-not-allowed'
+              : 'bg-zinc-900 text-white hover:bg-zinc-800'
+          }`}
         >
-          {added ? '¡Agregado!' : 'Add to Cart'}
+          {added ? '¡Agregado!' : availableStock === 0 ? 'Sin stock' : 'Agregar al carrito'}
         </button>
       </div>
     </div>

@@ -8,15 +8,31 @@ import { Star, StarHalf, SlidersHorizontal, ChevronDown, CheckCircle, Tag } from
 import Link from 'next/link';
 import { getUser } from '@/lib/auth';
 import { ProductReviews } from '@/components/ProductReviews';
+import { ProductGallery } from './ProductGallery';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
   const supabase = await createClient();
-  const { data: product } = await supabase.from('products').select('title, description').eq('id', resolvedParams.id).single();
+  const { data: product } = await supabase.from('products').select('title, description, image').eq('id', resolvedParams.id).single();
+
+  const title = product ? product.title : 'Producto no encontrado';
+  const description = product?.description || 'Detalles del producto en DRAVENIX';
+  const image = product?.image || '';
 
   return {
-    title: product ? `${product.title} | SHOP.CO` : 'Producto no encontrado',
-    description: product?.description || 'Detalles del producto',
+    title,
+    description,
+    openGraph: {
+      title: `${title} | DRAVENIX`,
+      description,
+      images: image ? [{ url: image }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | DRAVENIX`,
+      description,
+      images: image ? [image] : [],
+    }
   };
 }
 
@@ -26,7 +42,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   
   const { data: product } = await supabase
     .from('products')
-    .select('*, brands(*), categories(*), supplement_information(*)')
+    .select('*, brands(*), categories(*), supplement_information(*), product_images(*)')
     .eq('id', resolvedParams.id)
     .single();
 
@@ -41,6 +57,14 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     .select('*, profiles(email)')
     .eq('product_id', product.id)
     .order('created_at', { ascending: false });
+
+  const allImages: string[] = [];
+  if (product.image) allImages.push(product.image);
+  if (product.product_images && Array.isArray(product.product_images)) {
+    product.product_images.forEach((pi: any) => {
+      if (pi.url) allImages.push(pi.url);
+    });
+  }
 
   const reviewsList = reviews || [];
   const avgRating = reviewsList.length > 0 
@@ -80,27 +104,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
           
           {/* Left: Images */}
-          <div className="w-full lg:w-1/2 flex flex-col-reverse lg:flex-row gap-4">
-            {/* Thumbnails (Mocked duplicates since DB only has 1 image field for now) */}
-            <div className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-visible no-scrollbar pb-2 lg:pb-0 shrink-0">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="w-[110px] h-[110px] lg:w-[150px] lg:h-[150px] rounded-[20px] bg-[#F0EEED] relative overflow-hidden shrink-0 border border-transparent hover:border-zinc-900 cursor-pointer">
-                  {product.image && (
-                    <Image src={product.image} alt={product.title} fill unoptimized className="object-contain p-2" />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Main Image */}
-            <div className="flex-1 bg-[#F0EEED] rounded-[20px] relative aspect-square lg:aspect-auto lg:h-[480px] overflow-hidden">
-              {product.image ? (
-                <Image src={product.image} alt={product.title} fill unoptimized className="object-contain p-4" priority />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-zinc-400 font-medium">Sin imagen</div>
-              )}
-            </div>
-          </div>
+          <ProductGallery images={allImages} title={product.title} />
 
           {/* Right: Info */}
           <div className="w-full lg:w-1/2 flex flex-col">

@@ -15,7 +15,8 @@ export function Hero({ settings }: { settings?: any }) {
           src={image} 
           alt="Hero Background"
           fill
-          className="object-cover object-top"
+          className="object-cover"
+          style={{ objectPosition: 'center 30%' }}
           priority
         />
         {/* Subtle overlay to ensure text readability */}
@@ -24,10 +25,10 @@ export function Hero({ settings }: { settings?: any }) {
 
       <div className={styles.container}>
         <div className={styles.content}>
-          <h1 className={styles.title}>
+          <h1 className={styles.title} style={{ color: settings?.hero_title_color || '#FACC15' }}>
             {title}
           </h1>
-          <p className={styles.description}>
+          <p className={styles.description} style={{ color: settings?.hero_subtitle_color || 'var(--shop-white)' }}>
             {subtitle}
           </p>
           <Link href="/shop" className={styles.button}>

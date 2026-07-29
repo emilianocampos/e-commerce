@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS public.store_settings (
   
   -- Logo
   store_logo_url TEXT,
-  store_logo_text TEXT DEFAULT 'SHOP.CO',
+  store_logo_text TEXT DEFAULT 'DRAVENIX',
   
   -- Hero Section
   hero_title TEXT DEFAULT 'ENCUENTRA LO QUE COMBINA CON TU ESTILO',

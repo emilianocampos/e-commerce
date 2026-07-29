@@ -1,11 +1,17 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase-server';
 import { ProductCard } from '@/components/ProductCard';
 import { ShopFilters } from '@/components/ShopFilters';
 import { ChevronDown } from 'lucide-react';
 
-export const metadata = {
-  title: 'Tienda | SHOP.CO',
+export const metadata: Metadata = {
+  title: 'Tienda',
+  description: 'Explora nuestra colección completa de ropa y accesorios. Encuentra lo que combina con tu estilo en DRAVENIX.',
+  openGraph: {
+    title: 'Tienda | DRAVENIX',
+    description: 'Explora nuestra colección completa de ropa y accesorios. Encuentra lo que combina con tu estilo en DRAVENIX.',
+  }
 };
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
@@ -37,15 +43,13 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   }
 
   // Sorting
-  const sort = params.sort as string || 'popular';
+  const sort = params.sort as string || 'newest';
   if (sort === 'newest') {
     query = query.order('created_at', { ascending: false });
   } else if (sort === 'price_asc') {
     query = query.order('price', { ascending: true });
   } else if (sort === 'price_desc') {
     query = query.order('price', { ascending: false });
-  } else if (sort === 'popular') {
-    query = query.order('featured', { ascending: false }).order('created_at', { ascending: false });
   }
 
   const { data: products, error } = await query;
@@ -82,7 +86,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
               <div className="flex items-center gap-1 cursor-pointer">
                 <span>Ordenar por:</span>
                 <span className="font-bold text-zinc-900 flex items-center">
-                  {sort === 'popular' ? 'Más Popular' : sort === 'newest' ? 'Más Recientes' : 'Precio'} 
+                  {sort === 'newest' ? 'Más Recientes' : sort === 'price_asc' ? 'Precio: Menor a Mayor' : sort === 'price_desc' ? 'Precio: Mayor a Menor' : 'Más Recientes'}
                   <ChevronDown className="w-4 h-4 ml-1" />
                 </span>
               </div>

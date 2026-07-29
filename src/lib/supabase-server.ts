@@ -47,3 +47,17 @@ export async function createClient() {
     }
   );
 }
+
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+
+/**
+ * Crea una instancia de Supabase con permisos de administrador (Service Role).
+ * Útil para acciones en el servidor donde necesitamos saltarnos RLS o 
+ * cuando Next.js no ha propagado las cookies en la misma petición.
+ */
+export function createAdminClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}

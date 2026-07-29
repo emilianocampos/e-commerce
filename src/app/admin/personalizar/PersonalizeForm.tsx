@@ -119,7 +119,7 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Texto del Logo (si no hay imagen)</label>
-              <input name="store_logo_text" defaultValue={settings.store_logo_text} className="w-full border rounded-lg p-2" placeholder="Ej: SHOP.CO" />
+              <input name="store_logo_text" defaultValue={settings.store_logo_text} className="w-full border rounded-lg p-2" placeholder="Ej: DRAVENIX" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Subir Imagen del Logo</label>
@@ -133,18 +133,45 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
           </div>
         </section>
 
+        {/* REDES SOCIALES */}
+        <section className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <h2 className="text-xl font-bold mb-4 border-b pb-2">Redes Sociales</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Instagram URL</label>
+              <input name="instagram_url" defaultValue={settings.instagram_url} className="w-full border rounded-lg p-2" placeholder="https://instagram.com/tu_cuenta" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Facebook URL</label>
+              <input name="facebook_url" defaultValue={settings.facebook_url} className="w-full border rounded-lg p-2" placeholder="https://facebook.com/tu_pagina" />
+            </div>
+          </div>
+        </section>
+
         {/* HERO SECTION */}
         <section className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h2 className="text-xl font-bold mb-4 border-b pb-2">Sección Principal (Hero)</h2>
           <div className="grid grid-cols-1 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Título Principal</label>
-              <textarea name="hero_title" defaultValue={settings.hero_title} rows={3} className="w-full border rounded-lg p-2 font-display uppercase" placeholder="Ej: ENCUENTRA LO QUE COMBINA..." />
+              <div className="flex gap-4">
+                <textarea name="hero_title" defaultValue={settings.hero_title} rows={3} className="w-full border rounded-lg p-2 font-display uppercase" placeholder="Ej: ENCUENTRA LO QUE COMBINA..." />
+                <div className="flex flex-col items-center shrink-0">
+                  <label className="text-xs text-gray-500 mb-1">Color</label>
+                  <input type="color" name="hero_title_color" defaultValue={settings.hero_title_color || '#FACC15'} className="h-10 w-10 cursor-pointer rounded border" />
+                </div>
+              </div>
               <p className="text-xs text-gray-500 mt-1">Usa enters para separar las líneas como quieres que se vean.</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Subtítulo / Descripción</label>
-              <textarea name="hero_subtitle" defaultValue={settings.hero_subtitle} rows={3} className="w-full border rounded-lg p-2" />
+              <div className="flex gap-4">
+                <textarea name="hero_subtitle" defaultValue={settings.hero_subtitle} rows={3} className="w-full border rounded-lg p-2" />
+                <div className="flex flex-col items-center shrink-0">
+                  <label className="text-xs text-gray-500 mb-1">Color</label>
+                  <input type="color" name="hero_subtitle_color" defaultValue={settings.hero_subtitle_color || '#FFFFFF'} className="h-10 w-10 cursor-pointer rounded border" />
+                </div>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Imagen Principal</label>

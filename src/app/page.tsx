@@ -3,6 +3,7 @@ import { Hero } from '@/components/Hero';
 import { BrandsBanner } from '@/components/BrandsBanner';
 import { ProductSection } from '@/components/ProductSection';
 import { BrowseStyle } from '@/components/BrowseStyle';
+import { SiteReviewsSection } from '@/components/SiteReviewsSection';
 
 import { getStoreSettings } from '@/actions/settings';
 
@@ -50,11 +51,14 @@ export default async function Home() {
         <ProductSection 
           title="MÁS VENDIDOS" 
           products={topSelling} 
-          viewAllLink="/shop?sort=popular" 
+          viewAllLink="/shop?sort=newest" 
         />
       )}
 
       <BrowseStyle settings={settings} />
+      
+      {/* Testimonios / Reseñas Globales */}
+      <SiteReviewsSection />
     </div>
   );
 }

@@ -6,9 +6,17 @@
 }
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: 24px;
   margin-bottom: 40px;
+}
+@media (min-width: 768px) {
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 0;
+  }
 }
 .title {
   font-family: var(--font-display), sans-serif;
@@ -37,28 +45,34 @@
 }
 .carousel {
   display: flex;
+  flex-direction: column;
   gap: 20px;
-  overflow-x: auto;
-  padding-bottom: 16px;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
 }
-.carousel::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+@media (min-width: 768px) {
+  .carousel {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 16px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  .carousel::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
 }
 .reviewCard {
-  width: 85vw;
-  max-width: 400px;
-  flex-shrink: 0;
+  width: 100%;
   border: 1px solid var(--shop-gray-light);
   border-radius: 20px;
   padding: 24px;
-  scroll-snap-align: center;
 }
 @media (min-width: 768px) {
   .reviewCard {
     width: 400px;
+    max-width: 400px;
+    flex-shrink: 0;
+    scroll-snap-align: center;
     padding: 28px 32px;
   }
 }

@@ -10,7 +10,7 @@ export default async function CustomizeWebPage() {
 
   const defaultSettings = {
     top_banner_text: 'Sign up and get 20% off to your first order.',
-    store_logo_text: 'SHOP.CO',
+    store_logo_text: 'DRAVENIX',
     hero_title: 'ENCUENTRA LO\nQUE COMBINA CON\nTU ESTILO',
     hero_subtitle: 'Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida.',
     stats_1_number: '200+',

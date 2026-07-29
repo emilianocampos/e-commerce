@@ -93,7 +93,6 @@
   font-size: 24px;
   font-weight: 700;
   color: var(--shop-black);
-  margin-top: 12px;
 }
 .deleteBtn {
   position: absolute;
@@ -104,10 +103,15 @@
   cursor: pointer;
   color: #FF3333;
 }
+.itemBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
 .quantityControl {
-  position: absolute;
-  bottom: 24px;
-  right: 0;
   display: flex;
   align-items: center;
   background-color: var(--shop-gray-light);

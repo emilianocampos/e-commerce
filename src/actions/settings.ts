@@ -33,8 +33,12 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
   const updates: any = {
     top_banner_text: formData.get('top_banner_text'),
     store_logo_text: formData.get('store_logo_text'),
+    instagram_url: formData.get('instagram_url'),
+    facebook_url: formData.get('facebook_url'),
     hero_title: formData.get('hero_title'),
+    hero_title_color: formData.get('hero_title_color'),
     hero_subtitle: formData.get('hero_subtitle'),
+    hero_subtitle_color: formData.get('hero_subtitle_color'),
     stats_1_number: formData.get('stats_1_number'),
     stats_1_label: formData.get('stats_1_label'),
     stats_2_number: formData.get('stats_2_number'),

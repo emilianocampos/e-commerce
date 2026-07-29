@@ -73,10 +73,38 @@ export function ShopFilters() {
           </div>
           
           <div className="px-2">
-            <div className="relative h-1.5 w-full bg-zinc-200 rounded-full mb-6">
-              <div className="absolute h-full bg-zinc-900 rounded-full left-[25%] right-[25%]"></div>
-              <div className="absolute w-4 h-4 bg-zinc-900 rounded-full top-1/2 -translate-y-1/2 left-[25%] -translate-x-1/2"></div>
-              <div className="absolute w-4 h-4 bg-zinc-900 rounded-full top-1/2 -translate-y-1/2 right-[25%] translate-x-1/2"></div>
+            <div className="relative h-1.5 w-full bg-zinc-200 rounded-full mb-6 mt-4">
+              <div 
+                className="absolute h-full bg-zinc-900 rounded-full" 
+                style={{ 
+                  left: `${(Number(minPrice) / 100000) * 100}%`, 
+                  right: `${100 - (Number(maxPrice) / 100000) * 100}%` 
+                }}
+              ></div>
+              <input
+                type="range"
+                min="0"
+                max="100000"
+                step="1000"
+                value={minPrice}
+                onChange={(e) => {
+                  const val = Math.min(Number(e.target.value), Number(maxPrice));
+                  setMinPrice(val.toString());
+                }}
+                className="absolute w-full -top-[5px] appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-zinc-900 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-zinc-900 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-none"
+              />
+              <input
+                type="range"
+                min="0"
+                max="100000"
+                step="1000"
+                value={maxPrice}
+                onChange={(e) => {
+                  const val = Math.max(Number(e.target.value), Number(minPrice));
+                  setMaxPrice(val.toString());
+                }}
+                className="absolute w-full -top-[5px] appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-zinc-900 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-zinc-900 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-none"
+              />
             </div>
             <div className="flex justify-between items-center text-sm font-medium text-zinc-900">
               <div className="flex flex-col items-center">

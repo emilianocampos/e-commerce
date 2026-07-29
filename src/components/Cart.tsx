@@ -56,7 +56,6 @@ export function Cart() {
                   <h3 className={styles.itemTitle}>{item.product.title}</h3>
                   <p className={styles.itemDetail}>Talle: <span>{item.selectedSize || 'L'}</span></p>
                   <p className={styles.itemDetail}>Color: <span>Blanco</span></p>
-                  <p className={styles.itemPrice}>{formatCurrency(item.product.price)}</p>
                 </div>
                 
                 <button
@@ -70,22 +69,26 @@ export function Cart() {
                   <Trash2 size={24} />
                 </button>
                 
-                <div className={styles.quantityControl}>
-                  <button
-                    className={styles.quantityBtn}
-                    onClick={() => decreaseQuantity(item.product.id, item.selectedSize)}
-                    disabled={item.quantity <= 1}
-                  >
-                    <Minus size={16} strokeWidth={3} />
-                  </button>
-                  <span className={styles.quantityValue}>{item.quantity}</span>
-                  <button
-                    className={styles.quantityBtn}
-                    onClick={() => increaseQuantity(item.product.id, item.selectedSize)}
-                    disabled={item.quantity >= item.product.stock}
-                  >
-                    <Plus size={16} strokeWidth={3} />
-                  </button>
+                <div className={styles.itemBottom}>
+                  <p className={styles.itemPrice}>{formatCurrency(item.product.price)}</p>
+                  
+                  <div className={styles.quantityControl}>
+                    <button
+                      className={styles.quantityBtn}
+                      onClick={() => decreaseQuantity(item.product.id, item.selectedSize)}
+                      disabled={item.quantity <= 1}
+                    >
+                      <Minus size={16} strokeWidth={3} />
+                    </button>
+                    <span className={styles.quantityValue}>{item.quantity}</span>
+                    <button
+                      className={styles.quantityBtn}
+                      onClick={() => increaseQuantity(item.product.id, item.selectedSize)}
+                      disabled={item.quantity >= item.product.stock}
+                    >
+                      <Plus size={16} strokeWidth={3} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

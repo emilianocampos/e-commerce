@@ -6,7 +6,7 @@
  */
 'use server'; // Esta directiva le dice a Next.js que todas las funciones de este archivo deben ejecutarse en el servidor.
 
-import { createClient } from '@/lib/supabase-server';
+import { createClient, createAdminClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 
 /**
@@ -28,7 +28,7 @@ export async function login(formData: FormData) {
   const supabase = await createClient();
 
   // 4. Intentamos iniciar sesión utilizando el método de Supabase con email y password
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -38,7 +38,21 @@ export async function login(formData: FormData) {
     return { error: error.message };
   }
 
-  // 6. Si todo salió bien, redirigimos al usuario a la página principal ('/')
+  // 6. Verificamos el rol del usuario para redirigirlo a la sección correspondiente
+  if (data?.user) {
+    const adminSupabase = createAdminClient();
+    const { data: profile } = await adminSupabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .maybeSingle();
+
+    if (profile?.role === 'admin') {
+      redirect('/admin');
+    }
+  }
+
+  // 7. Si es un usuario normal, lo redirigimos a la página principal ('/')
   redirect('/');
 }
 

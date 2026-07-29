@@ -66,6 +66,7 @@ export function BrowseStyle({ settings }: { settings?: any }) {
                       src={style.image} 
                       alt={style.title} 
                       fill 
+                      sizes="(max-width: 768px) 100vw, 50vw"
                       className={styles.image} 
                     />
                     {/* Overlay sutil para oscurecer la imagen y que el texto se lea mejor */}
