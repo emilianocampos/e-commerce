@@ -49,8 +49,9 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
     const preference = new Preference(mpClient);
 
     // siteUrl: La URL base de nuestra web (ej: http://localhost:3000 o https://midominio.com).
-    // Viene de las variables de entorno (.env.local).
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    // Viene de las variables de entorno (.env.local). Removemos cualquier barra final (trailing slash).
+    const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const siteUrl = rawSiteUrl.endsWith('/') ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
 
     // items: Un array con la estructura y validaciones exactas que exige Mercado Pago.
     // Cruzamos la información del carrito local (cantidades) con la info de la BD (precios, títulos).
