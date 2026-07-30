@@ -118,6 +118,8 @@
   flex-direction: column;
   position: relative;
   min-width: 120px;
+  align-items: center;
+  text-align: center;
 }
 
 /* Dividers for Desktop */
@@ -156,7 +158,12 @@
   font-size: 32px;
   font-weight: bold;
   color: var(--shop-white);
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 @media (min-width: 768px) {
