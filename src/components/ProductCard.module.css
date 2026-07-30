@@ -4,7 +4,9 @@
   text-decoration: none;
   color: var(--shop-black);
   text-align: left;
+  min-width: 0;
 }
+
 .imageWrapper {
   background-color: #F0EEED;
   border-radius: 20px;
@@ -16,13 +18,16 @@
   align-items: center;
   justify-content: center;
 }
+
 .image {
   object-fit: cover;
   transition: transform 0.3s;
 }
+
 .card:hover .image {
   transform: scale(1.05);
 }
+
 .title {
   font-weight: 700;
   font-size: 18px;
@@ -32,32 +37,49 @@
   text-overflow: ellipsis;
   color: #000000;
 }
+
 .rating {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
 }
+
 .stars {
   color: #FFC633;
   display: flex;
   gap: 2px;
 }
+
 .ratingText {
   font-size: 14px;
   color: #000000;
   opacity: 0.6;
 }
+
+.priceContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .priceRow {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
+.oldPriceRow {
+  display: flex;
+  align-items: center;
+}
+
 .price {
   font-weight: 700;
   font-size: 24px;
   color: #000000;
 }
+
 .oldPrice {
   font-weight: 700;
   font-size: 24px;
@@ -65,6 +87,7 @@
   opacity: 0.4;
   text-decoration: line-through;
 }
+
 .discount {
   background-color: rgba(255, 51, 51, 0.1);
   color: #FF3333;

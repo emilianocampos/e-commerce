@@ -79,10 +79,12 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
       throw new Error('Ninguno de los productos seleccionados está disponible para la compra');
     }
 
-    // preferencePayload: El "paquete" de datos o cuerpo de la petición que se le envía a Mercado Pago
     const preferencePayload = {
       body: {
         items, // Lista de productos armados arriba
+        payer: {
+          email: user.email,
+        },
         // Pasamos metadata con el id del usuario y un json del carrito para poder procesarlo en el webhook
         metadata: {
           profile_id: user.id,

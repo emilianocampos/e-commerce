@@ -53,6 +53,8 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
     style_3_link: formData.get('style_3_link'),
     style_4_title: formData.get('style_4_title'),
     style_4_link: formData.get('style_4_link'),
+    discount_code: formData.get('discount_code'),
+    discount_percentage: formData.get('discount_percentage') ? Number(formData.get('discount_percentage')) : 0,
     updated_at: new Date().toISOString(),
   };
 
@@ -156,4 +158,25 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
   revalidatePath('/', 'layout');
   
   return { success: true };
+}
+
+export async function validateDiscountCode(code: string) {
+  if (!code) return { success: false, error: 'Código inválido' };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('store_settings')
+    .select('discount_code, discount_percentage')
+    .eq('id', 1)
+    .single();
+
+  if (error || !data) {
+    return { success: false, error: 'Error al validar código' };
+  }
+
+  if (data.discount_code && data.discount_code.trim().toUpperCase() === code.trim().toUpperCase()) {
+    return { success: true, percentage: data.discount_percentage || 0 };
+  }
+
+  return { success: false, error: 'Código inválido o expirado' };
 }

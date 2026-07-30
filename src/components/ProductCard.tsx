@@ -80,13 +80,21 @@ export function ProductCard({ product }: ProductCardProps) {
         </span>
       </div>
 
-      <div className={styles.priceRow}>
-        <span className={styles.price}>{formatCurrency(currentPrice)}</span>
-        {hasDiscount && originalPrice && (
+      <div className={styles.priceContainer}>
+        {hasDiscount && originalPrice ? (
           <>
-            <span className={styles.oldPrice}>{formatCurrency(originalPrice)}</span>
-            <span className={styles.discount}>-{discountPercent}%</span>
+            <div className={styles.oldPriceRow}>
+              <span className={styles.oldPrice}>{formatCurrency(originalPrice)}</span>
+            </div>
+            <div className={styles.priceRow}>
+              <span className={styles.price}>{formatCurrency(currentPrice)}</span>
+              <span className={styles.discount}>-{discountPercent}%</span>
+            </div>
           </>
+        ) : (
+          <div className={styles.priceRow}>
+            <span className={styles.price}>{formatCurrency(currentPrice)}</span>
+          </div>
         )}
       </div>
     </Link>

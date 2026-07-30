@@ -2,13 +2,13 @@ import { createClient } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { formatCurrency } from '@/lib/utils';
-import { AddToCartButton } from './AddToCartButton';
 import { Metadata } from 'next';
 import { Star, StarHalf, SlidersHorizontal, ChevronDown, CheckCircle, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { getUser } from '@/lib/auth';
 import { ProductReviews } from '@/components/ProductReviews';
 import { ProductGallery } from './ProductGallery';
+import { ProductPurchaseSection } from './ProductPurchaseSection';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
@@ -135,17 +135,13 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               <span className="text-sm text-zinc-900">{avgRating.toFixed(1)}/5 <span className="text-zinc-500">({reviewsList.length} reseñas)</span></span>
             </div>
             
-            <div className="flex items-center gap-4 mb-6">
-              <span className="text-3xl font-bold text-zinc-900">{formatCurrency(currentPrice)}</span>
-              {hasDiscount && originalPrice && (
-                <>
-                  <span className="text-3xl font-bold text-zinc-400 line-through">{formatCurrency(originalPrice)}</span>
-                  <span className="bg-[#FF3333]/10 text-[#FF3333] px-3 py-1 rounded-full text-sm font-medium">
-                    -{discountPercent}%
-                  </span>
-                </>
-              )}
-            </div>
+            <ProductPurchaseSection 
+              product={product} 
+              initialCurrentPrice={currentPrice} 
+              initialOriginalPrice={originalPrice} 
+              initialHasDiscount={hasDiscount} 
+              initialDiscountPercent={discountPercent} 
+            />
             
             <p className="text-zinc-500 mb-6 leading-relaxed pb-6 border-b border-zinc-200">
               {product.description || 'This graphic t-shirt which is perfect for any occasion. Crafted from a soft and breathable fabric, it offers superior comfort and style.'}
@@ -186,8 +182,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                 </dl>
               </div>
             )}
-
-            <AddToCartButton product={product as any} />
           </div>
         </div>
 

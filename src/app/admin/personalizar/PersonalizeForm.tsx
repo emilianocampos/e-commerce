@@ -204,6 +204,22 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
           </div>
         </section>
 
+        {/* DESCUENTO */}
+        <section className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <h2 className="text-xl font-bold mb-4 border-b pb-2">Código de Descuento</h2>
+          <p className="text-sm text-gray-500 mb-4">Configura un código de descuento que los clientes pueden ingresar en la página de producto para obtener una rebaja en porcentaje.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Código Válido (ej: OFERTA20)</label>
+              <input name="discount_code" defaultValue={settings.discount_code || ''} className="w-full border rounded-lg p-2 uppercase" placeholder="Ej: OFERTA20" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Porcentaje de descuento (%)</label>
+              <input type="number" name="discount_percentage" defaultValue={settings.discount_percentage || 0} min="0" max="100" className="w-full border rounded-lg p-2" placeholder="Ej: 10" />
+            </div>
+          </div>
+        </section>
+
         {/* BRANDS CAROUSEL */}
         <section className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h2 className="text-xl font-bold mb-4 border-b pb-2">Carrusel de Marcas</h2>

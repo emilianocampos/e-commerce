@@ -31,22 +31,22 @@ export function Hero({ settings }: { settings?: any }) {
           <p className={styles.description} style={{ color: settings?.hero_subtitle_color || 'var(--shop-white)' }}>
             {subtitle}
           </p>
-          <Link href="/shop" className={styles.button}>
+          <Link href="/shop" className={styles.button} style={{ backgroundColor: settings?.hero_title_color || '#FACC15' }}>
             Comprar Ahora
           </Link>
 
           <div className={styles.stats}>
             <div className={styles.statItem}>
               <span className={styles.statNumber}>{settings?.stats_1_number || '200+'}</span>
-              <span className={styles.statLabel}>{settings?.stats_1_label || 'Marcas Internacionales'}</span>
+              <span className={styles.statLabel} style={{ color: settings?.hero_title_color || '#FACC15' }}>{settings?.stats_1_label || 'Marcas Internacionales'}</span>
             </div>
             <div className={styles.statItem}>
               <span className={styles.statNumber}>{settings?.stats_2_number || '2,000+'}</span>
-              <span className={styles.statLabel}>{settings?.stats_2_label || 'Productos de Alta Calidad'}</span>
+              <span className={styles.statLabel} style={{ color: settings?.hero_title_color || '#FACC15' }}>{settings?.stats_2_label || 'Productos de Alta Calidad'}</span>
             </div>
             <div className={styles.statItem}>
               <span className={styles.statNumber}>{settings?.stats_3_number || '30,000+'}</span>
-              <span className={styles.statLabel}>{settings?.stats_3_label || 'Clientes Felices'}</span>
+              <span className={styles.statLabel} style={{ color: settings?.hero_title_color || '#FACC15' }}>{settings?.stats_3_label || 'Clientes Felices'}</span>
             </div>
           </div>
         </div>
