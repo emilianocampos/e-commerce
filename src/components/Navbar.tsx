@@ -57,7 +57,7 @@ export function Navbar({ user, role, settings }: NavbarProps) {
       )}
       <header className={`${styles.header} ${isScrolled ? styles.headerScrolled : ''}`}>
         <div className={styles.container}>
-          
+
           {/* Left: Hamburger (Mobile) + Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <button
@@ -87,9 +87,9 @@ export function Navbar({ user, role, settings }: NavbarProps) {
           {/* Center: Search */}
           <div className={styles.searchContainer}>
             <Search size={20} className={styles.searchIcon} />
-            <input 
-              type="text" 
-              placeholder="Buscar productos..." 
+            <input
+              type="text"
+              placeholder="Buscar productos..."
               className={styles.searchInput}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -123,7 +123,7 @@ export function Navbar({ user, role, settings }: NavbarProps) {
 
             {user ? (
               <div style={{ position: 'relative' }} ref={userMenuRef}>
-                <button 
+                <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className={styles.actionBtn}
                 >
@@ -192,9 +192,9 @@ export function Navbar({ user, role, settings }: NavbarProps) {
               </div>
               <div className={styles.mobileSearchContainer}>
                 <Search size={20} className={styles.searchIcon} />
-                <input 
-                  type="text" 
-                  placeholder="Buscar productos..." 
+                <input
+                  type="text"
+                  placeholder="Buscar productos..."
                   className={styles.searchInput}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {

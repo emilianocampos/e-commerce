@@ -33,7 +33,7 @@ export function Footer({ settings }: { settings?: any }) {
               )}
             </div>
           </div>
-          
+
 
           {/* Help */}
           <div>
