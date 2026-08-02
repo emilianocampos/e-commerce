@@ -38,7 +38,12 @@ export default async function AdminVentasPage() {
                 <td className="px-6 py-4">
                   <div className="font-medium text-zinc-900">{order.profile?.full_name || 'Sin nombre'}</div>
                   <div className="text-xs text-zinc-500">{order.profile?.email}</div>
-                  <div className="text-xs text-zinc-400 mt-1">{order.profile?.address}, {order.profile?.city}</div>
+                  {order.profile?.phone && <div className="text-xs text-zinc-500">Tel: {order.profile.phone}</div>}
+                  <div className="text-xs text-zinc-400 mt-1">
+                    {order.profile?.address}
+                    {order.profile?.city ? `, ${order.profile.city}` : ''}
+                    {order.profile?.postal_code ? ` (CP: ${order.profile.postal_code})` : ''}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="max-w-[250px]">

@@ -61,7 +61,7 @@ export async function POST(request: Request) {
           const { data: existingOrder } = await supabase
             .from('orders')
             .select('id')
-            .eq('payment_id', paymentData.id!.toString())
+            .eq('mp_payment_id', paymentData.id!.toString())
             .maybeSingle();
             
           if (existingOrder) {
@@ -89,13 +89,12 @@ export async function POST(request: Request) {
           const { data: order, error: orderError } = await supabase
             .from('orders')
             .insert({
-              user_id: profileId,
-              total: realTotal,
+              profile_id: profileId,
+              total_amount: realTotal,
               status: 'paid', // Estado guardado como "paid"
-              payment_id: paymentData.id!.toString(),
-              preference_id: paymentData.metadata?.preference_id || null // Si se pasó en metadata
+              mp_payment_id: paymentData.id!.toString()
             })
-            .select('id, order_number')
+            .select('id')
             .single();
 
           if (orderError || !order) {
@@ -103,7 +102,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ received: true }, { status: 200 });
           }
 
-          console.log(`[Webhook MP] Orden creada #${order.order_number} (UUID: ${order.id})`);
+          console.log(`[Webhook MP] Orden creada (UUID: ${order.id})`);
 
           // 7. Crear items (congelando la data) y actualizar stock
           for (const item of cartItems) {
@@ -112,15 +111,13 @@ export async function POST(request: Request) {
               const unitPrice = product.price;
               const subtotal = unitPrice * item.quantity;
               
-              // Insertamos item guardando datos congelados (nombre y subtotal)
+              // Insertamos item
               await supabase.from('order_items').insert({
                 order_id: order.id,
                 product_id: product.id,
-                product_name: product.title, 
                 selected_size: item.selectedSize || '',
                 quantity: item.quantity,
-                unit_price: unitPrice,
-                subtotal: subtotal
+                unit_price: unitPrice
               });
 
               // Descontamos stock (NO bajando por debajo de 0)

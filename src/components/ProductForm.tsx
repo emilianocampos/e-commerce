@@ -1,12 +1,13 @@
 'use client';
 
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, startTransition } from 'react';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Product, Brand, Category, Subcategory } from '@/types/product';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { showToast } from 'nextjs-toast-notify';
+import { compressImage } from '@/lib/imageCompression';
 
 interface ProductFormProps {
   action: (state: any, formData: FormData) => Promise<any>;
@@ -55,8 +56,33 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    // Compress main image if exists
+    const mainImg = formData.get('image_main') as File | null;
+    if (mainImg && mainImg.size > 0) {
+      const compressedMain = await compressImage(mainImg);
+      formData.set('image_main', compressedMain);
+    }
+
+    // Compress optional images if exists
+    for (let i = 1; i <= 3; i++) {
+      const optImg = formData.get(`image_opt_${i}`) as File | null;
+      if (optImg && optImg.size > 0) {
+        const compressedOpt = await compressImage(optImg);
+        formData.set(`image_opt_${i}`, compressedOpt);
+      }
+    }
+
+    startTransition(() => {
+      formAction(formData);
+    });
+  };
+
   return (
-    <form action={formAction} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {state?.error && (
         <div className="rounded-md bg-red-50 p-4 text-sm text-red-500">
           {state.error}
