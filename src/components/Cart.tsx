@@ -54,8 +54,16 @@ export function Cart() {
               <div className={styles.itemInfo}>
                 <div>
                   <h3 className={styles.itemTitle}>{item.product.title}</h3>
-                  <p className={styles.itemDetail}>Talle: <span>{item.selectedSize || 'L'}</span></p>
-                  <p className={styles.itemDetail}>Color: <span>Blanco</span></p>
+                  {item.product.type === 'SUPPLEMENT' ? (
+                    item.product.supplement_information?.flavor && (
+                      <p className={styles.itemDetail}>Sabor: <span>{item.product.supplement_information.flavor}</span></p>
+                    )
+                  ) : (
+                    <>
+                      <p className={styles.itemDetail}>Talle: <span>{item.selectedSize || 'Único'}</span></p>
+                      {item.selectedColor && <p className={styles.itemDetail}>Color: <span>{item.selectedColor}</span></p>}
+                    </>
+                  )}
                 </div>
                 
                 <button

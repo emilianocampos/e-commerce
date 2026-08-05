@@ -23,6 +23,7 @@ export function CheckoutButton() {
         productId: item.product.id,
         quantity: item.quantity,
         selectedSize: item.selectedSize,
+        selectedColor: item.selectedColor,
       }));
       
       const response = await createCheckoutPreference(cartItems);

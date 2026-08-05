@@ -42,13 +42,12 @@ export default async function AdminClientesPage() {
               {profiles?.map((profile) => (
                 <tr key={profile.id} className="hover:bg-zinc-50">
                   <td className="px-6 py-4 font-medium text-zinc-900">
-                    {profile.nombre} {profile.apellido}
+                    {profile.full_name || 'Sin nombre'}
                   </td>
                   <td className="px-6 py-4">{profile.email}</td>
-                  <td className="px-6 py-4">{profile.dni || '-'}</td>
-                  <td className="px-6 py-4">{profile.telefono || '-'}</td>
+                  <td className="px-6 py-4">{profile.phone || '-'}</td>
                   <td className="px-6 py-4">
-                    {profile.ciudad ? `${profile.ciudad}, ${profile.provincia}` : '-'}
+                    {profile.city ? profile.city : '-'}
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${

@@ -93,20 +93,24 @@ export async function register(formData: FormData) {
   }
 
   if (data.user) {
-    await supabase.from('profiles').update({
-      nombre,
-      apellido,
-      dni,
-      telefono,
-      calle,
-      numero,
-      piso: piso || null,
-      departamento: departamento || null,
-      ciudad,
-      provincia,
-      codigo_postal,
-      referencias: referencias || null,
-    }).eq('id', data.user.id);
+    const fullAddress = [
+      `${calle} ${numero}`,
+      piso ? `Piso ${piso}` : '',
+      departamento ? `Dpto ${departamento}` : '',
+      provincia ? `Prov ${provincia}` : '',
+      referencias ? `Ref: ${referencias}` : ''
+    ].filter(Boolean).join(', ');
+
+    const adminSupabase = createAdminClient();
+    await adminSupabase.from('profiles').upsert({
+      id: data.user.id,
+      email: email,
+      full_name: `${nombre} ${apellido}`.trim(),
+      phone: telefono,
+      address: fullAddress,
+      city: ciudad,
+      postal_code: codigo_postal,
+    });
   }
 
   // 6. En caso de éxito, redirigimos al inicio de sesión con un mensaje de éxito

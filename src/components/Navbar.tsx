@@ -1,11 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingBag, User as UserIcon, Menu, X, Search, ShieldAlert } from 'lucide-react';
+import { ShoppingBag, User as UserIcon, Menu, X, Search, ShieldAlert, ChevronDown } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { User } from '@supabase/supabase-js';
 import { logout } from '@/actions/auth';
 import { useState, useEffect, useRef } from 'react';
+import { getBrands } from '@/actions/brands';
+import { Brand } from '@/types/product';
+import { NotificationBell } from './NotificationBell';
 import styles from './Navbar.module.css';
 
 interface NavbarProps {
@@ -24,6 +27,14 @@ export function Navbar({ user, role, settings }: NavbarProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [mobileSuplementosOpen, setMobileSuplementosOpen] = useState(false);
+  const [mobileUrbanoOpen, setMobileUrbanoOpen] = useState(false);
+
+  useEffect(() => {
+    getBrands().then(setBrands);
+  }, []);
 
   // Handle scroll effect
   useEffect(() => {
@@ -78,10 +89,28 @@ export function Navbar({ user, role, settings }: NavbarProps) {
 
           {/* Desktop Nav */}
           <nav className={styles.nav}>
-            <Link href="/shop?type=SUPPLEMENT" className={styles.navLink}>Suplementos</Link>
+            <div className={styles.dropdown}>
+              <Link href="/shop?type=SUPPLEMENT" className={styles.navLink}>Suplementos <ChevronDown size={14} /></Link>
+              <div className={styles.dropdownContent}>
+                <Link href="/shop?type=SUPPLEMENT" className={styles.dropdownItem}>Todos los suplementos</Link>
+                {brands.map(brand => (
+                  <Link key={brand.id} href={`/shop?type=SUPPLEMENT&brand_id=${brand.id}`} className={styles.dropdownItem}>{brand.name}</Link>
+                ))}
+              </div>
+            </div>
+            
             <Link href="/shop?gender=MEN" className={styles.navLink}>Hombre</Link>
             <Link href="/shop?gender=WOMEN" className={styles.navLink}>Mujer</Link>
-            <Link href="/shop?category_name=urbano" className={styles.navLink}>Urbano</Link>
+            
+            <div className={styles.dropdown}>
+              <Link href="/shop?category_name=urbano" className={styles.navLink}>Urbano <ChevronDown size={14} /></Link>
+              <div className={styles.dropdownContent}>
+                <Link href="/shop?category_name=urbano" className={styles.dropdownItem}>Todos</Link>
+                <Link href="/shop?category_name=urbano&urbano_category=UNISEX" className={styles.dropdownItem}>Unisex</Link>
+                <Link href="/shop?category_name=urbano&urbano_category=MEN" className={styles.dropdownItem}>Hombre</Link>
+                <Link href="/shop?category_name=urbano&urbano_category=WOMEN" className={styles.dropdownItem}>Mujer</Link>
+              </div>
+            </div>
           </nav>
 
           {/* Center: Search */}
@@ -122,35 +151,38 @@ export function Navbar({ user, role, settings }: NavbarProps) {
             )}
 
             {user ? (
-              <div style={{ position: 'relative' }} ref={userMenuRef}>
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className={styles.actionBtn}
-                >
-                  <UserIcon size={24} />
-                </button>
-                {isUserMenuOpen && (
-                  <div style={{ position: 'absolute', right: 0, top: '40px', background: 'white', border: '1px solid #ddd', borderRadius: '8px', padding: '8px', width: '200px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-                    <div style={{ padding: '8px', borderBottom: '1px solid #eee', fontSize: '12px' }}>
-                      {user.email}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <NotificationBell />
+                <div style={{ position: 'relative' }} ref={userMenuRef}>
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className={styles.actionBtn}
+                  >
+                    <UserIcon size={24} />
+                  </button>
+                  {isUserMenuOpen && (
+                    <div style={{ position: 'absolute', right: 0, top: '40px', background: 'white', border: '1px solid #ddd', borderRadius: '8px', padding: '8px', width: '200px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+                      <div style={{ padding: '8px', borderBottom: '1px solid #eee', fontSize: '12px' }}>
+                        {user.email}
+                      </div>
+                      {role === 'admin' && (
+                        <Link href="/admin" style={{ display: 'block', padding: '8px', textDecoration: 'none', color: 'black' }}>
+                          Panel de Administrador
+                        </Link>
+                      )}
+                      {role !== 'admin' && (
+                        <Link href="/mis-pedidos" style={{ display: 'block', padding: '8px', textDecoration: 'none', color: 'black' }}>
+                          Mis Pedidos
+                        </Link>
+                      )}
+                      <form action={logout}>
+                        <button type="submit" style={{ width: '100%', textAlign: 'left', padding: '8px', background: 'none', border: 'none', cursor: 'pointer' }}>
+                          Cerrar Sesión
+                        </button>
+                      </form>
                     </div>
-                    {role === 'admin' && (
-                      <Link href="/admin" style={{ display: 'block', padding: '8px', textDecoration: 'none', color: 'black' }}>
-                        Panel de Administrador
-                      </Link>
-                    )}
-                    {role !== 'admin' && (
-                      <Link href="/mis-pedidos" style={{ display: 'block', padding: '8px', textDecoration: 'none', color: 'black' }}>
-                        Mis Pedidos
-                      </Link>
-                    )}
-                    <form action={logout}>
-                      <button type="submit" style={{ width: '100%', textAlign: 'left', padding: '8px', background: 'none', border: 'none', cursor: 'pointer' }}>
-                        Cerrar Sesión
-                      </button>
-                    </form>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             ) : (
               <Link href="/login" className={styles.actionBtn}>
@@ -207,11 +239,37 @@ export function Navbar({ user, role, settings }: NavbarProps) {
                   }}
                 />
               </div>
-              <nav style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <Link href="/shop?type=SUPPLEMENT" onClick={() => setIsMobileMenuOpen(false)} className={styles.navLink}>Suplementos</Link>
-                <Link href="/shop?gender=MEN" onClick={() => setIsMobileMenuOpen(false)} className={styles.navLink}>Hombre</Link>
-                <Link href="/shop?gender=WOMEN" onClick={() => setIsMobileMenuOpen(false)} className={styles.navLink}>Mujer</Link>
-                <Link href="/shop?category_name=urbano" onClick={() => setIsMobileMenuOpen(false)} className={styles.navLink}>Urbano</Link>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className={styles.mobileAccordeon}>
+                  <button onClick={() => setMobileSuplementosOpen(!mobileSuplementosOpen)} className={styles.mobileAccordeonHeader}>
+                    Suplementos <ChevronDown size={16} style={{ transform: mobileSuplementosOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
+                  </button>
+                  {mobileSuplementosOpen && (
+                    <div className={styles.mobileAccordeonContent}>
+                      <Link href="/shop?type=SUPPLEMENT" onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonItem}>Todos los suplementos</Link>
+                      {brands.map(brand => (
+                        <Link key={brand.id} href={`/shop?type=SUPPLEMENT&brand_id=${brand.id}`} onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonItem}>{brand.name}</Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                <Link href="/shop?gender=MEN" onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonHeader} style={{ paddingLeft: '0' }}>Hombre</Link>
+                <Link href="/shop?gender=WOMEN" onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonHeader} style={{ paddingLeft: '0' }}>Mujer</Link>
+                
+                <div className={styles.mobileAccordeon}>
+                  <button onClick={() => setMobileUrbanoOpen(!mobileUrbanoOpen)} className={styles.mobileAccordeonHeader}>
+                    Urbano <ChevronDown size={16} style={{ transform: mobileUrbanoOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
+                  </button>
+                  {mobileUrbanoOpen && (
+                    <div className={styles.mobileAccordeonContent}>
+                      <Link href="/shop?category_name=urbano" onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonItem}>Todos</Link>
+                      <Link href="/shop?category_name=urbano&urbano_category=UNISEX" onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonItem}>Unisex</Link>
+                      <Link href="/shop?category_name=urbano&urbano_category=MEN" onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonItem}>Hombre</Link>
+                      <Link href="/shop?category_name=urbano&urbano_category=WOMEN" onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonItem}>Mujer</Link>
+                    </div>
+                  )}
+                </div>
               </nav>
             </div>
           </div>

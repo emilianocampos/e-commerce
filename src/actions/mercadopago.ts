@@ -2,7 +2,7 @@
 
 import { Preference } from 'mercadopago';
 import { mpClient } from '@/lib/mercadopago';
-import { createClient } from '@/lib/supabase-server';
+import { createClient, createAdminClient } from '@/lib/supabase-server';
 
 /**
  * Función: createCheckoutPreference
@@ -14,7 +14,7 @@ import { createClient } from '@/lib/supabase-server';
  *                   únicamente los IDs de los productos y la cantidad elegida, pero NO los precios 
  *                   por cuestiones de seguridad.
  */
-export async function createCheckoutPreference(cartItems: { productId: string, quantity: number, selectedSize?: string }[]) {
+export async function createCheckoutPreference(cartItems: { productId: string, quantity: number, selectedSize?: string, selectedColor?: string }[]) {
   try {
     // supabase: Instancia del cliente de base de datos para ejecutar queries con nuestros permisos.
     // Viene de nuestra función helper en lib/supabase-server.ts
@@ -60,9 +60,14 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
       const product = products.find(p => p.id === cartItem.productId);
 
       if (product) {
+        const variantSpecs = [
+          cartItem.selectedSize ? `Talle: ${cartItem.selectedSize}` : null,
+          cartItem.selectedColor ? `Color: ${cartItem.selectedColor}` : null,
+        ].filter(Boolean).join(', ');
+
         acc.push({
           id: product.id,
-          title: `${product.title} ${cartItem.selectedSize ? `(Talle: ${cartItem.selectedSize})` : ''}`,
+          title: `${product.title} ${variantSpecs ? `(${variantSpecs})` : ''}`,
           quantity: Number(cartItem.quantity), // MP requiere un Number estricto
           unit_price: Number(product.price),   // Precio sacado de la BD, NO del frontend
           currency_id: 'ARS', // Moneda en Pesos Argentinos
@@ -79,16 +84,60 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
       throw new Error('Ninguno de los productos seleccionados está disponible para la compra');
     }
 
+    // 1. Crear la orden en estado "pending" antes de ir a MP
+    
+    // VERIFICACIÓN: Asegurarnos de que el usuario tenga un registro en "profiles" 
+    // para evitar el error de foreign key (orders_profile_id_fkey)
+    const { data: profile } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle();
+    if (!profile) {
+      const adminClient = createAdminClient();
+      await adminClient.from('profiles').insert({
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario'
+      });
+    }
+
+    const totalAmount = items.reduce((acc, item) => acc + (item.unit_price * item.quantity), 0);
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        profile_id: user.id,
+        total_amount: totalAmount,
+        status: 'pending',
+        mp_payment_id: `pending-${Date.now()}` // Temporary ID in case it's required
+      })
+      .select('id')
+      .single();
+
+    if (orderError || !order) {
+      console.error('Error creando orden previa:', orderError);
+      throw new Error('No se pudo inicializar la orden');
+    }
+
+    // 2. Insertar los items de la orden
+    const orderItemsToInsert = cartItems.map(cartItem => {
+       const p = products.find(prod => prod.id === cartItem.productId);
+       return {
+         order_id: order.id,
+         product_id: cartItem.productId,
+         selected_size: cartItem.selectedSize || '',
+         quantity: cartItem.quantity,
+         unit_price: p?.price || 0
+       };
+    });
+    
+    await supabase.from('order_items').insert(orderItemsToInsert);
+
     const preferencePayload = {
       body: {
         items, // Lista de productos armados arriba
         payer: {
           email: user.email,
         },
-        // Pasamos metadata con el id del usuario y un json del carrito para poder procesarlo en el webhook
+        external_reference: order.id.toString(), // ID de la orden en nuestra BD
         metadata: {
-          profile_id: user.id,
-          cart_items: cartItems,
+          order_id: order.id.toString(),
         },
         // back_urls: Adonde debe volver el usuario luego de pagar (éxito, fallo o pendiente)
         back_urls: {

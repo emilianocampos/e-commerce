@@ -36,14 +36,31 @@ export default async function AdminVentasPage() {
                   <span className="text-xs text-zinc-500">{new Date(order.created_at).toLocaleDateString()}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="font-medium text-zinc-900">{order.profile?.full_name || 'Sin nombre'}</div>
-                  <div className="text-xs text-zinc-500">{order.profile?.email}</div>
-                  {order.profile?.phone && <div className="text-xs text-zinc-500">Tel: {order.profile.phone}</div>}
-                  <div className="text-xs text-zinc-400 mt-1">
-                    {order.profile?.address}
-                    {order.profile?.city ? `, ${order.profile.city}` : ''}
-                    {order.profile?.postal_code ? ` (CP: ${order.profile.postal_code})` : ''}
-                  </div>
+                  {(() => {
+                    const p = order.profile;
+                    if (!p) return <div className="text-xs text-zinc-400">Sin datos de comprador</div>;
+
+                    const name = p.full_name || p.email || 'Sin nombre';
+                    const phone = p.phone;
+                    const addressParts = [
+                      p.address,
+                      p.city,
+                      p.postal_code ? `(CP: ${p.postal_code})` : ''
+                    ].filter(Boolean);
+
+                    return (
+                      <div>
+                        <div className="font-medium text-zinc-900">{name}</div>
+                        <div className="text-xs text-zinc-500">{p.email}</div>
+                        {phone && <div className="text-xs text-zinc-500">Tel: {phone}</div>}
+                        {addressParts.length > 0 && (
+                          <div className="text-xs text-zinc-400 mt-1">
+                            {addressParts.join(', ')}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </td>
                 <td className="px-6 py-4">
                   <div className="max-w-[250px]">

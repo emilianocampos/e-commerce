@@ -29,6 +29,7 @@ export async function createProduct(_prevState: any, formData: FormData) {
 
   const type = formData.get('type') as string;
   const gender = formData.get('gender') as string || null;
+  const urbano_category = type === 'CLOTHES' && gender === 'UNISEX' ? formData.get('urbano_category') as string : null;
   
   // Autogenerate SKU
   const sku = generateSKU(type, gender);
@@ -89,6 +90,7 @@ export async function createProduct(_prevState: any, formData: FormData) {
     image: imageUrl,
     type,
     gender: type === 'CLOTHES' ? gender : null,
+    urbano_category,
     sku,
     sale_price,
     brand_id,
@@ -114,6 +116,20 @@ export async function createProduct(_prevState: any, formData: FormData) {
         console.error("Error uploading optional image:", e);
       }
     }
+  }
+
+  // Insertar variantes de ropa (talle + color)
+  if (type === 'CLOTHES' && newProduct && sizes.length > 0) {
+    const variantInserts = sizes.map((size) => {
+      const color = formData.get(`size_color_${size}`) as string || null;
+      return {
+        product_id: newProduct.id,
+        size,
+        color: color ? color.trim() : null,
+        stock: Math.floor(stock / sizes.length) || stock,
+      };
+    });
+    await supabase.from('product_variants').insert(variantInserts);
   }
 
   // Insertar supplement_information si es suplemento
@@ -155,6 +171,7 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
 
   const type = formData.get('type') as string;
   const gender = formData.get('gender') as string || null;
+  const urbano_category = type === 'CLOTHES' && gender === 'UNISEX' ? formData.get('urbano_category') as string : null;
   
   const sale_price_str = formData.get('sale_price') as string;
   const sale_price = sale_price_str ? parseFloat(sale_price_str) : null;
@@ -212,6 +229,16 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     const file = optFiles[i];
     if (file && file.size > 0) {
       try {
+        const { data: oldOptImage } = await supabase.from('product_images').select('url').eq('product_id', id).eq('order', i + 1).maybeSingle();
+        if (oldOptImage?.url) {
+          try {
+            await deleteProductImage(oldOptImage.url);
+            await supabase.from('product_images').delete().eq('product_id', id).eq('order', i + 1);
+          } catch (delError) {
+            console.error("Error deleting old optional image:", delError);
+          }
+        }
+
         const url = await uploadProductImage(file);
         await supabase.from('product_images').insert({
           product_id: id,
@@ -232,6 +259,7 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     sizes: type === 'CLOTHES' ? sizes : [],
     type,
     gender: type === 'CLOTHES' ? gender : null,
+    urbano_category,
     sale_price,
     brand_id,
     updated_at: new Date().toISOString(),
@@ -245,6 +273,22 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
 
   if (error) {
     return { error: error.message };
+  }
+
+  if (type === 'CLOTHES') {
+    await supabase.from('product_variants').delete().eq('product_id', id);
+    if (sizes.length > 0) {
+      const variantInserts = sizes.map((size) => {
+        const color = formData.get(`size_color_${size}`) as string || null;
+        return {
+          product_id: id,
+          size,
+          color: color ? color.trim() : null,
+          stock: Math.floor(stock / sizes.length) || stock,
+        };
+      });
+      await supabase.from('product_variants').insert(variantInserts);
+    }
   }
 
   if (type === 'SUPPLEMENT') {

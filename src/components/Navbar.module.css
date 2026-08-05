@@ -144,3 +144,69 @@
     display: none;
   }
 }
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+.dropdownContent {
+  display: none;
+  position: absolute;
+  background-color: var(--shop-white);
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+  z-index: 50;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--shop-gray-light);
+  top: 100%;
+  left: 0;
+  padding: 8px 0;
+}
+.dropdown:hover .dropdownContent {
+  display: block;
+}
+.dropdownItem {
+  color: var(--shop-black);
+  padding: 10px 16px;
+  text-decoration: none;
+  display: block;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+.dropdownItem:hover {
+  background-color: var(--shop-gray-light);
+}
+
+/* Mobile Accordeon */
+.mobileAccordeon {
+  display: flex;
+  flex-direction: column;
+}
+.mobileAccordeonHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  color: var(--shop-black);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+.mobileAccordeonContent {
+  display: flex;
+  flex-direction: column;
+  padding-left: 16px;
+  gap: 12px;
+  margin-bottom: 12px;
+  border-left: 2px solid var(--shop-gray-light);
+}
+.mobileAccordeonItem {
+  color: var(--shop-gray-dark);
+  text-decoration: none;
+  font-size: 14px;
+}

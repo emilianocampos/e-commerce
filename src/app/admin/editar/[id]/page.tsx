@@ -13,7 +13,7 @@ export const metadata = {
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data: product } = await supabase.from('products').select('*, supplement_information(*)').eq('id', id).single();
+  const { data: product } = await supabase.from('products').select('*, supplement_information(*), product_images(*), product_variants(*)').eq('id', id).single();
 
   if (!product) {
     notFound();

@@ -8,7 +8,7 @@ import { showToast } from 'nextjs-toast-notify';
 
 interface CartState {
   items: CartItem[];
-  addItem: (product: Product, selectedSize: string, quantity?: number) => void;
+  addItem: (product: Product, selectedSize: string, quantity?: number, selectedColor?: string) => void;
   removeItem: (productId: string, selectedSize: string) => void;
   increaseQuantity: (productId: string, selectedSize: string) => void;
   decreaseQuantity: (productId: string, selectedSize: string) => void;
@@ -29,10 +29,10 @@ export const useCartStore = create<CartState>()(
       openCart: () => set({ isOpen: true }),
       closeCart: () => set({ isOpen: false }),
       
-      addItem: (product, selectedSize, quantity = 1) => {
+      addItem: (product, selectedSize, quantity = 1, selectedColor?: string) => {
         set((state) => {
           const existingItem = state.items.find(
-            (item) => item.product.id === product.id && item.selectedSize === selectedSize
+            (item) => item.product.id === product.id && item.selectedSize === selectedSize && item.selectedColor === selectedColor
           );
           
           if (existingItem) {
@@ -43,7 +43,7 @@ export const useCartStore = create<CartState>()(
             }
             return {
               items: state.items.map((item) =>
-                item.product.id === product.id && item.selectedSize === selectedSize
+                item.product.id === product.id && item.selectedSize === selectedSize && item.selectedColor === selectedColor
                   ? { ...item, quantity: newQuantity }
                   : item
               ),
@@ -55,7 +55,7 @@ export const useCartStore = create<CartState>()(
             return { items: state.items };
           }
 
-          return { items: [...state.items, { product, selectedSize, quantity }] };
+          return { items: [...state.items, { product, selectedSize, selectedColor, quantity }] };
         });
       },
       

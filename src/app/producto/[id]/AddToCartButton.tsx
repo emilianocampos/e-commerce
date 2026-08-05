@@ -3,7 +3,7 @@
 import { useCartStore } from '@/store/cartStore';
 import { Product } from '@/types/product';
 import { Button } from '@/components/Button';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Flame } from 'lucide-react';
 import { useState } from 'react';
 import { showToast } from 'nextjs-toast-notify';
 
@@ -33,6 +33,10 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
   // Si no hay stock disponible (considerando carrito) para el talle actual
   const isMaxReached = quantity > availableStock;
 
+  // Color asignado al talle seleccionado
+  const selectedVariant = product.product_variants?.find((v: any) => v.size === selectedSize);
+  const currentColor = selectedVariant?.color || undefined;
+
   const handleAdd = () => {
     // Si el producto tiene talles y el usuario no seleccionó ninguno
     if (product.sizes && product.sizes.length > 0 && !selectedSize) {
@@ -51,7 +55,7 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
       return;
     }
 
-    addItem(product, sizeToUse, quantity);
+    addItem(product, sizeToUse, quantity, currentColor);
     
     showToast.success('Producto agregado al carrito', {
       position: 'bottom-right',
@@ -80,7 +84,14 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
       {/* Selector de talles */}
       {product.sizes && product.sizes.length > 0 && (
         <div className="space-y-3 pb-6 border-b border-zinc-200">
-          <label className="text-zinc-500 text-sm">Elegir Talle</label>
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-zinc-500">Elegir Talle</span>
+            {selectedSize && currentColor && (
+              <span className="text-zinc-900 font-semibold bg-zinc-100 px-3 py-1 rounded-full text-xs">
+                Color: {currentColor}
+              </span>
+            )}
+          </div>
           <div className="flex flex-wrap gap-3">
             {product.sizes.map((size) => (
               <label
@@ -144,6 +155,14 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
           {added ? '¡Agregado!' : availableStock === 0 ? 'Sin stock' : 'Agregar al carrito'}
         </button>
       </div>
+
+      {/* Alerta de poco stock */}
+      {availableStock > 0 && availableStock < 5 && (
+        <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-red-50 py-3 text-red-500 text-sm font-medium border border-red-100">
+          <Flame size={16} />
+          <span>¡Solo quedan {availableStock} en stock!</span>
+        </div>
+      )}
     </div>
   );
 }

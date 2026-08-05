@@ -42,7 +42,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   
   const { data: product } = await supabase
     .from('products')
-    .select('*, brands(*), categories(*), supplement_information(*), product_images(*)')
+    .select('*, brands(*), categories(*), supplement_information(*), product_images(*), product_variants(*)')
     .eq('id', resolvedParams.id)
     .single();
 

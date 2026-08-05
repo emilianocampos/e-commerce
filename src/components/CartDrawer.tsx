@@ -100,9 +100,16 @@ export function CartDrawer() {
                                 </h3>
                                 <p className="ml-4 font-semibold">{formatCurrency(item.product.price * item.quantity)}</p>
                               </div>
-                              <p className="mt-1 text-sm text-zinc-500 capitalize">
-                                {item.product.category} {item.selectedSize && `• Talle: ${item.selectedSize}`}
-                              </p>
+                              <div className="mt-1 text-sm text-zinc-500 capitalize">
+                                {item.product.type === 'SUPPLEMENT' ? (
+                                  item.product.supplement_information?.flavor && <p>Sabor: {item.product.supplement_information.flavor}</p>
+                                ) : (
+                                  <>
+                                    {item.selectedSize && <p>Talle: {item.selectedSize}</p>}
+                                    {item.selectedColor && <p>Color: {item.selectedColor}</p>}
+                                  </>
+                                )}
+                              </div>
                             </div>
                             <div className="flex flex-1 items-end justify-between text-sm">
                               

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase-server';
 import { requireAdmin } from '@/lib/auth';
+import { createNotification } from './notifications';
 
 /**
  * Obtiene todas las órdenes del usuario logueado.
@@ -81,6 +82,14 @@ export async function updateShippingStatus(orderId: string, status: string) {
   await requireAdmin();
 
   const supabase = await createClient();
+  
+  // Primero obtenemos la orden para saber a qué usuario pertenece
+  const { data: order } = await supabase
+    .from('orders')
+    .select('profile_id, id')
+    .eq('id', orderId)
+    .single();
+
   const { error } = await supabase
     .from('orders')
     .update({ shipping_status: status })
@@ -88,6 +97,20 @@ export async function updateShippingStatus(orderId: string, status: string) {
 
   if (error) {
     throw new Error('Error al actualizar estado de envío: ' + error.message);
+  }
+
+  // Notificar al usuario si la orden tiene un perfil asociado
+  if (order && order.profile_id) {
+    let msg = `El estado de tu pedido ha sido actualizado a: ${status}.`;
+    if (status === 'ENVIADO') msg = `¡Buenas noticias! Tu pedido (Ref: ${orderId.split('-')[0]}) ha sido enviado.`;
+    if (status === 'EMPAQUETADO') msg = `Tu pedido (Ref: ${orderId.split('-')[0]}) está empaquetado y listo para salir.`;
+    if (status === 'ENTREGADO') msg = `Tu pedido (Ref: ${orderId.split('-')[0]}) figura como entregado. ¡Que lo disfrutes!`;
+
+    await createNotification(
+      order.profile_id,
+      'Actualización de Envío',
+      msg
+    );
   }
   
   return { success: true };

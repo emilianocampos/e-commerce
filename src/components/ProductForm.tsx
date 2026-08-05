@@ -34,13 +34,31 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
   const [previewImage, setPreviewImage] = useState<string | null>(initialData?.image ?? null);
   
   // Optional Images
-  // For editing we would ideally populate these from product_images, but for creation it's blank
-  const [previewImagesOpt, setPreviewImagesOpt] = useState<(string | null)[]>([null, null, null]);
+  const initialOptImages = [null, null, null] as (string | null)[];
+  if (initialData?.product_images) {
+    initialData.product_images.forEach(img => {
+      if (img.order >= 1 && img.order <= 3) {
+        initialOptImages[img.order - 1] = img.url;
+      }
+    });
+  }
+  const [previewImagesOpt, setPreviewImagesOpt] = useState<(string | null)[]>(initialOptImages);
 
   const [selectedSizes, setSelectedSizes] = useState<string[]>(initialData?.sizes || []);
+
+  const initialSizeColors: Record<string, string> = {};
+  if (initialData?.product_variants && Array.isArray(initialData.product_variants)) {
+    initialData.product_variants.forEach((v) => {
+      if (v.size && v.color) {
+        initialSizeColors[v.size] = v.color;
+      }
+    });
+  }
+  const [sizeColors, setSizeColors] = useState<Record<string, string>>(initialSizeColors);
   
   // Category logic (Ropa vs Suplementos)
   const [productType, setProductType] = useState<string>(initialData?.type || 'CLOTHES');
+  const [productGender, setProductGender] = useState<string>(initialData?.gender || 'UNISEX');
 
   const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -107,14 +125,26 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
         
         {/* SUBCATEGORÍA (Solo Ropa) */}
         {productType === 'CLOTHES' && (
-          <div className="space-y-2 md:col-span-2">
-            <label className="block text-sm font-bold text-zinc-900">Subcategoría</label>
-            <select name="gender" defaultValue={initialData?.gender || 'UNISEX'} className="w-full rounded-md border border-zinc-300 p-2 text-zinc-900 bg-white">
-              <option value="MEN">Hombre</option>
-              <option value="WOMEN">Mujer</option>
-              <option value="UNISEX">Urbano (Unisex)</option>
-            </select>
-            {/* Usamos el campo gender para esto, o podríamos usar category_id de la DB. Según el plan usaremos gender. */}
+          <div className="space-y-4 md:col-span-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-zinc-900">Subcategoría</label>
+              <select name="gender" value={productGender} onChange={(e) => setProductGender(e.target.value)} className="w-full rounded-md border border-zinc-300 p-2 text-zinc-900 bg-white">
+                <option value="MEN">Hombre</option>
+                <option value="WOMEN">Mujer</option>
+                <option value="UNISEX">Urbano</option>
+              </select>
+            </div>
+            
+            {productGender === 'UNISEX' && (
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-zinc-900">Género Urbano</label>
+                <select name="urbano_category" defaultValue={initialData?.urbano_category || 'UNISEX'} className="w-full rounded-md border border-zinc-300 p-2 text-zinc-900 bg-white">
+                  <option value="UNISEX">Unisex</option>
+                  <option value="MEN">Hombre</option>
+                  <option value="WOMEN">Mujer</option>
+                </select>
+              </div>
+            )}
           </div>
         )}
 
@@ -142,8 +172,8 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
         
         {/* Talles (solo ropa) */}
         {productType === 'CLOTHES' && (
-          <div className="space-y-2 md:col-span-2">
-            <label className="block text-sm font-medium text-zinc-900">Talles disponibles</label>
+          <div className="space-y-4 md:col-span-2 bg-zinc-50 p-4 rounded-xl border border-zinc-200">
+            <label className="block text-sm font-bold text-zinc-900">Talles y Colores disponibles</label>
             <div className="flex flex-wrap gap-2">
               {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => {
                 const isSelected = selectedSizes.includes(size);
@@ -155,6 +185,27 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
                 );
               })}
             </div>
+
+            {selectedSizes.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-zinc-200 space-y-3">
+                <label className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider">Asignar Color a cada Talle</label>
+                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                  {selectedSizes.map((size) => (
+                    <div key={size} className="space-y-1 bg-white p-2.5 rounded-lg border border-zinc-200 shadow-sm">
+                      <span className="text-xs font-bold text-zinc-900 block">Talle {size}</span>
+                      <input 
+                        type="text" 
+                        name={`size_color_${size}`} 
+                        value={sizeColors[size] || ''} 
+                        onChange={(e) => setSizeColors({ ...sizeColors, [size]: e.target.value })} 
+                        placeholder="Color (ej: Negro)" 
+                        className="w-full text-xs rounded border border-zinc-300 p-2 text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -166,6 +217,20 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
             <div className="grid gap-4 md:grid-cols-2">
               <Input label="Entrada (Stock Ingresado)" name="supp_entrada" type="number" defaultValue={initialData?.supplement_information?.entrada || ''} />
               <Input label="Salida (Stock Retirado)" name="supp_salida" type="number" defaultValue={initialData?.supplement_information?.salida || ''} />
+            </div>
+            <div className="mt-4 space-y-2">
+              <label className="block text-sm font-bold text-zinc-900">Sabor</label>
+              <select name="supp_flavor" defaultValue={initialData?.supplement_information?.flavor || ''} className="w-full rounded-md border border-zinc-300 p-2 text-zinc-900 bg-white">
+                <option value="">Seleccionar Sabor...</option>
+                <option value="Neutro/sin sabor">Neutro/sin sabor</option>
+                <option value="Chocolate">Chocolate</option>
+                <option value="Vainilla Cream">Vainilla Cream</option>
+                <option value="Banana">Banana</option>
+                <option value="Frutilla">Frutilla</option>
+                <option value="Cookies And Cream">Cookies And Cream</option>
+                <option value="Frutos rojos">Frutos rojos</option>
+                <option value="Limón">Limón</option>
+              </select>
             </div>
           </div>
         )}

@@ -25,7 +25,16 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   if (params.gender) query = query.eq('gender', params.gender);
   if (params.category_name === 'urbano') {
     query = query.eq('type', 'CLOTHES').eq('gender', 'UNISEX');
+    if (params.urbano_category) {
+      query = query.eq('urbano_category', params.urbano_category);
+    }
   }
+
+  // Brand Filter
+  if (params.brand_id) {
+    query = query.eq('brand_id', params.brand_id);
+  }
+
 
   // Search by name
   if (params.q) {
@@ -56,10 +65,21 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
   // Determine dynamic title
   let pageTitle = 'Todos los productos';
-  if (params.type === 'SUPPLEMENT') pageTitle = 'Suplementos';
+  if (params.type === 'SUPPLEMENT') {
+    pageTitle = 'Suplementos';
+    if (params.brand_id) {
+      const brand = await supabase.from('brands').select('name').eq('id', params.brand_id).single();
+      if (brand.data) pageTitle = `Suplementos ${brand.data.name}`;
+    }
+  }
   if (params.gender === 'MEN') pageTitle = 'Hombre';
   if (params.gender === 'WOMEN') pageTitle = 'Mujer';
-  if (params.category_name === 'urbano') pageTitle = 'Urbano';
+  if (params.category_name === 'urbano') {
+    pageTitle = 'Urbano';
+    if (params.urbano_category === 'MEN') pageTitle = 'Urbano Hombre';
+    if (params.urbano_category === 'WOMEN') pageTitle = 'Urbano Mujer';
+    if (params.urbano_category === 'UNISEX') pageTitle = 'Urbano Unisex';
+  }
   if (params.q) pageTitle = `Resultados para "${params.q}"`;
 
   return (

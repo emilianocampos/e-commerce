@@ -52,82 +52,67 @@ export async function POST(request: Request) {
 
       // 3. Validar estado (Solo procesar cuando está aprobado)
       if (paymentData.status === 'approved') {
-        const profileId = paymentData.metadata?.profile_id;
-        const cartItems = paymentData.metadata?.cart_items;
+        const orderId = paymentData.external_reference || paymentData.metadata?.order_id;
         
-        if (profileId && cartItems && cartItems.length > 0) {
+        if (orderId) {
           
-          // 4. Evitar duplicados
+          // 4. Buscar la orden
           const { data: existingOrder } = await supabase
             .from('orders')
-            .select('id')
-            .eq('mp_payment_id', paymentData.id!.toString())
-            .maybeSingle();
+            .select('id, status')
+            .eq('id', orderId)
+            .single();
             
-          if (existingOrder) {
-            console.log(`[Webhook MP] La orden para el pago ${paymentData.id} ya fue insertada.`);
-            return NextResponse.json({ received: true }, { status: 200 }); // Responder 200 rápido
+          if (!existingOrder) {
+            console.error(`[Webhook MP] Orden no encontrada: ${orderId}`);
+            return NextResponse.json({ received: true }, { status: 200 }); 
           }
 
-          // 5. Obtener los productos de la BD para sacar sus precios y nombres REALES
-          const productIds = cartItems.map((item: any) => item.productId);
-          const { data: products, error: productsError } = await supabase
-            .from('products')
-            .select('id, title, price, stock')
-            .in('id', productIds);
-
-          if (productsError || !products || products.length === 0) {
-            console.error('[Webhook MP] Error consultando productos:', productsError);
-            return NextResponse.json({ received: true }, { status: 200 }); // Retornar 200 para que MP no reintente.
+          if (existingOrder.status === 'paid') {
+            console.log(`[Webhook MP] La orden ${orderId} ya estaba pagada.`);
+            return NextResponse.json({ received: true }, { status: 200 }); 
           }
 
-          // Calculamos el total internamente por seguridad, aunque MP envíe transaction_amount
-          // Esto asegura congruencia
-          const realTotal = paymentData.transaction_amount || 0;
-
-          // 6. Crear el pedido principal (orders)
-          const { data: order, error: orderError } = await supabase
+          // 5. Actualizar orden a "paid"
+          const { error: orderError } = await supabase
             .from('orders')
-            .insert({
-              profile_id: profileId,
-              total_amount: realTotal,
-              status: 'paid', // Estado guardado como "paid"
+            .update({
+              status: 'paid', 
               mp_payment_id: paymentData.id!.toString()
             })
-            .select('id')
-            .single();
+            .eq('id', orderId);
 
-          if (orderError || !order) {
-            console.error('[Webhook MP] Error creando orden:', orderError);
+          if (orderError) {
+            console.error('[Webhook MP] Error actualizando orden:', orderError);
             return NextResponse.json({ received: true }, { status: 200 });
           }
 
-          console.log(`[Webhook MP] Orden creada (UUID: ${order.id})`);
+          console.log(`[Webhook MP] Orden actualizada a pagada (UUID: ${orderId})`);
 
-          // 7. Crear items (congelando la data) y actualizar stock
-          for (const item of cartItems) {
-            const product = products.find((p: any) => p.id === item.productId);
-            if (product) {
-              const unitPrice = product.price;
-              const subtotal = unitPrice * item.quantity;
-              
-              // Insertamos item
-              await supabase.from('order_items').insert({
-                order_id: order.id,
-                product_id: product.id,
-                selected_size: item.selectedSize || '',
-                quantity: item.quantity,
-                unit_price: unitPrice
-              });
+          // 6. Obtener los items y descontar stock
+          const { data: orderItems } = await supabase
+            .from('order_items')
+            .select('product_id, quantity')
+            .eq('order_id', orderId);
 
-              // Descontamos stock (NO bajando por debajo de 0)
-              const newStock = Math.max(0, product.stock - item.quantity);
-              await supabase.from('products').update({ stock: newStock }).eq('id', product.id);
+          if (orderItems && orderItems.length > 0) {
+            for (const item of orderItems) {
+              const { data: product } = await supabase
+                .from('products')
+                .select('stock')
+                .eq('id', item.product_id)
+                .single();
+                
+              if (product) {
+                const newStock = Math.max(0, product.stock - item.quantity);
+                await supabase.from('products').update({ stock: newStock }).eq('id', item.product_id);
+              }
             }
           }
 
           console.log(`[Webhook MP] Productos procesados y stock actualizado exitosamente.`);
         }
+
       } else {
         console.log(`[Webhook MP] Pago con estado "${paymentData.status}" - No se genera orden.`);
       }

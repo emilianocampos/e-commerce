@@ -81,6 +81,7 @@ export interface Product {
   subcategory_id?: string | null;
   gender?: GenderType | null;
   type?: ProductType | null;
+  urbano_category?: GenderType | null;
   featured?: boolean;
   new?: boolean;
   active?: boolean;
@@ -99,5 +100,6 @@ export interface Product {
 export interface CartItem {
   product: Product;
   selectedSize: string;
+  selectedColor?: string;
   quantity: number;
 }
