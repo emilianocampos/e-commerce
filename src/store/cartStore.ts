@@ -9,9 +9,9 @@ import { showToast } from 'nextjs-toast-notify';
 interface CartState {
   items: CartItem[];
   addItem: (product: Product, selectedSize: string, quantity?: number, selectedColor?: string) => void;
-  removeItem: (productId: string, selectedSize: string) => void;
-  increaseQuantity: (productId: string, selectedSize: string) => void;
-  decreaseQuantity: (productId: string, selectedSize: string) => void;
+  removeItem: (productId: string, selectedSize: string, selectedColor?: string) => void;
+  increaseQuantity: (productId: string, selectedSize: string, selectedColor?: string) => void;
+  decreaseQuantity: (productId: string, selectedSize: string, selectedColor?: string) => void;
   clearCart: () => void;
   subtotal: () => number;
   total: () => number;
@@ -59,17 +59,17 @@ export const useCartStore = create<CartState>()(
         });
       },
       
-      removeItem: (productId, selectedSize) => {
+      removeItem: (productId, selectedSize, selectedColor) => {
         set((state) => ({
-          items: state.items.filter((item) => !(item.product.id === productId && item.selectedSize === selectedSize)),
+          items: state.items.filter((item) => !(item.product.id === productId && item.selectedSize === selectedSize && item.selectedColor === selectedColor)),
         }));
       },
       
-      increaseQuantity: (productId, selectedSize) => {
+      increaseQuantity: (productId, selectedSize, selectedColor) => {
         set((state) => {
           let reachedLimit = false;
           const newItems = state.items.map((item) => {
-            if (item.product.id === productId && item.selectedSize === selectedSize) {
+            if (item.product.id === productId && item.selectedSize === selectedSize && item.selectedColor === selectedColor) {
               if (item.quantity + 1 > item.product.stock) {
                 reachedLimit = true;
                 return item;
@@ -87,10 +87,10 @@ export const useCartStore = create<CartState>()(
         });
       },
       
-      decreaseQuantity: (productId, selectedSize) => {
+      decreaseQuantity: (productId, selectedSize, selectedColor) => {
         set((state) => ({
           items: state.items.map((item) =>
-            item.product.id === productId && item.selectedSize === selectedSize && item.quantity > 1
+            item.product.id === productId && item.selectedSize === selectedSize && item.selectedColor === selectedColor && item.quantity > 1
               ? { ...item, quantity: item.quantity - 1 }
               : item
           ),

@@ -77,7 +77,7 @@ export function CartDrawer() {
                   ) : (
                     <ul role="list" className="-my-6 divide-y divide-zinc-100">
                       {items.map((item) => (
-                        <li key={item.product.id} className="flex py-6">
+                        <li key={`${item.product.id}-${item.selectedSize}-${item.selectedColor || ''}`} className="flex py-6">
                           <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-zinc-100 bg-zinc-50">
                             {item.product.image ? (
                               <Image 
@@ -115,7 +115,7 @@ export function CartDrawer() {
                               
                               <div className="flex items-center rounded-lg border border-zinc-200 p-1">
                                 <button
-                                  onClick={() => decreaseQuantity(item.product.id, item.selectedSize)}
+                                  onClick={() => decreaseQuantity(item.product.id, item.selectedSize, item.selectedColor)}
                                   className="rounded-md p-1 hover:bg-zinc-100 disabled:opacity-50 transition-colors"
                                   disabled={item.quantity <= 1}
                                 >
@@ -123,7 +123,7 @@ export function CartDrawer() {
                                 </button>
                                 <span className="w-8 text-center font-medium text-zinc-900">{item.quantity}</span>
                                 <button
-                                  onClick={() => increaseQuantity(item.product.id, item.selectedSize)}
+                                  onClick={() => increaseQuantity(item.product.id, item.selectedSize, item.selectedColor)}
                                   className="rounded-md p-1 hover:bg-zinc-100 disabled:opacity-50 transition-colors"
                                   disabled={item.quantity >= item.product.stock}
                                 >
@@ -135,7 +135,7 @@ export function CartDrawer() {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    removeItem(item.product.id, item.selectedSize);
+                                    removeItem(item.product.id, item.selectedSize, item.selectedColor);
                                     showToast.error('Producto eliminado', { position: 'top-center', duration: 3000 });
                                   }}
                                   className="font-medium text-red-500 hover:text-red-600 flex items-center gap-1 transition-colors"

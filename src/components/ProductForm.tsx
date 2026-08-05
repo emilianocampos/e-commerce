@@ -46,15 +46,21 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
 
   const [selectedSizes, setSelectedSizes] = useState<string[]>(initialData?.sizes || []);
 
-  const initialSizeColors: Record<string, string> = {};
+  const initialSizeColors: Record<string, string[]> = {};
   if (initialData?.product_variants && Array.isArray(initialData.product_variants)) {
     initialData.product_variants.forEach((v) => {
       if (v.size && v.color) {
-        initialSizeColors[v.size] = v.color;
+        if (!initialSizeColors[v.size]) {
+          initialSizeColors[v.size] = [];
+        }
+        if (!initialSizeColors[v.size].includes(v.color)) {
+          initialSizeColors[v.size].push(v.color);
+        }
       }
     });
   }
-  const [sizeColors, setSizeColors] = useState<Record<string, string>>(initialSizeColors);
+  const [sizeColors, setSizeColors] = useState<Record<string, string[]>>(initialSizeColors);
+  const [customColorInput, setCustomColorInput] = useState<Record<string, string>>({});
   
   // Category logic (Ropa vs Suplementos)
   const [productType, setProductType] = useState<string>(initialData?.type || 'CLOTHES');
@@ -74,8 +80,47 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
     }
   };
 
+  const toggleColorForSize = (size: string, colorName: string) => {
+    const current = sizeColors[size] || [];
+    if (current.includes(colorName)) {
+      setSizeColors({ ...sizeColors, [size]: current.filter(c => c !== colorName) });
+    } else {
+      setSizeColors({ ...sizeColors, [size]: [...current, colorName] });
+    }
+  };
+
+  const addCustomColorForSize = (size: string) => {
+    const colorName = (customColorInput[size] || '').trim();
+    if (!colorName) return;
+    const current = sizeColors[size] || [];
+    if (!current.includes(colorName)) {
+      setSizeColors({ ...sizeColors, [size]: [...current, colorName] });
+    }
+    setCustomColorInput({ ...customColorInput, [size]: '' });
+  };
+
+  const removeColorFromSize = (size: string, colorName: string) => {
+    const current = sizeColors[size] || [];
+    setSizeColors({ ...sizeColors, [size]: current.filter(c => c !== colorName) });
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (productType === 'CLOTHES') {
+      if (selectedSizes.length === 0) {
+        showToast.error('Debes seleccionar al menos un talle', { position: 'top-center' });
+        return;
+      }
+      for (const size of selectedSizes) {
+        const colors = sizeColors[size] || [];
+        if (colors.length === 0) {
+          showToast.error(`Debes asignar al menos un color para el talle ${size}`, { position: 'top-center' });
+          return;
+        }
+      }
+    }
+
     const formData = new FormData(e.currentTarget);
     
     // Compress main image if exists
@@ -98,6 +143,23 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
       formAction(formData);
     });
   };
+
+  const PRESET_COLORS = [
+    { name: 'Negro', hex: '#000000', border: false },
+    { name: 'Blanco', hex: '#FFFFFF', border: true },
+    { name: 'Gris', hex: '#6B7280', border: false },
+    { name: 'Rojo', hex: '#EF4444', border: false },
+    { name: 'Azul', hex: '#3B82F6', border: false },
+    { name: 'Verde', hex: '#22C55E', border: false },
+    { name: 'Amarillo', hex: '#EAB308', border: false },
+    { name: 'Beige', hex: '#F5F5DC', border: true },
+    { name: 'Rosa', hex: '#EC4899', border: false },
+    { name: 'Violeta', hex: '#A855F7', border: false },
+    { name: 'Naranja', hex: '#F97316', border: false },
+    { name: 'Marrón', hex: '#78350F', border: false },
+    { name: 'Celeste', hex: '#38BDF8', border: false },
+    { name: 'Bordo', hex: '#800020', border: false },
+  ];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -187,22 +249,101 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
             </div>
 
             {selectedSizes.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-zinc-200 space-y-3">
-                <label className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider">Asignar Color a cada Talle</label>
-                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-                  {selectedSizes.map((size) => (
-                    <div key={size} className="space-y-1 bg-white p-2.5 rounded-lg border border-zinc-200 shadow-sm">
-                      <span className="text-xs font-bold text-zinc-900 block">Talle {size}</span>
-                      <input 
-                        type="text" 
-                        name={`size_color_${size}`} 
-                        value={sizeColors[size] || ''} 
-                        onChange={(e) => setSizeColors({ ...sizeColors, [size]: e.target.value })} 
-                        placeholder="Color (ej: Negro)" 
-                        className="w-full text-xs rounded border border-zinc-300 p-2 text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900"
-                      />
-                    </div>
-                  ))}
+              <div className="mt-4 pt-4 border-t border-zinc-200 space-y-4">
+                <label className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider">
+                  Seleccionar Colores para cada Talle (Obligatorio al menos 1 color por talle)
+                </label>
+                
+                <div className="grid gap-4 md:grid-cols-2">
+                  {selectedSizes.map((size) => {
+                    const activeColors = sizeColors[size] || [];
+                    const hasColors = activeColors.length > 0;
+                    return (
+                      <div key={size} className={`bg-white p-4 rounded-xl border transition-all shadow-sm space-y-3 ${hasColors ? 'border-zinc-300' : 'border-red-300 bg-red-50/20'}`}>
+                        <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
+                          <span className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+                            Talle <span className="bg-zinc-900 text-white text-xs px-2 py-0.5 rounded">{size}</span>
+                          </span>
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${hasColors ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                            {hasColors ? `${activeColors.length} ${activeColors.length === 1 ? 'color' : 'colores'}` : 'Sin colores'}
+                          </span>
+                        </div>
+
+                        {/* Hidden input for server action submission */}
+                        <input type="hidden" name={`size_color_${size}`} value={activeColors.join(', ')} />
+
+                        {/* Selected Color Badges */}
+                        {hasColors && (
+                          <div className="flex flex-wrap gap-1.5 pb-1">
+                            {activeColors.map((colorName) => (
+                              <span key={colorName} className="inline-flex items-center gap-1 bg-zinc-100 text-zinc-800 text-xs font-medium px-2.5 py-1 rounded-md border border-zinc-200">
+                                {colorName}
+                                <button type="button" onClick={() => removeColorFromSize(size, colorName)} className="text-zinc-400 hover:text-red-500 font-bold ml-1">
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Preset Swatches Selector */}
+                        <div className="space-y-1">
+                          <span className="text-[11px] font-semibold text-zinc-400 uppercase">Paleta de colores rápidos:</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {PRESET_COLORS.map((preset) => {
+                              const isChecked = activeColors.includes(preset.name);
+                              return (
+                                <button
+                                  key={preset.name}
+                                  type="button"
+                                  onClick={() => toggleColorForSize(size, preset.name)}
+                                  title={preset.name}
+                                  className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium border transition-all ${
+                                    isChecked
+                                      ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm'
+                                      : 'border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100'
+                                  }`}
+                                >
+                                  <span
+                                    className="w-3 h-3 rounded-full shrink-0"
+                                    style={{
+                                      backgroundColor: preset.hex,
+                                      border: preset.border ? '1px solid #D1D5DB' : 'none'
+                                    }}
+                                  />
+                                  {preset.name}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Custom Color Input */}
+                        <div className="pt-2 border-t border-zinc-100 flex gap-2">
+                          <input
+                            type="text"
+                            value={customColorInput[size] || ''}
+                            onChange={(e) => setCustomColorInput({ ...customColorInput, [size]: e.target.value })}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                addCustomColorForSize(size);
+                              }
+                            }}
+                            placeholder="Otro color personalizado..."
+                            className="flex-1 text-xs rounded border border-zinc-300 p-2 text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => addCustomColorForSize(size)}
+                            className="bg-zinc-800 hover:bg-zinc-900 text-white text-xs px-3 py-1.5 rounded font-medium transition-colors"
+                          >
+                            + Agregar
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

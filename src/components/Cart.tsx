@@ -44,7 +44,7 @@ export function Cart() {
         {/* Left Column: Items */}
         <div className={styles.itemsBox}>
           {items.map((item) => (
-            <div key={`${item.product.id}-${item.selectedSize}`} className={styles.itemRow}>
+            <div key={`${item.product.id}-${item.selectedSize}-${item.selectedColor || ''}`} className={styles.itemRow}>
               <div className={styles.itemImage}>
                 {item.product.image && (
                   <Image src={item.product.image} alt={item.product.title} fill unoptimized className="object-cover" />
@@ -69,7 +69,7 @@ export function Cart() {
                 <button
                   className={styles.deleteBtn}
                   onClick={() => {
-                    removeItem(item.product.id, item.selectedSize);
+                    removeItem(item.product.id, item.selectedSize, item.selectedColor);
                     showToast.error('Producto eliminado', { position: 'top-center', duration: 3000 });
                   }}
                   aria-label="Eliminar producto"
@@ -83,7 +83,7 @@ export function Cart() {
                   <div className={styles.quantityControl}>
                     <button
                       className={styles.quantityBtn}
-                      onClick={() => decreaseQuantity(item.product.id, item.selectedSize)}
+                      onClick={() => decreaseQuantity(item.product.id, item.selectedSize, item.selectedColor)}
                       disabled={item.quantity <= 1}
                     >
                       <Minus size={16} strokeWidth={3} />
@@ -91,7 +91,7 @@ export function Cart() {
                     <span className={styles.quantityValue}>{item.quantity}</span>
                     <button
                       className={styles.quantityBtn}
-                      onClick={() => increaseQuantity(item.product.id, item.selectedSize)}
+                      onClick={() => increaseQuantity(item.product.id, item.selectedSize, item.selectedColor)}
                       disabled={item.quantity >= item.product.stock}
                     >
                       <Plus size={16} strokeWidth={3} />

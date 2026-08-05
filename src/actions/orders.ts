@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase-server';
+import { createClient, createAdminClient } from '@/lib/supabase-server';
 import { requireAdmin } from '@/lib/auth';
 import { createNotification } from './notifications';
 
@@ -44,9 +44,9 @@ export async function getUserOrders() {
 export async function getAllOrders() {
   await requireAdmin();
 
-  const supabase = await createClient();
+  const adminClient = createAdminClient();
   
-  const { data: orders, error } = await supabase
+  const { data: orders, error } = await adminClient
     .from('orders')
     .select(`
       *,
@@ -81,16 +81,16 @@ export async function getAllOrders() {
 export async function updateShippingStatus(orderId: string, status: string) {
   await requireAdmin();
 
-  const supabase = await createClient();
+  const adminClient = createAdminClient();
   
   // Primero obtenemos la orden para saber a qué usuario pertenece
-  const { data: order } = await supabase
+  const { data: order } = await adminClient
     .from('orders')
     .select('profile_id, id')
     .eq('id', orderId)
     .single();
 
-  const { error } = await supabase
+  const { error } = await adminClient
     .from('orders')
     .update({ shipping_status: status })
     .eq('id', orderId);
@@ -101,10 +101,21 @@ export async function updateShippingStatus(orderId: string, status: string) {
 
   // Notificar al usuario si la orden tiene un perfil asociado
   if (order && order.profile_id) {
-    let msg = `El estado de tu pedido ha sido actualizado a: ${status}.`;
-    if (status === 'ENVIADO') msg = `¡Buenas noticias! Tu pedido (Ref: ${orderId.split('-')[0]}) ha sido enviado.`;
-    if (status === 'EMPAQUETADO') msg = `Tu pedido (Ref: ${orderId.split('-')[0]}) está empaquetado y listo para salir.`;
-    if (status === 'ENTREGADO') msg = `Tu pedido (Ref: ${orderId.split('-')[0]}) figura como entregado. ¡Que lo disfrutes!`;
+    const ref = orderId.split('-')[0];
+    const normalizedStatus = (status || '').toLowerCase();
+    let msg = `El estado de tu pedido (Ref: ${ref}) ha sido actualizado a: ${status}.`;
+
+    if (normalizedStatus === 'shipped' || normalizedStatus === 'enviado') {
+      msg = `¡Buenas noticias! Tu pedido (Ref: ${ref}) ha sido enviado.`;
+    } else if (normalizedStatus === 'delivered' || normalizedStatus === 'entregado') {
+      msg = `Tu pedido (Ref: ${ref}) figura como entregado. ¡Que lo disfrutes!`;
+    } else if (normalizedStatus === 'preparing' || normalizedStatus === 'empaquetado' || normalizedStatus === 'preparación' || normalizedStatus === 'preparacion') {
+      msg = `Tu pedido (Ref: ${ref}) se encuentra en preparación y empaquetado.`;
+    } else if (normalizedStatus === 'pending' || normalizedStatus === 'pendiente') {
+      msg = `Tu pedido (Ref: ${ref}) está registrado como pendiente.`;
+    } else if (normalizedStatus === 'cancelled' || normalizedStatus === 'cancelado') {
+      msg = `Tu pedido (Ref: ${ref}) ha sido cancelado.`;
+    }
 
     await createNotification(
       order.profile_id,

@@ -120,16 +120,32 @@ export async function createProduct(_prevState: any, formData: FormData) {
 
   // Insertar variantes de ropa (talle + color)
   if (type === 'CLOTHES' && newProduct && sizes.length > 0) {
-    const variantInserts = sizes.map((size) => {
-      const color = formData.get(`size_color_${size}`) as string || null;
-      return {
-        product_id: newProduct.id,
-        size,
-        color: color ? color.trim() : null,
-        stock: Math.floor(stock / sizes.length) || stock,
-      };
+    // Validar que cada talle tenga al menos un color
+    for (const size of sizes) {
+      const colorStr = formData.get(`size_color_${size}`) as string || '';
+      const colors = colorStr.split(',').map(c => c.trim()).filter(Boolean);
+      if (colors.length === 0) {
+        await supabase.from('products').delete().eq('id', newProduct.id);
+        return { error: `El talle ${size} debe tener al menos un color asignado.` };
+      }
+    }
+
+    const variantInserts: any[] = [];
+    sizes.forEach((size) => {
+      const colorStr = formData.get(`size_color_${size}`) as string || '';
+      const colors = colorStr.split(',').map(c => c.trim()).filter(Boolean);
+      colors.forEach(color => {
+        variantInserts.push({
+          product_id: newProduct.id,
+          size,
+          color,
+          stock: Math.floor(stock / sizes.length) || stock,
+        });
+      });
     });
-    await supabase.from('product_variants').insert(variantInserts);
+    if (variantInserts.length > 0) {
+      await supabase.from('product_variants').insert(variantInserts);
+    }
   }
 
   // Insertar supplement_information si es suplemento
@@ -276,18 +292,34 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
   }
 
   if (type === 'CLOTHES') {
+    if (sizes.length > 0) {
+      for (const size of sizes) {
+        const colorStr = formData.get(`size_color_${size}`) as string || '';
+        const colors = colorStr.split(',').map(c => c.trim()).filter(Boolean);
+        if (colors.length === 0) {
+          return { error: `El talle ${size} debe tener al menos un color asignado.` };
+        }
+      }
+    }
+
     await supabase.from('product_variants').delete().eq('product_id', id);
     if (sizes.length > 0) {
-      const variantInserts = sizes.map((size) => {
-        const color = formData.get(`size_color_${size}`) as string || null;
-        return {
-          product_id: id,
-          size,
-          color: color ? color.trim() : null,
-          stock: Math.floor(stock / sizes.length) || stock,
-        };
+      const variantInserts: any[] = [];
+      sizes.forEach((size) => {
+        const colorStr = formData.get(`size_color_${size}`) as string || '';
+        const colors = colorStr.split(',').map(c => c.trim()).filter(Boolean);
+        colors.forEach(color => {
+          variantInserts.push({
+            product_id: id,
+            size,
+            color,
+            stock: Math.floor(stock / sizes.length) || stock,
+          });
+        });
       });
-      await supabase.from('product_variants').insert(variantInserts);
+      if (variantInserts.length > 0) {
+        await supabase.from('product_variants').insert(variantInserts);
+      }
     }
   }
 

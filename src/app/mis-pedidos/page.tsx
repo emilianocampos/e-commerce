@@ -38,10 +38,17 @@ export default async function MisPedidosPage() {
                   <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Estado Envío</p>
                   <span className={`inline-flex px-2 py-1 text-xs font-bold uppercase tracking-wider rounded ${
                     order.shipping_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    order.shipping_status === 'preparing' ? 'bg-orange-100 text-orange-800' :
                     order.shipping_status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                    'bg-green-100 text-green-800'
+                    order.shipping_status === 'delivered' ? 'bg-green-100 text-green-800' :
+                    'bg-red-100 text-red-800'
                   }`}>
-                    {order.shipping_status === 'pending' ? 'Pendiente' : order.shipping_status === 'shipped' ? 'Enviado' : 'Entregado'}
+                    {order.shipping_status === 'pending' ? 'Pendiente' :
+                     order.shipping_status === 'preparing' ? 'En Preparación' :
+                     order.shipping_status === 'shipped' ? 'Enviado' :
+                     order.shipping_status === 'delivered' ? 'Entregado' :
+                     order.shipping_status === 'cancelled' ? 'Cancelado' :
+                     order.shipping_status || 'Pendiente'}
                   </span>
                 </div>
               </div>

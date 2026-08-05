@@ -16,13 +16,25 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
   const cartItems = useCartStore((state) => state.items);
   const [added, setAdded] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
 
   const [quantity, setQuantity] = useState(1);
 
-  // Calculamos cuánto stock queda realmente (restando lo que ya está en el carrito para ese talle)
+  // Obtener colores disponibles para el talle actualmente seleccionado
+  const availableColorsForSize: string[] = selectedSize
+    ? Array.from(
+        new Set(
+          (product.product_variants || [])
+            .filter((v: any) => v.size === selectedSize && v.color)
+            .map((v: any) => v.color as string)
+        )
+      )
+    : [];
+
+  // Calculamos cuánto stock queda realmente
   const sizeToUse = selectedSize || 'Único';
   const itemInCart = cartItems.find(
-    (item) => item.product.id === product.id && item.selectedSize === sizeToUse
+    (item) => item.product.id === product.id && item.selectedSize === sizeToUse && item.selectedColor === (selectedColor || undefined)
   );
   const quantityInCart = itemInCart ? itemInCart.quantity : 0;
   const availableStock = Math.max(0, (product.stock || 0) - quantityInCart);
@@ -33,18 +45,23 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
   // Si no hay stock disponible (considerando carrito) para el talle actual
   const isMaxReached = quantity > availableStock;
 
-  // Color asignado al talle seleccionado
-  const selectedVariant = product.product_variants?.find((v: any) => v.size === selectedSize);
-  const currentColor = selectedVariant?.color || undefined;
-
   const handleAdd = () => {
     // Si el producto tiene talles y el usuario no seleccionó ninguno
-    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
-      showToast.error('Debes seleccionar un talle antes de continuar.', {
-        position: 'top-center',
-        duration: 3000,
-      });
-      return;
+    if (product.sizes && product.sizes.length > 0) {
+      if (!selectedSize) {
+        showToast.error('Debes seleccionar un talle antes de continuar.', {
+          position: 'top-center',
+          duration: 3000,
+        });
+        return;
+      }
+      if (availableColorsForSize.length > 0 && !selectedColor) {
+        showToast.error('Debes seleccionar un color para el talle elegido.', {
+          position: 'top-center',
+          duration: 3000,
+        });
+        return;
+      }
     }
 
     if (quantity > availableStock) {
@@ -55,7 +72,7 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
       return;
     }
 
-    addItem(product, sizeToUse, quantity, currentColor);
+    addItem(product, sizeToUse, quantity, selectedColor || undefined);
     
     showToast.success('Producto agregado al carrito', {
       position: 'bottom-right',
@@ -64,7 +81,6 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
-    // Reiniciar cantidad a 1, pero verificar que quede stock
     if (availableStock - quantity > 0) {
       setQuantity(1);
     }
@@ -81,39 +97,86 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
   return (
     <div className="space-y-6">
       
-      {/* Selector de talles */}
+      {/* Selector de talles y colores */}
       {product.sizes && product.sizes.length > 0 && (
-        <div className="space-y-3 pb-6 border-b border-zinc-200">
+        <div className="space-y-4 pb-6 border-b border-zinc-200">
           <div className="flex justify-between items-center text-sm">
-            <span className="text-zinc-500">Elegir Talle</span>
-            {selectedSize && currentColor && (
-              <span className="text-zinc-900 font-semibold bg-zinc-100 px-3 py-1 rounded-full text-xs">
-                Color: {currentColor}
+            <span className="text-zinc-500 font-medium">Elegir Talle</span>
+            {selectedSize && (
+              <span className="text-xs text-zinc-400">
+                Talle seleccionado: <strong className="text-zinc-900">{selectedSize}</strong>
               </span>
             )}
           </div>
+
           <div className="flex flex-wrap gap-3">
             {product.sizes.map((size) => (
-              <label
+              <button
                 key={size}
-                className={`relative flex px-6 h-12 cursor-pointer items-center justify-center rounded-full text-sm transition-all ${
+                type="button"
+                onClick={() => {
+                  setSelectedSize(size);
+                  const colors = Array.from(
+                    new Set(
+                      (product.product_variants || [])
+                        .filter((v: any) => v.size === size && v.color)
+                        .map((v: any) => v.color as string)
+                    )
+                  );
+                  if (colors.length > 0) {
+                    setSelectedColor(colors[0]);
+                  } else {
+                    setSelectedColor(null);
+                  }
+                }}
+                className={`flex px-6 h-12 cursor-pointer items-center justify-center rounded-full text-sm font-medium transition-all ${
                   selectedSize === size
-                    ? 'bg-zinc-900 text-white font-medium'
+                    ? 'bg-zinc-900 text-white shadow-md font-bold'
                     : 'bg-[#F0F0F0] text-zinc-600 hover:bg-zinc-200'
                 }`}
               >
-                <input
-                  type="radio"
-                  name="size"
-                  value={size}
-                  className="sr-only"
-                  onChange={() => setSelectedSize(size)}
-                  checked={selectedSize === size}
-                />
                 {size}
-              </label>
+              </button>
             ))}
           </div>
+
+          {/* Muestra los colores del talle seleccionado */}
+          {selectedSize ? (
+            availableColorsForSize.length > 0 ? (
+              <div className="pt-2 space-y-3">
+                <div className="text-base text-zinc-800">
+                  Color: <span className="font-bold text-zinc-900">{selectedColor || 'Seleccionar...'}</span>
+                </div>
+                <div className="flex flex-wrap gap-2.5">
+                  {availableColorsForSize.map((color) => {
+                    const isSelectedColor = selectedColor === color;
+                    return (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setSelectedColor(color)}
+                        className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer ${
+                          isSelectedColor
+                            ? 'border-2 border-blue-500 text-zinc-900 bg-white shadow-sm'
+                            : 'border border-zinc-300 text-zinc-800 bg-white hover:border-zinc-400'
+                        }`}
+                      >
+                        {color}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="pt-2 text-xs text-zinc-400 italic">
+                No hay colores registrados para el talle {selectedSize}.
+              </div>
+            )
+          ) : (
+            <div className="pt-2 text-xs text-zinc-400 italic">
+              Haz clic en un talle para ver sus colores disponibles.
+            </div>
+          )}
         </div>
       )}
 
@@ -166,3 +229,4 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     </div>
   );
 }
+

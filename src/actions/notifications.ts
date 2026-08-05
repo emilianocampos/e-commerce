@@ -13,7 +13,8 @@ export async function getUserNotifications() {
     return [];
   }
 
-  const { data, error } = await supabase
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient
     .from('notifications')
     .select('*')
     .eq('profile_id', user.id)
@@ -36,7 +37,8 @@ export async function markNotificationAsRead(notificationId: string) {
 
   if (!user) return { success: false };
 
-  const { error } = await supabase
+  const adminClient = createAdminClient();
+  const { error } = await adminClient
     .from('notifications')
     .update({ is_read: true })
     .eq('id', notificationId)
