@@ -72,12 +72,13 @@ export async function register(formData: FormData) {
   const numero = formData.get('numero') as string;
   const piso = formData.get('piso') as string;
   const departamento = formData.get('departamento') as string;
-  const ciudad = formData.get('ciudad') as string;
+  const localidad = (formData.get('localidad') || formData.get('ciudad')) as string;
   const provincia = formData.get('provincia') as string;
   const codigo_postal = formData.get('codigo_postal') as string;
   const referencias = formData.get('referencias') as string;
+  const shipping_quote_required = formData.get('shipping_quote_required') === 'true';
 
-  if (!email || !password || !nombre || !apellido || !dni || !telefono || !calle || !numero || !ciudad || !provincia || !codigo_postal) {
+  if (!email || !password || !nombre || !apellido || !dni || !telefono || !calle || !numero || !localidad || !provincia || !codigo_postal) {
     return { error: 'Por favor completa todos los campos obligatorios.' };
   }
 
@@ -108,8 +109,11 @@ export async function register(formData: FormData) {
       full_name: `${nombre} ${apellido}`.trim(),
       phone: telefono,
       address: fullAddress,
-      city: ciudad,
+      city: localidad,
+      provincia: provincia,
+      localidad: localidad,
       postal_code: codigo_postal,
+      shipping_quote_required: shipping_quote_required,
     });
   }
 

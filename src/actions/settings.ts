@@ -45,6 +45,7 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
     stats_2_label: formData.get('stats_2_label'),
     stats_3_number: formData.get('stats_3_number'),
     stats_3_label: formData.get('stats_3_label'),
+    show_stats_numbers: formData.get('show_stats_numbers') === 'true',
     style_1_title: formData.get('style_1_title'),
     style_1_link: formData.get('style_1_link'),
     style_2_title: formData.get('style_2_title'),

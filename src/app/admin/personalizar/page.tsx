@@ -19,14 +19,15 @@ export default async function CustomizeWebPage() {
     stats_2_label: 'Productos de Alta Calidad',
     stats_3_number: '30,000+',
     stats_3_label: 'Clientes Felices',
+    show_stats_numbers: true,
     style_1_title: 'Hombre',
     style_1_link: '/shop?gender=MEN',
     style_2_title: 'Mujer',
     style_2_link: '/shop?gender=WOMEN',
     style_3_title: 'Urbano',
     style_3_link: '/shop?category_name=urbano',
-    style_4_title: '',
-    style_4_link: '',
+    style_4_title: 'Suplementos',
+    style_4_link: '/shop?type=SUPPLEMENT',
   };
 
   const finalSettings = settings || defaultSettings;

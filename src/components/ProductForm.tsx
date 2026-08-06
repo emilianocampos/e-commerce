@@ -237,7 +237,7 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
           <div className="space-y-4 md:col-span-2 bg-zinc-50 p-4 rounded-xl border border-zinc-200">
             <label className="block text-sm font-bold text-zinc-900">Talles y Colores disponibles</label>
             <div className="flex flex-wrap gap-2">
-              {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => {
+              {['XS', 'S', 'M', 'S/M', 'L', 'XL', 'L/XL', 'XXL'].map((size) => {
                 const isSelected = selectedSizes.includes(size);
                 return (
                   <label key={size} className={`flex items-center justify-center min-w-12 h-10 px-3 rounded-md border text-sm font-medium cursor-pointer transition-colors ${isSelected ? 'border-zinc-900 bg-zinc-900 text-white' : 'border-zinc-200 bg-white text-zinc-700'}`}>

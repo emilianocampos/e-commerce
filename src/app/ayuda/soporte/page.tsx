@@ -1,12 +1,18 @@
 import React from 'react';
 import Link from 'next/link';
+import { getStoreSettings } from '@/actions/settings';
 
 export const metadata = {
   title: 'Soporte al Cliente | DRAVENIX',
   description: 'Comunicate con nuestro equipo de soporte para resolver tus dudas.',
 };
 
-export default function SoportePage() {
+export default async function SoportePage() {
+  const settings = await getStoreSettings();
+  const instagramUrl = settings?.instagram_url || '#';
+  const facebookUrl = settings?.facebook_url || '#';
+  const whatsappUrl = 'https://wa.me/5492804350717';
+
   return (
     <div className="bg-white min-h-screen py-16">
       <div className="container mx-auto px-4 max-w-3xl">
@@ -25,18 +31,32 @@ export default function SoportePage() {
             
             <div className="space-y-6">
               <div>
-                <h3 className="font-bold text-zinc-900">Correo Electrónico</h3>
-                <p className="text-zinc-600">Puedes escribirnos en cualquier momento a <a href="mailto:soporte@dravenix.com" className="text-blue-600 underline">soporte@dravenix.com</a>. Intentaremos responderte en un plazo no mayor a 24 horas hábiles.</p>
-              </div>
-              
-              <div>
                 <h3 className="font-bold text-zinc-900">WhatsApp</h3>
-                <p className="text-zinc-600">Escríbenos a nuestro canal de WhatsApp: <strong>+54 9 11 1234-5678</strong> (Solo mensajes). Disponible de Lunes a Viernes de 9:00 a 18:00 hrs.</p>
+                <p className="text-zinc-600">
+                  Escríbenos directamente a nuestro canal de WhatsApp:{' '}
+                  <a 
+                    href={whatsappUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-emerald-600 font-bold underline hover:text-emerald-700 inline-flex items-center gap-1"
+                  >
+                    +54 9 280 435-0717 💬
+                  </a>
+                </p>
               </div>
 
               <div>
                 <h3 className="font-bold text-zinc-900">Redes Sociales</h3>
-                <p className="text-zinc-600">También puedes enviarnos un mensaje directo a través de nuestro <a href="#" className="text-blue-600 underline">Instagram</a> o <a href="#" className="text-blue-600 underline">Facebook</a>.</p>
+                <p className="text-zinc-600">
+                  También puedes enviarnos un mensaje directo a través de nuestro{' '}
+                  <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold underline hover:text-blue-800">
+                    Instagram
+                  </a>{' '}
+                  o{' '}
+                  <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold underline hover:text-blue-800">
+                    Facebook
+                  </a>.
+                </p>
               </div>
             </div>
           </div>

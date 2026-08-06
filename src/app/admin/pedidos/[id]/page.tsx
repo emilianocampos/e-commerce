@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase-server';
 import { redirect, notFound } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
+import { ShippingStatusSelect } from '@/app/admin/ventas/ShippingStatusSelect';
 
 export const metadata = {
   title: 'Detalle de Pedido | Panel de Administración',
@@ -29,7 +30,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
     notFound();
   }
 
-  const client = order.profiles;
+  const client = order.profiles || {};
 
   return (
     <div className="max-w-5xl">
@@ -47,7 +48,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           <dl className="space-y-3 text-sm">
             <div>
               <dt className="text-zinc-500 text-xs">Nombre Completo</dt>
-              <dd className="font-medium text-zinc-900">{client.nombre} {client.apellido}</dd>
+              <dd className="font-medium text-zinc-900">{client.full_name || `${client.nombre || ''} ${client.apellido || ''}`.trim() || client.email}</dd>
             </div>
             <div>
               <dt className="text-zinc-500 text-xs">Email</dt>
@@ -59,16 +60,16 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
             </div>
             <div>
               <dt className="text-zinc-500 text-xs">Teléfono</dt>
-              <dd className="text-zinc-900">{client.telefono || 'No provisto'}</dd>
+              <dd className="text-zinc-900">{client.phone || client.telefono || 'No provisto'}</dd>
             </div>
             <div>
               <dt className="text-zinc-500 text-xs">Dirección</dt>
-              <dd className="text-zinc-900">{client.direccion || 'No provisto'}</dd>
+              <dd className="text-zinc-900">{client.address || client.direccion || 'No provisto'}</dd>
             </div>
             <div>
               <dt className="text-zinc-500 text-xs">Ciudad / Provincia / CP</dt>
               <dd className="text-zinc-900">
-                {[client.ciudad, client.provincia, client.codigo_postal].filter(Boolean).join(', ') || 'No provisto'}
+                {[client.city || client.ciudad, client.provincia, client.postal_code || client.codigo_postal].filter(Boolean).join(', ') || 'No provisto'}
               </dd>
             </div>
           </dl>
@@ -96,7 +97,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
             </div>
             <div className="flex justify-between">
               <dt className="text-zinc-500">Última Actualización</dt>
-              <dd className="text-zinc-900 text-right">{new Date(order.updated_at).toLocaleString()}</dd>
+              <dd className="text-zinc-900 text-right">{new Date(order.updated_at || order.created_at).toLocaleString()}</dd>
             </div>
             <div className="mt-4 pt-4 border-t border-zinc-100">
               <dt className="text-zinc-500 text-xs mb-1">ID Orden (Interno)</dt>
@@ -104,13 +105,22 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
             </div>
             <div>
               <dt className="text-zinc-500 text-xs mb-1">Payment ID (Mercado Pago)</dt>
-              <dd className="font-mono text-xs text-zinc-900 break-all bg-zinc-50 p-1 rounded">{order.payment_id || 'N/A'}</dd>
-            </div>
-            <div>
-              <dt className="text-zinc-500 text-xs mb-1">Preference ID</dt>
-              <dd className="font-mono text-xs text-zinc-900 break-all bg-zinc-50 p-1 rounded">{order.preference_id || 'N/A'}</dd>
+              <dd className="font-mono text-xs text-zinc-900 break-all bg-zinc-50 p-1 rounded">{order.mp_payment_id || order.payment_id || 'N/A'}</dd>
             </div>
           </dl>
+        </div>
+
+        {/* Estado Envío */}
+        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <h2 className="text-sm font-bold tracking-wider text-zinc-500 uppercase mb-4 border-b border-zinc-100 pb-2">ESTADO ENVÍO</h2>
+            <div className="mt-2">
+              <ShippingStatusSelect orderId={order.id} initialStatus={order.shipping_status || 'pending'} />
+            </div>
+          </div>
+          <p className="text-xs text-zinc-400 mt-4">
+            Al cambiar este estado, se enviará automáticamente una notificación al cliente.
+          </p>
         </div>
 
         {/* Productos */}

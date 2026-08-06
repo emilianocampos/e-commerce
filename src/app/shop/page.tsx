@@ -36,6 +36,11 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   }
 
 
+  // On Sale Filter
+  if (params.on_sale === 'true' || params.ofertas === 'true') {
+    query = query.not('sale_price', 'is', null).gt('sale_price', 0);
+  }
+
   // Search by name
   if (params.q) {
     query = query.ilike('name', `%${params.q}%`);
@@ -65,6 +70,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
   // Determine dynamic title
   let pageTitle = 'Todos los productos';
+  if (params.on_sale === 'true' || params.ofertas === 'true') pageTitle = 'Ofertas';
   if (params.type === 'SUPPLEMENT') {
     pageTitle = 'Suplementos';
     if (params.brand_id) {

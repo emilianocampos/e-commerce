@@ -31,8 +31,8 @@ export function ShopFilters() {
   };
 
   const sizes = [
-    'XXS', 'XS', 'S', 'M', 
-    'L', 'XL', 'XXL', '3XL', '4XL'
+    'XXS', 'XS', 'S', 'M', 'S/M',
+    'L', 'XL', 'L/XL', 'XXL', '3XL', '4XL'
   ];
 
   const toggleSize = (size: string) => {

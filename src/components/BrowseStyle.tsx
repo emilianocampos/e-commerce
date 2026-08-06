@@ -6,26 +6,26 @@ export function BrowseStyle({ settings }: { settings?: any }) {
   // Configuración de los 4 posibles estilos
   const stylesData = [
     {
-      title: settings?.style_1_title ?? 'Hombre',
-      link: settings?.style_1_link ?? '/shop?gender=MEN',
+      title: settings?.style_1_title || 'Hombre',
+      link: settings?.style_1_link || '/shop?gender=MEN',
       image: settings?.style_1_image,
       defaultGradient: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)',
     },
     {
-      title: settings?.style_2_title ?? 'Mujer',
-      link: settings?.style_2_link ?? '/shop?gender=WOMEN',
+      title: settings?.style_2_title || 'Mujer',
+      link: settings?.style_2_link || '/shop?gender=WOMEN',
       image: settings?.style_2_image,
       defaultGradient: 'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)',
     },
     {
-      title: settings?.style_3_title ?? 'Urbano',
-      link: settings?.style_3_link ?? '/shop?category_name=urbano',
+      title: settings?.style_3_title || 'Urbano',
+      link: settings?.style_3_link || '/shop?category_name=urbano',
       image: settings?.style_3_image,
       defaultGradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
     },
     {
-      title: settings?.style_4_title ?? '',
-      link: settings?.style_4_link ?? '',
+      title: settings?.style_4_title || 'Suplementos',
+      link: settings?.style_4_link || '/shop?type=SUPPLEMENT',
       image: settings?.style_4_image,
       defaultGradient: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
     },

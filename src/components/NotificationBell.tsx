@@ -11,18 +11,27 @@ export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Cargar notificaciones al iniciar
+  const fetchNotifications = async () => {
+    const data = await getUserNotifications();
+    setNotifications(data);
+  };
+
+  // Cargar notificaciones al iniciar y al enfocar la ventana
   useEffect(() => {
-    const fetchNotifications = async () => {
-      const data = await getUserNotifications();
-      setNotifications(data);
-    };
     fetchNotifications();
 
-    // Actualizar cada minuto
-    const interval = setInterval(fetchNotifications, 60000);
-    return () => clearInterval(interval);
+    window.addEventListener('focus', fetchNotifications);
+    return () => {
+      window.removeEventListener('focus', fetchNotifications);
+    };
   }, []);
+
+  const handleToggleOpen = () => {
+    if (!isOpen) {
+      fetchNotifications();
+    }
+    setIsOpen(!isOpen);
+  };
 
   // Cerrar al hacer click afuera
   useEffect(() => {
@@ -48,7 +57,7 @@ export function NotificationBell() {
   return (
     <div className="relative" ref={containerRef}>
       <button 
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggleOpen}
         className="relative p-2 text-zinc-600 hover:text-zinc-900 transition-colors rounded-full hover:bg-zinc-100 flex items-center justify-center"
       >
         <Bell size={24} />

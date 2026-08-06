@@ -6,7 +6,7 @@ import { useCartStore } from '@/store/cartStore';
 import { User } from '@supabase/supabase-js';
 import { logout } from '@/actions/auth';
 import { useState, useEffect, useRef } from 'react';
-import { getBrands } from '@/actions/brands';
+import { getSupplementBrands } from '@/actions/brands';
 import { Brand } from '@/types/product';
 import { NotificationBell } from './NotificationBell';
 import styles from './Navbar.module.css';
@@ -33,7 +33,7 @@ export function Navbar({ user, role, settings }: NavbarProps) {
   const [mobileUrbanoOpen, setMobileUrbanoOpen] = useState(false);
 
   useEffect(() => {
-    getBrands().then(setBrands);
+    getSupplementBrands().then(setBrands);
   }, []);
 
   // Handle scroll effect
@@ -111,6 +111,8 @@ export function Navbar({ user, role, settings }: NavbarProps) {
                 <Link href="/shop?category_name=urbano&urbano_category=WOMEN" className={styles.dropdownItem}>Mujer</Link>
               </div>
             </div>
+            
+            <Link href="/shop?on_sale=true" className={styles.navLink} style={{ color: 'var(--shop-red, #ef4444)', fontWeight: 'bold' }}>Ofertas</Link>
           </nav>
 
           {/* Center: Search */}
@@ -270,6 +272,8 @@ export function Navbar({ user, role, settings }: NavbarProps) {
                     </div>
                   )}
                 </div>
+
+                <Link href="/shop?on_sale=true" onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonHeader} style={{ paddingLeft: '0', color: 'var(--shop-red, #ef4444)', fontWeight: 'bold' }}>Ofertas</Link>
               </nav>
             </div>
           </div>

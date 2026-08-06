@@ -6,6 +6,7 @@ export function Hero({ settings }: { settings?: any }) {
   const title = settings?.hero_title || 'ENCUENTRA LO\nQUE COMBINA CON\nTU ESTILO';
   const subtitle = settings?.hero_subtitle || 'Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida.';
   const image = settings?.hero_image_url || 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=900&auto=format&fit=crop';
+  const showStatsNumbers = settings?.show_stats_numbers;
 
   return (
     <section className={styles.heroSection}>
@@ -35,20 +36,22 @@ export function Hero({ settings }: { settings?: any }) {
             Comprar Ahora
           </Link>
 
-          <div className={styles.stats}>
-            <div className={styles.statItem}>
-              <span className={styles.statNumber}>{settings?.stats_1_number || '200+'}</span>
-              <span className={styles.statLabel} style={{ color: settings?.hero_title_color || '#FACC15' }}>{settings?.stats_1_label || 'Marcas Internacionales'}</span>
+          {showStatsNumbers !== false && (
+            <div className={styles.stats}>
+              <div className={styles.statItem}>
+                <span className={styles.statNumber}>{settings?.stats_1_number || '200+'}</span>
+                <span className={styles.statLabel} style={{ color: settings?.hero_title_color || '#FACC15' }}>{settings?.stats_1_label || 'Marcas Internacionales'}</span>
+              </div>
+              <div className={styles.statItem}>
+                <span className={styles.statNumber}>{settings?.stats_2_number || '2,000+'}</span>
+                <span className={styles.statLabel} style={{ color: settings?.hero_title_color || '#FACC15' }}>{settings?.stats_2_label || 'Productos de Alta Calidad'}</span>
+              </div>
+              <div className={styles.statItem}>
+                <span className={styles.statNumber}>{settings?.stats_3_number || '30,000+'}</span>
+                <span className={styles.statLabel} style={{ color: settings?.hero_title_color || '#FACC15' }}>{settings?.stats_3_label || 'Clientes Felices'}</span>
+              </div>
             </div>
-            <div className={styles.statItem}>
-              <span className={styles.statNumber}>{settings?.stats_2_number || '2,000+'}</span>
-              <span className={styles.statLabel} style={{ color: settings?.hero_title_color || '#FACC15' }}>{settings?.stats_2_label || 'Productos de Alta Calidad'}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statNumber}>{settings?.stats_3_number || '30,000+'}</span>
-              <span className={styles.statLabel} style={{ color: settings?.hero_title_color || '#FACC15' }}>{settings?.stats_3_label || 'Clientes Felices'}</span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </section>

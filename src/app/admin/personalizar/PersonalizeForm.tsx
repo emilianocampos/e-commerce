@@ -88,6 +88,8 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
     setSaving(false);
   };
 
+  const [showStatsNumbers, setShowStatsNumbers] = useState<boolean>(initialSettings.show_stats_numbers !== false);
+
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-8">
@@ -184,7 +186,19 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
             </div>
           </div>
           
-          <h3 className="text-lg font-bold mt-8 mb-4">Estadísticas del Hero</h3>
+          <div className="flex items-center justify-between mt-8 mb-4 border-b pb-2">
+            <h3 className="text-lg font-bold">Estadísticas del Hero</h3>
+            <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 px-3 py-1.5 rounded-lg transition-colors">
+              <input type="hidden" name="show_stats_numbers" value={showStatsNumbers ? 'true' : 'false'} />
+              <input 
+                type="checkbox" 
+                checked={showStatsNumbers} 
+                onChange={(e) => setShowStatsNumbers(e.target.checked)} 
+                className="w-4 h-4 rounded text-black cursor-pointer"
+              />
+              Mostrar Números de Estadísticas
+            </label>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="border p-4 rounded-lg bg-gray-50">
               <label className="block text-xs font-bold text-gray-500 mb-1">ESTADÍSTICA 1</label>
@@ -279,11 +293,11 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
                   <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
-                      <input name={`style_${num}_title`} defaultValue={settings[`style_${num}_title`]} className="w-full border rounded p-2" placeholder="Ej: Hombre" />
+                      <input name={`style_${num}_title`} defaultValue={settings[`style_${num}_title`]} className="w-full border rounded p-2" placeholder="Ej: Suplementos" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Enlace (URL)</label>
-                      <input name={`style_${num}_link`} defaultValue={settings[`style_${num}_link`]} className="w-full border rounded p-2" placeholder="Ej: /shop?gender=MEN" />
+                      <input name={`style_${num}_link`} defaultValue={settings[`style_${num}_link`]} className="w-full border rounded p-2" placeholder="Ej: /shop?type=SUPPLEMENT o /suplementos" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Imagen de Fondo</label>

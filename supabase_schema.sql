@@ -10,7 +10,10 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS full_name TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS address TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS city TEXT;
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS postal_code TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS provincia TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS localidad TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS shipping_quote_required BOOLEAN DEFAULT false;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS shipping_quote_required BOOLEAN DEFAULT false;
 
 -- 2. Crear tabla orders (si no existe)
 CREATE TABLE IF NOT EXISTS public.orders (
@@ -19,6 +22,7 @@ CREATE TABLE IF NOT EXISTS public.orders (
   total_amount NUMERIC NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending',
   shipping_status TEXT NOT NULL DEFAULT 'pending',
+  shipping_quote_required BOOLEAN DEFAULT false,
   mp_payment_id TEXT UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -96,3 +100,31 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- 8. Crear tabla notifications (si no existe)
+CREATE TABLE IF NOT EXISTS public.notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own notifications" ON public.notifications;
+CREATE POLICY "Users can view own notifications" 
+ON public.notifications FOR SELECT 
+USING (auth.uid() = profile_id);
+
+DROP POLICY IF EXISTS "Users can update own notifications" ON public.notifications;
+CREATE POLICY "Users can update own notifications" 
+ON public.notifications FOR UPDATE 
+USING (auth.uid() = profile_id);
+
+DROP POLICY IF EXISTS "Service role can insert notifications" ON public.notifications;
+CREATE POLICY "Service role can insert notifications" 
+ON public.notifications FOR INSERT 
+WITH CHECK (true);
+
