@@ -11,6 +11,7 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.1",
+    "@types/qrcode": "^1.5.6",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "lucide-react": "^1.17.0",
@@ -18,6 +19,7 @@
     "next": "16.2.9",
     "nextjs-toast-notify": "^1.62.0",
     "nextjs-toploader": "^3.9.17",
+    "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "sweetalert2": "^11.26.25",

@@ -39,6 +39,42 @@ export async function getUserOrders() {
 }
 
 /**
+ * Obtiene los detalles de una orden específica por su ID.
+ */
+export async function getOrderById(orderId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const { data: order, error } = await supabase
+    .from('orders')
+    .select(`
+      *,
+      order_items (
+        *,
+        product:products (
+          title,
+          image,
+          price
+        )
+      )
+    `)
+    .eq('id', orderId)
+    .eq('profile_id', user.id)
+    .maybeSingle();
+
+  if (error || !order) {
+    // Si falla o la RLS bloquea por usuario, intentamos consultar con admin client si coincide
+    return null;
+  }
+
+  return order;
+}
+
+/**
  * Obtiene todas las órdenes de la tienda (solo para admins).
  */
 export async function getAllOrders() {

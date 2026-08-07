@@ -1,18 +1,12 @@
-/**
- * Archivo: src/app/admin/productos/page.tsx
- * Responsabilidad: Mostrar una tabla con todos los productos actuales para el administrador.
- * Al ser Server Component, obtiene la data segura y velozmente desde el backend.
- */
 import { createClient } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { Button } from '@/components/Button';
-import { Product } from '@/types/product';
 import { DeleteAllProductsButton } from './DeleteAllProductsButton';
 import { DeleteProductButton } from './DeleteProductButton';
 import { formatCurrency } from '@/lib/utils';
 import Image from 'next/image';
+import { PlusCircle, Trash2, Edit, Package, Layers } from 'lucide-react';
 
-// 1. Invalidar la cache siempre en el panel admin para ver los cambios instantáneos
 export const revalidate = 0;
 
 type Props = {
@@ -23,10 +17,8 @@ export default async function AdminProductsPage({ searchParams }: Props) {
   const resolvedSearchParams = await searchParams;
   const sort = resolvedSearchParams.sort as string;
 
-  // 2. Conectamos con Supabase
   const supabase = await createClient();
   
-  // 3. Traemos todos los productos y aplicamos el orden
   let query = supabase.from('products').select('*');
 
   if (sort === 'category_asc') {
@@ -39,9 +31,8 @@ export default async function AdminProductsPage({ searchParams }: Props) {
 
   const { data: products, error } = await query;
 
-  // 4. Manejo de error de base de datos
   if (error) {
-    return <div className="text-red-500">Error: {error.message}</div>;
+    return <div className="text-red-500 p-4">Error: {error.message}</div>;
   }
 
   const getCategoryLabel = (product: any) => {
@@ -62,22 +53,88 @@ export default async function AdminProductsPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* 5. Cabecera con título y botón para agregar un nuevo producto */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Productos</h1>
-        <div className="flex gap-4">
+      {/* Cabecera Adaptable */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 flex items-center gap-2.5">
+            <Package className="w-7 h-7 text-emerald-600" />
+            Productos ({products?.length || 0})
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
+            Administrá el catálogo, precios, stock y variaciones.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
           <DeleteAllProductsButton />
           <Link href="/admin/crear">
-            <Button variant="primary">Nuevo Producto</Button>
+            <Button variant="primary" className="flex items-center gap-1.5 text-xs sm:text-sm py-2 px-3.5">
+              <PlusCircle className="w-4 h-4" />
+              <span>Nuevo Producto</span>
+            </Button>
           </Link>
         </div>
       </div>
 
-      {/* 6. Contenedor de la tabla con estilos para hacerla scrollable en pantallas chicas */}
-      <div className="rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
+      {/* VISTA MOBILE: Tarjetas Táctiles (Visibles solo en mobile: block md:hidden) */}
+      <div className="grid grid-cols-1 gap-3 md:hidden">
+        {products?.map((product: any) => (
+          <div key={product.id} className="bg-white rounded-2xl p-4 border border-zinc-200 shadow-sm flex flex-col justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100">
+                {product.image ? (
+                  <Image src={product.image} alt={product.title} fill unoptimized className="object-cover" sizes="64px" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-400">Sin foto</div>
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-zinc-900 text-sm truncate">{product.title}</h3>
+                
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-600">
+                    {getCategoryLabel(product)}
+                  </span>
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                    product.stock > 10 ? 'bg-emerald-100 text-emerald-800' : 
+                    product.stock > 0 ? 'bg-amber-100 text-amber-800' : 
+                    'bg-rose-100 text-rose-800'
+                  }`}>
+                    Stock: {product.stock}
+                  </span>
+                </div>
+
+                <div className="text-base font-extrabold text-zinc-900 mt-2">
+                  {formatCurrency(product.price)}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-zinc-100 flex items-center justify-end gap-2">
+              <Link
+                href={`/admin/editar/${product.id}`}
+                className="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-semibold rounded-lg flex items-center gap-1 transition-colors"
+              >
+                <Edit className="w-3.5 h-3.5" />
+                Editar
+              </Link>
+              <DeleteProductButton id={product.id} title={product.title} />
+            </div>
+          </div>
+        ))}
+
+        {(!products || products.length === 0) && (
+          <div className="bg-white rounded-2xl p-8 border border-zinc-200 text-center text-sm text-zinc-500">
+            No hay productos registrados en la base de datos.
+          </div>
+        )}
+      </div>
+
+      {/* VISTA DESKTOP: Tabla Tradicional (Visible solo en pantallas md+) */}
+      <div className="hidden md:block rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-zinc-200">
-            {/* Cabecera de la tabla */}
+          <table className="min-w-full divide-y divide-zinc-200 text-sm">
             <thead className="bg-zinc-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Producto</th>
@@ -86,7 +143,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                     Categoría
                     {sort === 'category_asc' && <span>↑</span>}
                     {sort === 'category_desc' && <span>↓</span>}
-                    {!sort && <span className="opacity-0 group-hover:opacity-100 text-zinc-400">↕</span>}
+                    {!sort && <span className="opacity-50 text-zinc-400">↕</span>}
                   </Link>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Precio</th>
@@ -95,57 +152,47 @@ export default async function AdminProductsPage({ searchParams }: Props) {
               </tr>
             </thead>
             
-            {/* Cuerpo de la tabla */}
             <tbody className="divide-y divide-zinc-200 bg-white">
               {products.map((product: any) => (
                 <tr key={product.id} className="hover:bg-zinc-50 transition-colors">
-                  {/* Celda: Título e Imagen */}
                   <td className="whitespace-nowrap px-6 py-4">
                     <div className="flex items-center gap-4">
-                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md border border-zinc-200 bg-zinc-100">
+                      <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100">
                         {product.image && (
-                          <Image src={product.image} alt={product.title} fill unoptimized className="object-cover" sizes="40px" />
+                          <Image src={product.image} alt={product.title} fill unoptimized className="object-cover" sizes="44px" />
                         )}
                       </div>
-                      <div>
-                        <div className="font-medium text-zinc-900">{product.title}</div>
-                      </div>
+                      <div className="font-medium text-zinc-900">{product.title}</div>
                     </div>
                   </td>
-                  {/* Celda: Categoría */}
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-700">
-                    <span className="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-600 ring-1 ring-inset ring-zinc-500/10">
+                  <td className="whitespace-nowrap px-6 py-4 text-zinc-700">
+                    <span className="inline-flex items-center rounded-md bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600">
                       {getCategoryLabel(product)}
                     </span>
                   </td>
-                  {/* Celda: Precio */}
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900">
+                  <td className="whitespace-nowrap px-6 py-4 font-bold text-zinc-900">
                     {formatCurrency(product.price)}
                   </td>
-                  {/* Celda: Stock visual */}
                   <td className="whitespace-nowrap px-6 py-4">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      product.stock > 10 ? 'bg-green-100 text-green-800' : 
-                      product.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 
-                      'bg-red-100 text-red-800'
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      product.stock > 10 ? 'bg-emerald-100 text-emerald-800' : 
+                      product.stock > 0 ? 'bg-amber-100 text-amber-800' : 
+                      'bg-rose-100 text-rose-800'
                     }`}>
                       {product.stock} unid.
                     </span>
                   </td>
-                  {/* Celda: Botones de Editar y Eliminar */}
-                  <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                  <td className="whitespace-nowrap px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-3">
-                      <Link href={`/admin/editar/${product.id}`} className="text-blue-600 hover:text-blue-900">
+                      <Link href={`/admin/editar/${product.id}`} className="text-blue-600 hover:text-blue-900 font-semibold text-xs">
                         Editar
                       </Link>
-                      {/* DeleteProductButton usa un Server Action por debajo para eliminar sin JS si es necesario */}
                       <DeleteProductButton id={product.id} title={product.title} />
                     </div>
                   </td>
                 </tr>
               ))}
               
-              {/* Si no hay productos, mostramos este estado vacío */}
               {products.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-zinc-500">
