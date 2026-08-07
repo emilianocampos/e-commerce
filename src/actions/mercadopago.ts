@@ -129,27 +129,30 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
     
     await supabase.from('order_items').insert(orderItemsToInsert);
 
+    const isHttps = siteUrl.startsWith('https://');
+    const isTestToken = (process.env.MERCADOPAGO_ACCESS_TOKEN || '').startsWith('TEST-');
+
+    if (isTestToken) {
+      console.warn('⚠️ ATENCIÓN: El MERCADOPAGO_ACCESS_TOKEN configurado es de PRUEBA (empieza con TEST-). Para producción debes usar las credenciales que empiezan con APP_USR-');
+    }
+
     const preferencePayload = {
       body: {
-        items, // Lista de productos armados arriba
+        items,
         payer: {
           email: user.email,
         },
-        external_reference: order.id.toString(), // ID de la orden en nuestra BD
+        external_reference: order.id.toString(),
+        statement_descriptor: 'DRAVENIX',
         metadata: {
           order_id: order.id.toString(),
         },
-        // back_urls: Adonde debe volver el usuario luego de pagar (éxito, fallo o pendiente)
         back_urls: {
           success: `${siteUrl}/pago/exito`,
           failure: `${siteUrl}/pago/fallo`,
           pending: `${siteUrl}/pago/pendiente`,
         },
-        // auto_return: Obliga a MercadoPago a redirigir al usuario al "success" inmediatamente tras un pago exitoso.
-        // Ojo: Solo lo activamos si NO estamos en localhost, ya que MP rechaza "localhost" como URL válida de retorno automático.
-        ...(siteUrl.includes('localhost') ? {} : { auto_return: 'approved' }),
-        // notification_url: (Webhooks) URL donde MercadoPago nos enviará POSTs silenciosos avisándonos si un pago se concretó
-        notification_url: `${siteUrl}/api/mercadopago/webhook`,
+        ...(isHttps ? { auto_return: 'approved', notification_url: `${siteUrl}/api/mercadopago/webhook` } : {}),
       }
     };
 
@@ -157,14 +160,12 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
     console.log(JSON.stringify(preferencePayload, null, 2));
     console.log('---------------------------------');
 
-    // response: Respuesta oficial de Mercado Pago tras recibir nuestra preferencia.
-    // Usamos preference.create(...) pasándole el payload.
     const response = await preference.create(preferencePayload as any);
 
-    // Retornamos el init_point al frontend. 
-    // init_point es un string tipo "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=123"
-    // Al cual enviaremos a nuestro usuario en el navegador para que proceda con su pago.
-    return { init_point: response.init_point };
+    // En modo prueba Mercado Pago puede requerir sandbox_init_point, pero en producción devuelve init_point.
+    const checkoutUrl = isTestToken ? (response.sandbox_init_point || response.init_point) : response.init_point;
+
+    return { init_point: checkoutUrl };
 
   } catch (error: any) {
     // Si algo falla, atrapamos el error y se lo mandamos de forma segura al frontend
