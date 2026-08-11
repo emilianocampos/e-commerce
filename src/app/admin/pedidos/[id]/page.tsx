@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
 import { ShippingStatusSelect } from '@/app/admin/ventas/ShippingStatusSelect';
+import { OrderStatusSelect } from '@/app/admin/ventas/OrderStatusSelect';
 
 export const metadata = {
   title: 'Detalle de Pedido | Panel de Administración',
@@ -12,8 +13,6 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
   const resolvedParams = await params;
   const orderId = resolvedParams.id;
   const supabase = await createClient();
-
-  // La verificación de admin ahora se hace de forma global en src/app/admin/layout.tsx
 
   // Traer la orden con sus items y los datos del perfil del cliente
   const { data: order, error } = await supabase
@@ -80,15 +79,9 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           <h2 className="text-lg font-bold text-zinc-900 mb-4 border-b border-zinc-100 pb-2">Información del Pago</h2>
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between items-center">
-              <dt className="text-zinc-500">Estado</dt>
+              <dt className="text-zinc-500">Estado Compra</dt>
               <dd>
-                <span className={`rounded-full px-2 py-0.5 text-xs font-semibold uppercase tracking-wider
-                    ${order.status === 'approved' ? 'bg-green-100 text-green-700' : 
-                      order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 
-                      order.status === 'rejected' ? 'bg-red-100 text-red-700' : 
-                      'bg-zinc-100 text-zinc-700'}`}>
-                    {order.status}
-                </span>
+                <OrderStatusSelect orderId={order.id} initialStatus={order.status || 'pending'} />
               </dd>
             </div>
             <div className="flex justify-between">

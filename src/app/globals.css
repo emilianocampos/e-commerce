@@ -13,6 +13,100 @@
   --shop-white: #ffffff;
 }
 
+/* Modo Oscuro (Alineado al cartel QR: #09090b / #18181b / emerald) */
+body[data-theme="dark"] {
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  --shop-black: #ffffff;
+  --shop-white: #18181b;
+  --shop-gray-light: #27272a;
+  --shop-gray: #18181b;
+  --shop-gray-dark: #a1a1aa;
+  color-scheme: dark;
+}
+
+body[data-theme="dark"] header {
+  background-color: #09090b !important;
+  border-bottom-color: #27272a !important;
+}
+
+body[data-theme="dark"] .bg-white {
+  background-color: #18181b !important;
+  color: #f4f4f5 !important;
+  border-color: #27272a !important;
+}
+
+body[data-theme="dark"] .text-zinc-900,
+body[data-theme="dark"] .text-zinc-800,
+body[data-theme="dark"] .text-zinc-700 {
+  color: #f4f4f5 !important;
+}
+
+body[data-theme="dark"] .text-zinc-500,
+body[data-theme="dark"] .text-zinc-600 {
+  color: #a1a1aa !important;
+}
+
+body[data-theme="dark"] .bg-zinc-50,
+body[data-theme="dark"] .bg-zinc-100 {
+  background-color: #27272a !important;
+}
+
+body[data-theme="dark"] .border-zinc-200,
+body[data-theme="dark"] .border-zinc-100,
+body[data-theme="dark"] .border-zinc-300 {
+  border-color: #27272a !important;
+}
+
+/* Modo Degradé Personalizado */
+body[data-theme="gradient"] {
+  background: linear-gradient(180deg, var(--gradient-from, #18181b) 0%, var(--gradient-to, #09090b) 100%) !important;
+  background-attachment: fixed !important;
+  --background: transparent;
+  --foreground: #ffffff;
+  --shop-black: #ffffff;
+  --shop-white: #18181b;
+  --shop-gray-light: rgba(255, 255, 255, 0.12);
+  --shop-gray: rgba(24, 24, 27, 0.85);
+  --shop-gray-dark: #d4d4d8;
+  color-scheme: dark;
+}
+
+body[data-theme="gradient"] header {
+  background-color: rgba(9, 9, 11, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body[data-theme="gradient"] .bg-white {
+  background-color: rgba(24, 24, 27, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+body[data-theme="gradient"] .text-zinc-900,
+body[data-theme="gradient"] .text-zinc-800,
+body[data-theme="gradient"] .text-zinc-700 {
+  color: #ffffff !important;
+}
+
+body[data-theme="gradient"] .text-zinc-500,
+body[data-theme="gradient"] .text-zinc-600 {
+  color: #d4d4d8 !important;
+}
+
+body[data-theme="gradient"] .bg-zinc-50,
+body[data-theme="gradient"] .bg-zinc-100 {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body[data-theme="gradient"] .border-zinc-200,
+body[data-theme="gradient"] .border-zinc-100,
+body[data-theme="gradient"] .border-zinc-300 {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

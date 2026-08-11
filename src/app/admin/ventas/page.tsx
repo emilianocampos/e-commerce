@@ -1,6 +1,7 @@
 import { getAllOrders } from '@/actions/orders';
 import { formatCurrency } from '@/lib/utils';
 import { ShippingStatusSelect } from './ShippingStatusSelect';
+import { OrderStatusSelect } from './OrderStatusSelect';
 import { DollarSign, User, Package, Calendar, MapPin, Phone, Mail } from 'lucide-react';
 
 export const metadata = {
@@ -19,7 +20,7 @@ export default async function AdminVentasPage() {
             Ventas Registradas ({orders?.length || 0})
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
-            Gestión de pedidos, información de envío y cambio de estado.
+            Gestión de pedidos, información de envío y cambio de estado de compra.
           </p>
         </div>
       </div>
@@ -90,10 +91,16 @@ export default async function AdminVentasPage() {
                 ))}
               </div>
 
-              {/* Selector de Estado de Envío */}
-              <div className="pt-2 flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Estado de Envío</span>
-                <ShippingStatusSelect orderId={order.id} initialStatus={order.shipping_status} />
+              {/* Selectores de Estado */}
+              <div className="pt-2 grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Estado Compra</span>
+                  <OrderStatusSelect orderId={order.id} initialStatus={order.status} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Estado Envío</span>
+                  <ShippingStatusSelect orderId={order.id} initialStatus={order.shipping_status} />
+                </div>
               </div>
             </div>
           );
@@ -116,6 +123,7 @@ export default async function AdminVentasPage() {
                 <th className="px-6 py-4 font-semibold">Cliente</th>
                 <th className="px-6 py-4 font-semibold">Items</th>
                 <th className="px-6 py-4 font-semibold">Total</th>
+                <th className="px-6 py-4 font-semibold">Estado Compra</th>
                 <th className="px-6 py-4 font-semibold">Estado Envío</th>
               </tr>
             </thead>
@@ -168,13 +176,16 @@ export default async function AdminVentasPage() {
                     {formatCurrency(order.total_amount)}
                   </td>
                   <td className="px-6 py-4">
+                    <OrderStatusSelect orderId={order.id} initialStatus={order.status} />
+                  </td>
+                  <td className="px-6 py-4">
                     <ShippingStatusSelect orderId={order.id} initialStatus={order.shipping_status} />
                   </td>
                 </tr>
               ))}
               {orders.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-zinc-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-zinc-500">
                     No hay ventas registradas.
                   </td>
                 </tr>

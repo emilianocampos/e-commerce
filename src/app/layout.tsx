@@ -67,7 +67,12 @@ export default async function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${inter.variable} ${archivoBlack.variable} bg-white text-shop-black min-h-screen flex flex-col font-sans antialiased selection:bg-shop-black selection:text-white`}
+        data-theme={settings?.theme_mode || 'light'}
+        style={{
+          '--gradient-from': settings?.gradient_color_from || '#18181b',
+          '--gradient-to': settings?.gradient_color_to || '#09090b',
+        } as React.CSSProperties}
+        className={`${inter.variable} ${archivoBlack.variable} min-h-screen flex flex-col font-sans antialiased selection:bg-shop-black selection:text-white transition-colors duration-300`}
       >
         <NextTopLoader
           color="#000000"

@@ -3,6 +3,7 @@
 import { createClient, createAdminClient } from '@/lib/supabase-server';
 import { requireAdmin } from '@/lib/auth';
 import { createNotification } from './notifications';
+import { revalidatePath } from 'next/cache';
 
 /**
  * Obtiene todas las órdenes del usuario logueado.
@@ -160,5 +161,60 @@ export async function updateShippingStatus(orderId: string, status: string) {
     );
   }
   
+  revalidatePath('/mis-pedidos');
+  revalidatePath('/admin/ventas');
+  revalidatePath('/admin/pedidos');
   return { success: true };
 }
+
+/**
+ * Actualiza el estado del pago / compra de una orden (solo para admins).
+ */
+export async function updateOrderStatus(orderId: string, status: string) {
+  await requireAdmin();
+
+  const adminClient = createAdminClient();
+  
+  const { data: order } = await adminClient
+    .from('orders')
+    .select('profile_id, id')
+    .eq('id', orderId)
+    .single();
+
+  const { error } = await adminClient
+    .from('orders')
+    .update({ status: status })
+    .eq('id', orderId);
+
+  if (error) {
+    throw new Error('Error al actualizar estado del pedido: ' + error.message);
+  }
+
+  if (order && order.profile_id) {
+    const ref = orderId.split('-')[0];
+    const normalizedStatus = (status || '').toLowerCase();
+    let msg = `El estado de tu compra (Ref: ${ref}) ha cambiado a: ${status}.`;
+
+    if (normalizedStatus === 'approved' || normalizedStatus === 'aprobado' || normalizedStatus === 'paid') {
+      msg = `¡Tu pago para el pedido (Ref: ${ref}) ha sido APROBADO!`;
+    } else if (normalizedStatus === 'pending' || normalizedStatus === 'pendiente') {
+      msg = `El pago de tu pedido (Ref: ${ref}) está pendiente.`;
+    } else if (normalizedStatus === 'rejected' || normalizedStatus === 'rechazado') {
+      msg = `El pago de tu pedido (Ref: ${ref}) fue rechazado.`;
+    } else if (normalizedStatus === 'cancelled' || normalizedStatus === 'cancelado') {
+      msg = `El pedido (Ref: ${ref}) ha sido cancelado.`;
+    }
+
+    await createNotification(
+      order.profile_id,
+      'Actualización de Compra',
+      msg
+    );
+  }
+
+  revalidatePath('/mis-pedidos');
+  revalidatePath('/admin/ventas');
+  revalidatePath('/admin/pedidos');
+  return { success: true };
+}
+

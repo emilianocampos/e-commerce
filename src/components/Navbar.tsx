@@ -167,6 +167,9 @@ export function Navbar({ user, role, settings }: NavbarProps) {
                       <div style={{ padding: '8px', borderBottom: '1px solid #eee', fontSize: '12px' }}>
                         {user.email}
                       </div>
+                      <Link href="/perfil" style={{ display: 'block', padding: '8px', textDecoration: 'none', color: 'black' }}>
+                        Mi Perfil
+                      </Link>
                       {role === 'admin' && (
                         <Link href="/admin" style={{ display: 'block', padding: '8px', textDecoration: 'none', color: 'black' }}>
                           Panel de Administrador

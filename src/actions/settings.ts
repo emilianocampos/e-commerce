@@ -56,6 +56,9 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
     style_4_link: formData.get('style_4_link'),
     discount_code: formData.get('discount_code'),
     discount_percentage: formData.get('discount_percentage') ? Number(formData.get('discount_percentage')) : 0,
+    theme_mode: formData.get('theme_mode') || 'light',
+    gradient_color_from: formData.get('gradient_color_from') || '#18181b',
+    gradient_color_to: formData.get('gradient_color_to') || '#09090b',
     updated_at: new Date().toISOString(),
   };
 
@@ -147,13 +150,34 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
   }
   updates.brands_images = currentBrands;
 
-  const { error } = await supabase
-    .from('store_settings')
-    .update(updates)
-    .eq('id', 1);
+  let updateErr: any = null;
+  let attempts = 0;
 
-  if (error) {
-    return { success: false, error: 'Error al actualizar configuración: ' + error.message };
+  // Retry loop: if a column does not exist in store_settings, remove it and update the remaining fields
+  while (attempts < 10) {
+    attempts++;
+    const { error } = await supabase
+      .from('store_settings')
+      .update(updates)
+      .eq('id', 1);
+
+    if (!error) {
+      updateErr = null;
+      break;
+    }
+
+    const match = error.message.match(/Could not find the '(.*?)' column/);
+    if (match && match[1] && match[1] in updates) {
+      delete updates[match[1]];
+      updateErr = error;
+    } else {
+      updateErr = error;
+      break;
+    }
+  }
+
+  if (updateErr) {
+    return { success: false, error: 'Error al actualizar configuración: ' + updateErr.message };
   }
 
   revalidatePath('/', 'layout');
