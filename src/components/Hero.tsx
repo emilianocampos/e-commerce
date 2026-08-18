@@ -3,8 +3,8 @@ import Image from 'next/image';
 import styles from './Hero.module.css';
 
 export function Hero({ settings }: { settings?: any }) {
-  const title = settings?.hero_title || 'ENCUENTRA LO\nQUE COMBINA CON\nTU ESTILO';
-  const subtitle = settings?.hero_subtitle || 'Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida.';
+  const title = settings?.hero_title !== undefined ? settings.hero_title : 'ENCUENTRA LO\nQUE COMBINA CON\nTU ESTILO';
+  const subtitle = settings?.hero_subtitle !== undefined ? settings.hero_subtitle : 'Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida.';
   const image = settings?.hero_image_url || 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=900&auto=format&fit=crop';
   const showStatsNumbers = settings?.show_stats_numbers;
 
@@ -26,12 +26,16 @@ export function Hero({ settings }: { settings?: any }) {
 
       <div className={styles.container}>
         <div className={styles.content}>
-          <h1 className={styles.title} style={{ color: settings?.hero_title_color || '#FACC15' }}>
-            {title}
-          </h1>
-          <p className={styles.description} style={{ color: settings?.hero_subtitle_color || 'var(--shop-white)' }}>
-            {subtitle}
-          </p>
+          {title && (
+            <h1 className={styles.title} style={{ color: settings?.hero_title_color || '#FACC15' }}>
+              {title}
+            </h1>
+          )}
+          {subtitle && subtitle.trim().length > 0 && (
+            <p className={styles.description} style={{ color: settings?.hero_subtitle_color || 'var(--shop-white)' }}>
+              {subtitle}
+            </p>
+          )}
           <Link href="/shop" className={styles.button} style={{ backgroundColor: settings?.hero_title_color || '#FACC15' }}>
             Comprar Ahora
           </Link>

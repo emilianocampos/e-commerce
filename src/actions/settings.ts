@@ -62,6 +62,32 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
     updated_at: new Date().toISOString(),
   };
 
+  // Handle multiple discount codes if submitted
+  const discountCodesJson = formData.get('discount_codes_json') as string;
+  if (discountCodesJson) {
+    try {
+      const parsedCodes = JSON.parse(discountCodesJson);
+      if (Array.isArray(parsedCodes)) {
+        const cleanedCodes = parsedCodes
+          .filter((item: any) => item && typeof item.code === 'string' && item.code.trim() !== '')
+          .map((item: any) => ({
+            code: item.code.trim().toUpperCase(),
+            percentage: Math.max(0, Math.min(100, Number(item.percentage) || 0))
+          }));
+        updates.discount_codes = cleanedCodes;
+        if (cleanedCodes.length > 0) {
+          updates.discount_code = cleanedCodes[0].code;
+          updates.discount_percentage = cleanedCodes[0].percentage;
+        } else {
+          updates.discount_code = '';
+          updates.discount_percentage = 0;
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
   // Image uploads (optional)
   const storeLogoFile = formData.get('store_logo_file') as File;
   const heroImageFile = formData.get('hero_image_file') as File;
@@ -186,12 +212,12 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
 }
 
 export async function validateDiscountCode(code: string) {
-  if (!code) return { success: false, error: 'Código inválido' };
+  if (!code || !code.trim()) return { success: false, error: 'Código inválido' };
 
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('store_settings')
-    .select('discount_code, discount_percentage')
+    .select('*')
     .eq('id', 1)
     .single();
 
@@ -199,8 +225,35 @@ export async function validateDiscountCode(code: string) {
     return { success: false, error: 'Error al validar código' };
   }
 
-  if (data.discount_code && data.discount_code.trim().toUpperCase() === code.trim().toUpperCase()) {
-    return { success: true, percentage: data.discount_percentage || 0 };
+  const cleanCode = code.trim().toUpperCase();
+
+  // Check in discount_codes array if present
+  let codesList: { code: string; percentage: number }[] = [];
+  if (data.discount_codes) {
+    if (typeof data.discount_codes === 'string') {
+      try {
+        codesList = JSON.parse(data.discount_codes);
+      } catch (e) {}
+    } else if (Array.isArray(data.discount_codes)) {
+      codesList = data.discount_codes;
+    }
+  }
+
+  // Also check legacy single code if list is empty
+  if ((!codesList || codesList.length === 0) && data.discount_code) {
+    codesList.push({
+      code: data.discount_code,
+      percentage: Number(data.discount_percentage) || 0
+    });
+  }
+
+  const found = codesList.find(c => c && typeof c.code === 'string' && c.code.trim().toUpperCase() === cleanCode);
+  if (found && Number(found.percentage) > 0) {
+    return { success: true, percentage: Number(found.percentage), code: found.code.trim().toUpperCase() };
+  }
+
+  if (data.discount_code && data.discount_code.trim().toUpperCase() === cleanCode && Number(data.discount_percentage) > 0) {
+    return { success: true, percentage: Number(data.discount_percentage) || 0, code: data.discount_code.trim().toUpperCase() };
   }
 
   return { success: false, error: 'Código inválido o expirado' };

@@ -63,6 +63,17 @@ export function ProductPurchaseSection({
     setDiscountLoading(false);
   };
 
+  const handleRemoveDiscount = () => {
+    setCurrentPrice(initialCurrentPrice);
+    setOriginalPrice(initialOriginalPrice);
+    setHasDiscount(initialHasDiscount);
+    setDiscountPercent(initialDiscountPercent);
+    setDiscountApplied(false);
+    setDiscountCode('');
+    setDiscountMessage({ text: '', isError: false });
+    setShowDiscountInput(true);
+  };
+
   // Preparamos un product actualizado para el carrito si se aplicó un código
   const productForCart = {
     ...product,
@@ -104,13 +115,19 @@ export function ProductPurchaseSection({
                 value={discountCode}
                 onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
                 placeholder="OFERTA20"
-                className="flex-1 border border-zinc-300 rounded-md px-3 py-2 text-sm uppercase"
+                className="flex-1 border border-zinc-300 rounded-md px-3 py-2 text-sm uppercase font-mono font-bold"
                 disabled={discountLoading}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleApplyDiscount();
+                  }
+                }}
               />
               <button 
                 onClick={handleApplyDiscount}
                 disabled={discountLoading}
-                className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50"
+                className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50 hover:bg-zinc-800 transition"
               >
                 {discountLoading ? '...' : 'Aplicar'}
               </button>
@@ -122,9 +139,18 @@ export function ProductPurchaseSection({
             )}
           </div>
         ) : (
-          <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-3 py-2 rounded-lg text-sm font-medium border border-green-200">
-            <Tag size={16} />
-            {discountMessage.text}
+          <div className="inline-flex items-center justify-between gap-3 bg-green-50 text-green-700 px-4 py-2.5 rounded-xl text-sm font-medium border border-green-200 w-full sm:w-auto">
+            <div className="flex items-center gap-2">
+              <Tag size={16} />
+              <span>{discountMessage.text}</span>
+            </div>
+            <button
+              onClick={handleRemoveDiscount}
+              className="text-xs font-bold text-green-800 hover:text-red-600 underline ml-2"
+              title="Quitar o cambiar código"
+            >
+              Cambiar
+            </button>
           </div>
         )}
       </div>

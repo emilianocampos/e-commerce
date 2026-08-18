@@ -26,6 +26,7 @@ export function Navbar({ user, role, settings }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -146,6 +147,15 @@ export function Navbar({ user, role, settings }: NavbarProps) {
               </a>
             )}
 
+            {/* Mobile search toggle */}
+            <button 
+              className={`${styles.actionBtn} md:hidden`}
+              onClick={() => setShowMobileSearch(!showMobileSearch)}
+              aria-label="Buscar productos"
+            >
+              <Search size={22} />
+            </button>
+
             {role === 'admin' && (
               <Link href="/admin" className={styles.actionBtn} style={{ color: 'var(--shop-red)' }}>
                 <ShieldAlert size={24} />
@@ -209,6 +219,36 @@ export function Navbar({ user, role, settings }: NavbarProps) {
             )}
           </div>
         </div>
+
+        {/* Mobile Search Bar Dropdown */}
+        {showMobileSearch && (
+          <div className="md:hidden px-4 pb-3 pt-1 border-t border-zinc-100 bg-white shadow-sm">
+            <div className="relative flex items-center">
+              <Search size={18} className="absolute left-3.5 text-zinc-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Buscar productos..."
+                autoFocus
+                className="w-full bg-zinc-100 rounded-full py-2 pl-10 pr-9 text-sm outline-none border border-zinc-200 focus:border-zinc-900"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const val = e.currentTarget.value;
+                    if (val.trim()) {
+                      setShowMobileSearch(false);
+                      window.location.href = `/shop?q=${encodeURIComponent(val.trim())}`;
+                    }
+                  }
+                }}
+              />
+              <button
+                onClick={() => setShowMobileSearch(false)}
+                className="absolute right-3 p-1 text-zinc-400 hover:text-zinc-700"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Menu Overlay */}
         {isMobileMenuOpen && (

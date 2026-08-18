@@ -32,6 +32,46 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
   });
   const [newTextBrand, setNewTextBrand] = useState('');
 
+  // Discount codes logic
+  const [discountCodes, setDiscountCodes] = useState<{ code: string; percentage: number }[]>(() => {
+    if (initialSettings.discount_codes) {
+      if (typeof initialSettings.discount_codes === 'string') {
+        try {
+          return JSON.parse(initialSettings.discount_codes);
+        } catch (e) {}
+      } else if (Array.isArray(initialSettings.discount_codes)) {
+        return initialSettings.discount_codes;
+      }
+    }
+    if (initialSettings.discount_code) {
+      return [{
+        code: initialSettings.discount_code,
+        percentage: Number(initialSettings.discount_percentage) || 0
+      }];
+    }
+    return [];
+  });
+
+  const handleAddDiscountCode = () => {
+    setDiscountCodes(prev => [...prev, { code: '', percentage: 10 }]);
+  };
+
+  const handleUpdateDiscountCode = (index: number, field: 'code' | 'percentage', value: any) => {
+    setDiscountCodes(prev => {
+      const next = [...prev];
+      if (field === 'code') {
+        next[index] = { ...next[index], code: value.toUpperCase() };
+      } else {
+        next[index] = { ...next[index], percentage: Number(value) || 0 };
+      }
+      return next;
+    });
+  };
+
+  const handleRemoveDiscountCode = (index: number) => {
+    setDiscountCodes(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'hero' | 'style1' | 'style2' | 'style3' | 'style4') => {
     const file = e.target.files?.[0];
     if (file) {
@@ -44,8 +84,6 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
       if (type === 'style4') setStyle4Preview(url);
     }
   };
-
-
 
   const removeExistingBrand = (index: number) => {
     setBrands(prev => prev.filter((_, i) => i !== index));
@@ -71,6 +109,7 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
     
     const formData = new FormData(e.currentTarget);
     formData.append('brands_images_json', JSON.stringify(brands));
+    formData.append('discount_codes_json', JSON.stringify(discountCodes));
 
     const res = await updateStoreSettings(null, formData);
     if (res?.success) {
@@ -89,6 +128,15 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
         if (data.theme_mode) setThemeMode(data.theme_mode);
         if (data.gradient_color_from) setGradientFrom(data.gradient_color_from);
         if (data.gradient_color_to) setGradientTo(data.gradient_color_to);
+        if (data.discount_codes) {
+          let dc = data.discount_codes;
+          if (typeof dc === 'string') {
+            try { dc = JSON.parse(dc); } catch(e){}
+          }
+          if (Array.isArray(dc)) setDiscountCodes(dc);
+        } else if (data.discount_code) {
+          setDiscountCodes([{ code: data.discount_code, percentage: Number(data.discount_percentage) || 0 }]);
+        }
       }
     } else {
       setMessage('Error: ' + (res?.error || 'Desconocido'));
@@ -379,17 +427,77 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
 
         {/* DESCUENTO */}
         <section className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <h2 className="text-xl font-bold mb-4 border-b pb-2">Código de Descuento</h2>
-          <p className="text-sm text-gray-500 mb-4">Configura un código de descuento que los clientes pueden ingresar en la página de producto para obtener una rebaja en porcentaje.</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between border-b pb-3 mb-4 gap-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Código Válido (ej: OFERTA20)</label>
-              <input name="discount_code" defaultValue={settings.discount_code || ''} className="w-full border rounded-lg p-2 uppercase" placeholder="Ej: OFERTA20" />
+              <h2 className="text-xl font-bold">Códigos de Descuento</h2>
+              <p className="text-sm text-gray-500">Configura los códigos de descuento que los clientes pueden ingresar en la tienda para obtener una rebaja en porcentaje.</p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Porcentaje de descuento (%)</label>
-              <input type="number" name="discount_percentage" defaultValue={settings.discount_percentage || 0} min="0" max="100" className="w-full border rounded-lg p-2" placeholder="Ej: 10" />
-            </div>
+            <button
+              type="button"
+              onClick={handleAddDiscountCode}
+              className="inline-flex items-center gap-1.5 bg-black text-white hover:bg-zinc-800 px-4 py-2 rounded-lg text-sm font-semibold transition shrink-0"
+            >
+              <Plus size={16} /> Agregar Código
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {discountCodes.length === 0 ? (
+              <div className="text-center py-8 border-2 border-dashed border-zinc-200 rounded-xl">
+                <p className="text-sm text-zinc-500 mb-3">No tienes códigos de descuento creados actualmente.</p>
+                <button
+                  type="button"
+                  onClick={handleAddDiscountCode}
+                  className="inline-flex items-center gap-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 px-4 py-2 rounded-lg text-xs font-bold transition"
+                >
+                  <Plus size={14} /> + Crear primer código
+                </button>
+              </div>
+            ) : (
+              discountCodes.map((item, idx) => (
+                <div key={idx} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3 bg-zinc-50 border border-zinc-200 rounded-xl">
+                  <div className="flex-1">
+                    <label className="block text-xs font-bold text-zinc-600 uppercase mb-1">
+                      Código #{idx + 1}
+                    </label>
+                    <input
+                      type="text"
+                      value={item.code}
+                      onChange={(e) => handleUpdateDiscountCode(idx, 'code', e.target.value)}
+                      placeholder="EJ: OFERTA20"
+                      className="w-full border border-zinc-300 rounded-lg p-2 font-mono uppercase text-sm font-bold bg-white"
+                    />
+                  </div>
+                  <div className="w-full sm:w-44">
+                    <label className="block text-xs font-bold text-zinc-600 uppercase mb-1">
+                      Descuento (%)
+                    </label>
+                    <div className="relative flex items-center">
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={item.percentage}
+                        onChange={(e) => handleUpdateDiscountCode(idx, 'percentage', e.target.value)}
+                        placeholder="10"
+                        className="w-full border border-zinc-300 rounded-lg p-2 pr-8 text-sm font-bold bg-white"
+                      />
+                      <span className="absolute right-3 text-zinc-400 font-bold text-sm pointer-events-none">%</span>
+                    </div>
+                  </div>
+                  <div className="flex sm:flex-col justify-end sm:self-end pb-0 sm:pb-0.5">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveDiscountCode(idx)}
+                      className="p-2 text-red-500 hover:bg-red-50 hover:text-red-700 rounded-lg transition"
+                      title="Eliminar este código"
+                    >
+                      <Trash size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
 

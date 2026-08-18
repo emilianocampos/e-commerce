@@ -3,7 +3,9 @@ import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase-server';
 import { ProductCard } from '@/components/ProductCard';
 import { ShopFilters } from '@/components/ShopFilters';
+import { ShopSearchBar } from '@/components/ShopSearchBar';
 import { ChevronDown } from 'lucide-react';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Tienda',
@@ -88,6 +90,22 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   }
   if (params.q) pageTitle = `Resultados para "${params.q}"`;
 
+  // Helper to build URL for sorting
+  const buildSortUrl = (newSort: string) => {
+    const p = new URLSearchParams();
+    Object.entries(params).forEach(([key, val]) => {
+      if (key !== 'sort' && val !== undefined) {
+        if (Array.isArray(val)) {
+          val.forEach(v => p.append(key, v));
+        } else {
+          p.set(key, val);
+        }
+      }
+    });
+    p.set('sort', newSort);
+    return `/shop?${p.toString()}`;
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex flex-col md:flex-row gap-8">
@@ -101,20 +119,41 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
         {/* Main Content Area */}
         <div className="w-full flex-1">
-          <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <h1 className="text-[32px] font-black text-zinc-900 leading-none m-0 p-0">
+          {/* Functional Search Bar */}
+          <Suspense fallback={null}>
+            <ShopSearchBar />
+          </Suspense>
+
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <h1 className="text-[28px] md:text-[32px] font-black text-zinc-900 leading-none m-0 p-0">
               {pageTitle}
             </h1>
             
-            <div className="flex items-center gap-2 text-zinc-500 text-sm">
-              <span>Mostrando 1-{products?.length || 0} de {products?.length || 0} Productos</span>
-              <span className="hidden md:inline mx-2 text-zinc-300">|</span>
-              <div className="flex items-center gap-1 cursor-pointer">
-                <span>Ordenar por:</span>
-                <span className="font-bold text-zinc-900 flex items-center">
-                  {sort === 'newest' ? 'Más Recientes' : sort === 'price_asc' ? 'Precio: Menor a Mayor' : sort === 'price_desc' ? 'Precio: Mayor a Menor' : 'Más Recientes'}
-                  <ChevronDown className="w-4 h-4 ml-1" />
-                </span>
+            <div className="flex flex-wrap items-center gap-2 text-zinc-500 text-sm">
+              <span>{products?.length || 0} {products?.length === 1 ? 'Producto' : 'Productos'}</span>
+              <span className="hidden sm:inline mx-1 text-zinc-300">|</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-zinc-400">Ordenar:</span>
+                <div className="flex items-center gap-1 text-xs font-bold bg-zinc-100 p-1 rounded-lg">
+                  <Link
+                    href={buildSortUrl('newest')}
+                    className={`px-2.5 py-1 rounded-md transition ${sort === 'newest' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >
+                    Recientes
+                  </Link>
+                  <Link
+                    href={buildSortUrl('price_asc')}
+                    className={`px-2.5 py-1 rounded-md transition ${sort === 'price_asc' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >
+                    $ Menor
+                  </Link>
+                  <Link
+                    href={buildSortUrl('price_desc')}
+                    className={`px-2.5 py-1 rounded-md transition ${sort === 'price_desc' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >
+                    $ Mayor
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

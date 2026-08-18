@@ -65,8 +65,9 @@ export default async function RootLayout({
 
   // b. Retornamos la estructura HTML fundamental
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         data-theme={settings?.theme_mode || 'light'}
         style={{
           '--gradient-from': settings?.gradient_color_from || '#18181b',
