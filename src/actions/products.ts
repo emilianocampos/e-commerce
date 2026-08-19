@@ -171,7 +171,13 @@ export async function createProduct(_prevState: any, formData: FormData) {
   }
 
   revalidatePath('/');
+  revalidatePath('/shop');
+  revalidatePath('/hombre');
+  revalidatePath('/mujer');
+  revalidatePath('/suplementos');
+  revalidatePath('/ofertas');
   revalidatePath('/admin/productos');
+  revalidatePath(`/producto/${newProduct.id}`);
 
   return { success: true };
 }
@@ -345,6 +351,11 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
   }
 
   revalidatePath('/');
+  revalidatePath('/shop');
+  revalidatePath('/hombre');
+  revalidatePath('/mujer');
+  revalidatePath('/suplementos');
+  revalidatePath('/ofertas');
   revalidatePath('/admin/productos');
   revalidatePath(`/producto/${id}`);
 
@@ -366,6 +377,11 @@ export async function deleteProduct(id: string) {
   }
 
   revalidatePath('/');
+  revalidatePath('/shop');
+  revalidatePath('/hombre');
+  revalidatePath('/mujer');
+  revalidatePath('/suplementos');
+  revalidatePath('/ofertas');
   revalidatePath('/admin/productos');
   return { success: true };
 }
@@ -394,6 +410,11 @@ export async function deleteAllProducts() {
   }
 
   revalidatePath('/');
+  revalidatePath('/shop');
+  revalidatePath('/hombre');
+  revalidatePath('/mujer');
+  revalidatePath('/suplementos');
+  revalidatePath('/ofertas');
   revalidatePath('/admin/productos');
   return { success: true };
 }

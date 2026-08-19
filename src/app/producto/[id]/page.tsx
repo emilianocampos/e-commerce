@@ -10,10 +10,13 @@ import { ProductReviews } from '@/components/ProductReviews';
 import { ProductGallery } from './ProductGallery';
 import { ProductPurchaseSection } from './ProductPurchaseSection';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
   const supabase = await createClient();
-  const { data: product } = await supabase.from('products').select('title, description, image').eq('id', resolvedParams.id).single();
+  const { data: product } = await supabase.from('products').select('title, description, image').eq('id', resolvedParams.id).maybeSingle();
 
   const title = product ? product.title : 'Producto no encontrado';
   const description = product?.description || 'Detalles del producto en DRAVENIX';
@@ -40,14 +43,46 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const resolvedParams = await params;
   const supabase = await createClient();
   
-  const { data: product } = await supabase
+  // Intento 1: Traer el producto con todas sus relaciones anidadas
+  let product: any = null;
+  const { data: productData, error: productError } = await supabase
     .from('products')
     .select('*, brands(*), categories(*), supplement_information(*), product_images(*), product_variants(*)')
     .eq('id', resolvedParams.id)
-    .single();
+    .maybeSingle();
 
-  if (!product) {
+  if (productData) {
+    product = productData;
+  } else if (!productError) {
+    // Si no hubo error en la consulta y no vino data, el producto realmente no existe
     notFound();
+  } else {
+    // Si hubo un error en los joins (ej. relación no existente o permisos RLS), hacemos fallback seguro
+    console.error("Error al consultar producto con relaciones, ejecutando fallback:", productError);
+    const { data: baseProduct } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', resolvedParams.id)
+      .maybeSingle();
+
+    if (!baseProduct) {
+      notFound();
+    }
+
+    const [brandsRes, suppRes, imagesRes, variantsRes] = await Promise.all([
+      baseProduct.brand_id ? supabase.from('brands').select('*').eq('id', baseProduct.brand_id).maybeSingle() : Promise.resolve({ data: null }),
+      baseProduct.type === 'SUPPLEMENT' ? supabase.from('supplement_information').select('*').eq('product_id', baseProduct.id).maybeSingle() : Promise.resolve({ data: null }),
+      supabase.from('product_images').select('*').eq('product_id', baseProduct.id).order('order', { ascending: true }),
+      supabase.from('product_variants').select('*').eq('product_id', baseProduct.id)
+    ]);
+
+    product = {
+      ...baseProduct,
+      brands: brandsRes.data || null,
+      supplement_information: suppRes.data || null,
+      product_images: imagesRes.data || [],
+      product_variants: variantsRes.data || []
+    };
   }
 
   const user = await getUser();
