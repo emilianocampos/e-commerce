@@ -38,6 +38,12 @@ export async function createProduct(_prevState: any, formData: FormData) {
   const sale_price = sale_price_str ? parseFloat(sale_price_str) : null;
   const brand_name = formData.get('brand_name') as string;
 
+  const vip_discount_percentage_raw = formData.get('vip_discount_percentage') as string;
+  const vip_discount_percentage = vip_discount_percentage_raw !== '' && vip_discount_percentage_raw !== null && !isNaN(parseFloat(vip_discount_percentage_raw))
+    ? parseFloat(vip_discount_percentage_raw)
+    : null;
+  const vip_stackable = formData.get('vip_stackable') !== 'false';
+
   if (!title || isNaN(price) || isNaN(stock)) {
     return { error: 'Faltan campos requeridos o son inválidos' };
   }
@@ -94,6 +100,8 @@ export async function createProduct(_prevState: any, formData: FormData) {
     sku,
     sale_price,
     brand_id,
+    vip_discount_percentage,
+    vip_stackable,
     active: true,
   }).select('id').single();
 
@@ -199,6 +207,12 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
   const sale_price = sale_price_str ? parseFloat(sale_price_str) : null;
   const brand_name = formData.get('brand_name') as string;
 
+  const vip_discount_percentage_raw = formData.get('vip_discount_percentage') as string;
+  const vip_discount_percentage = vip_discount_percentage_raw !== '' && vip_discount_percentage_raw !== null && !isNaN(parseFloat(vip_discount_percentage_raw))
+    ? parseFloat(vip_discount_percentage_raw)
+    : null;
+  const vip_stackable = formData.get('vip_stackable') !== 'false';
+
   if (!title || isNaN(price) || isNaN(stock)) {
     return { error: 'Faltan campos requeridos o son inválidos' };
   }
@@ -284,6 +298,8 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     urbano_category,
     sale_price,
     brand_id,
+    vip_discount_percentage,
+    vip_stackable,
     updated_at: new Date().toISOString(),
   };
 

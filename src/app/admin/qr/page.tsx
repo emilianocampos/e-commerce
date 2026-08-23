@@ -7,7 +7,7 @@ import { showToast } from 'nextjs-toast-notify';
 
 export default function AdminQRPage() {
   const [storeUrl, setStoreUrl] = useState<string>('');
-  const [storeName, setStoreName] = useState<string>('DRAVENIX');
+  const [storeName, setStoreName] = useState<string>('KLONFARK');
   const [subtitle, setSubtitle] = useState<string>('¡Escaneá este código QR y mirá todo nuestro catálogo online!');
   const [posterTheme, setPosterTheme] = useState<'dark' | 'light' | 'gradient'>('dark');
   const [copied, setCopied] = useState<boolean>(false);
@@ -164,7 +164,7 @@ export default function AdminQRPage() {
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
               className="w-full px-3 py-2.5 border border-zinc-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-              placeholder="Ej: DRAVENIX"
+              placeholder="Ej: KLONFARK"
             />
           </div>
 

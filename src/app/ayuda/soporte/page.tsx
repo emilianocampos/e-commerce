@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { getStoreSettings } from '@/actions/settings';
 
 export const metadata = {
-  title: 'Soporte al Cliente | DRAVENIX',
+  title: 'Soporte al Cliente | KLONFARK',
   description: 'Comunicate con nuestro equipo de soporte para resolver tus dudas.',
 };
 

@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { showToast } from 'nextjs-toast-notify';
 import { compressImage } from '@/lib/imageCompression';
+import { Crown } from 'lucide-react';
 
 interface ProductFormProps {
   action: (state: any, formData: FormData) => Promise<any>;
@@ -65,6 +66,24 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
   // Category logic (Ropa vs Suplementos)
   const [productType, setProductType] = useState<string>(initialData?.type || 'CLOTHES');
   const [productGender, setProductGender] = useState<string>(initialData?.gender || 'UNISEX');
+
+  // VIP Benefit logic
+  const getInitialVipType = () => {
+    if (initialData?.vip_discount_percentage === undefined || initialData?.vip_discount_percentage === null) return 'default';
+    if (initialData.vip_discount_percentage === 15) return '15';
+    if (initialData.vip_discount_percentage === 10) return '10';
+    if (initialData.vip_discount_percentage === 5) return '5';
+    if (initialData.vip_discount_percentage === 0) return '0';
+    return 'custom';
+  };
+
+  const [vipDiscountType, setVipDiscountType] = useState<string>(getInitialVipType());
+  const [customVipPercentage, setCustomVipPercentage] = useState<string>(
+    initialData?.vip_discount_percentage !== undefined && initialData?.vip_discount_percentage !== null && ![0, 5, 10, 15].includes(initialData.vip_discount_percentage)
+      ? String(initialData.vip_discount_percentage)
+      : ''
+  );
+  const [vipStackable, setVipStackable] = useState<boolean>(initialData?.vip_stackable !== false);
 
   const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -231,6 +250,96 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
         <Input label="Precio ($)" name="price" type="number" step="0.01" required defaultValue={initialData?.price} placeholder="0.00" />
         <Input label="Cantidad de stock" name="stock" type="number" required defaultValue={initialData?.stock} placeholder="Ej: 100" />
         <Input label="Precio Oferta ($)" name="sale_price" type="number" step="0.01" defaultValue={initialData?.sale_price || ''} placeholder="0.00 (Opcional)" />
+        
+        {/* BENEFICIO TARJETA VIP KLONFARK */}
+        <div className="md:col-span-2 bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-transparent p-5 rounded-2xl border border-amber-300/60 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/20">
+                <Crown className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-sm text-zinc-900 flex items-center gap-2">
+                  Beneficio Tarjeta VIP Klonfark
+                  <span className="text-[10px] uppercase font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-300/50">VIP Club</span>
+                </h3>
+                <p className="text-xs text-zinc-500">Configura el porcentaje para clientes VIP o define si es acumulable con otras promociones.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">
+                Descuento VIP para este Producto
+              </label>
+              <select
+                value={vipDiscountType}
+                onChange={(e) => setVipDiscountType(e.target.value)}
+                className="w-full rounded-xl border border-zinc-300 p-2.5 text-sm font-semibold text-zinc-900 bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none"
+              >
+                <option value="default">✨ Heredar de Tarjeta del Cliente (10% o 15% según tarjeta)</option>
+                <option value="15">15% de Descuento VIP</option>
+                <option value="10">10% de Descuento VIP</option>
+                <option value="5">5% de Descuento VIP (Recomendado para margen bajo / promo previa)</option>
+                <option value="0">⛔ Sin beneficio VIP (0%)</option>
+                <option value="custom">✏️ Personalizado (% a elección)</option>
+              </select>
+            </div>
+
+            {vipDiscountType === 'custom' && (
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">
+                  Porcentaje Personalizado (%)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.5"
+                  value={customVipPercentage}
+                  onChange={(e) => setCustomVipPercentage(e.target.value)}
+                  placeholder="Ej: 7.5"
+                  className="w-full rounded-xl border border-zinc-300 p-2.5 text-sm font-medium text-zinc-900 bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                />
+              </div>
+            )}
+
+            <div className={vipDiscountType === 'custom' ? 'sm:col-span-2' : ''}>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">
+                Regla de Acumulación con Promociones
+              </label>
+              <div className="flex items-center gap-3 p-2.5 bg-white rounded-xl border border-zinc-200">
+                <input
+                  type="checkbox"
+                  id="vip_stackable_check"
+                  checked={vipStackable}
+                  onChange={(e) => setVipStackable(e.target.checked)}
+                  className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500 cursor-pointer"
+                />
+                <label htmlFor="vip_stackable_check" className="text-xs text-zinc-800 font-medium cursor-pointer">
+                  {vipStackable ? '✅ Acumulable (se suma a las promociones por transferencia y cupones)' : '❌ VIP No acumulable (si ya goza de otra promoción, el beneficio VIP no aplica a este producto)'}
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Hidden inputs to send in FormData */}
+          <input 
+            type="hidden" 
+            name="vip_discount_percentage" 
+            value={
+              vipDiscountType === 'default' ? '' :
+              vipDiscountType === 'custom' ? customVipPercentage :
+              vipDiscountType
+            } 
+          />
+          <input 
+            type="hidden" 
+            name="vip_stackable" 
+            value={vipStackable ? 'true' : 'false'} 
+          />
+        </div>
         
         {/* Talles (solo ropa) */}
         {productType === 'CLOTHES' && (

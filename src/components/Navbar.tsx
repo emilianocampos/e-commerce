@@ -83,7 +83,7 @@ export function Navbar({ user, role, settings }: NavbarProps) {
               {settings?.store_logo_url ? (
                 <img src={settings.store_logo_url} alt={settings?.store_logo_text || 'Logo'} style={{ height: '48px', objectFit: 'contain' }} />
               ) : (
-                settings?.store_logo_text || 'DRAVENIX'
+                settings?.store_logo_text || 'KLONFARK'
               )}
             </Link>
           </div>
@@ -260,7 +260,7 @@ export function Navbar({ user, role, settings }: NavbarProps) {
                   {settings?.store_logo_url ? (
                     <img src={settings.store_logo_url} alt={settings?.store_logo_text || 'Logo'} style={{ height: '36px', objectFit: 'contain' }} />
                   ) : (
-                    settings?.store_logo_text || 'DRAVENIX'
+                    settings?.store_logo_text || 'KLONFARK'
                   )}
                 </span>
                 <button onClick={() => setIsMobileMenuOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>

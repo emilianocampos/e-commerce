@@ -105,7 +105,7 @@ export function CartDrawer() {
                                   item.product.supplement_information?.flavor && <p>Sabor: {item.product.supplement_information.flavor}</p>
                                 ) : (
                                   <>
-                                    {item.selectedSize && <p>Talle: {item.selectedSize}</p>}
+                                    {item.selectedSize && item.selectedSize !== 'Único' && item.selectedSize.trim() !== '' && <p>Talle: {item.selectedSize}</p>}
                                     {item.selectedColor && <p>Color: {item.selectedColor}</p>}
                                   </>
                                 )}

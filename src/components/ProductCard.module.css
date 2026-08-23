@@ -2,13 +2,13 @@
   display: flex;
   flex-direction: column;
   text-decoration: none;
-  color: var(--shop-black);
+  color: var(--foreground);
   text-align: left;
   min-width: 0;
 }
 
 .imageWrapper {
-  background-color: #F0EEED;
+  background-color: var(--shop-gray-light);
   border-radius: 20px;
   aspect-ratio: 1;
   position: relative;
@@ -35,7 +35,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #000000;
+  color: var(--foreground);
 }
 
 .rating {
@@ -53,8 +53,7 @@
 
 .ratingText {
   font-size: 14px;
-  color: #000000;
-  opacity: 0.6;
+  color: var(--shop-gray-dark);
 }
 
 .priceContainer {
@@ -77,22 +76,22 @@
 .price {
   font-weight: 700;
   font-size: 24px;
-  color: #000000;
+  color: var(--foreground);
 }
 
 .oldPrice {
   font-weight: 700;
   font-size: 24px;
-  color: #000000;
-  opacity: 0.4;
+  color: var(--shop-gray-dark);
+  opacity: 0.6;
   text-decoration: line-through;
 }
 
 .discount {
-  background-color: rgba(255, 51, 51, 0.1);
+  background-color: rgba(255, 51, 51, 0.15);
   color: #FF3333;
   padding: 6px 14px;
   border-radius: 62px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
 }

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { formatCurrency } from '@/lib/utils';
 import { Metadata } from 'next';
-import { Star, StarHalf, SlidersHorizontal, ChevronDown, CheckCircle, Tag } from 'lucide-react';
+import { Star, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { getUser } from '@/lib/auth';
 import { ProductReviews } from '@/components/ProductReviews';
@@ -19,20 +19,20 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { data: product } = await supabase.from('products').select('title, description, image').eq('id', resolvedParams.id).maybeSingle();
 
   const title = product ? product.title : 'Producto no encontrado';
-  const description = product?.description || 'Detalles del producto en DRAVENIX';
+  const description = product?.description || 'Detalles del producto en KLONFARK';
   const image = product?.image || '';
 
   return {
     title,
     description,
     openGraph: {
-      title: `${title} | DRAVENIX`,
+      title: `${title} | KLONFARK`,
       description,
       images: image ? [{ url: image }] : [],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | DRAVENIX`,
+      title: `${title} | KLONFARK`,
       description,
       images: image ? [image] : [],
     }
@@ -43,7 +43,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const resolvedParams = await params;
   const supabase = await createClient();
   
-  // Intento 1: Traer el producto con todas sus relaciones anidadas
   let product: any = null;
   const { data: productData, error: productError } = await supabase
     .from('products')
@@ -54,10 +53,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   if (productData) {
     product = productData;
   } else if (!productError) {
-    // Si no hubo error en la consulta y no vino data, el producto realmente no existe
     notFound();
   } else {
-    // Si hubo un error en los joins (ej. relación no existente o permisos RLS), hacemos fallback seguro
     console.error("Error al consultar producto con relaciones, ejecutando fallback:", productError);
     const { data: baseProduct } = await supabase
       .from('products')
@@ -119,31 +116,31 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const originalPrice = hasDiscount ? product.price : null;
 
   return (
-    <div className="bg-white">
+    <div className="w-full">
       {/* Breadcrumbs */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center text-sm text-zinc-500 gap-2">
-          <Link href="/" className="hover:text-zinc-900">Home</Link>
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        <div className="flex items-center text-sm text-zinc-400 gap-2">
+          <Link href="/" className="hover:text-zinc-100 transition-colors">Home</Link>
           <span>&gt;</span>
-          <Link href="/shop" className="hover:text-zinc-900">Shop</Link>
+          <Link href="/shop" className="hover:text-zinc-100 transition-colors">Shop</Link>
           <span>&gt;</span>
-          <Link href={`/shop?category_name=${product.categories?.name?.toLowerCase() || ''}`} className="hover:text-zinc-900 capitalize">
+          <Link href={`/shop?category_name=${product.categories?.name?.toLowerCase() || ''}`} className="hover:text-zinc-100 capitalize transition-colors">
             {product.categories?.name || 'General'}
           </Link>
           <span>&gt;</span>
-          <span className="text-zinc-900 truncate max-w-[200px]">{product.title}</span>
+          <span className="font-semibold text-zinc-100 truncate max-w-[200px]">{product.title}</span>
         </div>
       </div>
 
       <div className="container mx-auto px-4 pb-24 max-w-7xl">
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           
           {/* Left: Images */}
           <ProductGallery images={allImages} title={product.title} />
 
           {/* Right: Info */}
           <div className="w-full lg:w-1/2 flex flex-col">
-            <h1 className="text-3xl lg:text-[40px] font-black tracking-tighter text-zinc-900 leading-tight mb-3 uppercase">
+            <h1 className="text-3xl lg:text-[40px] font-black tracking-tighter text-zinc-900 dark-title leading-tight mb-3 uppercase">
               {product.title}
             </h1>
             
@@ -153,11 +150,10 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                   <Star 
                     key={i} 
                     fill={i + 1 <= avgRating ? "currentColor" : (i + 0.5 <= avgRating ? "url(#half-grad)" : "transparent")} 
-                    color={i + 1 <= Math.ceil(avgRating) ? "currentColor" : "#D4D4D8"} 
+                    color={i + 1 <= Math.ceil(avgRating) ? "currentColor" : "#71717a"} 
                     size={20} 
                   />
                 ))}
-                {/* SVG gradient para media estrella si es necesario */}
                 <svg width="0" height="0">
                   <defs>
                     <linearGradient id="half-grad">
@@ -167,7 +163,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                   </defs>
                 </svg>
               </div>
-              <span className="text-sm text-zinc-900">{avgRating.toFixed(1)}/5 <span className="text-zinc-500">({reviewsList.length} reseñas)</span></span>
+              <span className="text-sm font-semibold text-zinc-300">
+                {avgRating.toFixed(1)}/5 <span className="text-zinc-400 font-normal">({reviewsList.length} reseñas)</span>
+              </span>
             </div>
             
             <ProductPurchaseSection 
@@ -178,40 +176,40 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               initialDiscountPercent={discountPercent} 
             />
             
-            <p className="text-zinc-500 mb-6 leading-relaxed pb-6 border-b border-zinc-200">
-              {product.description || 'This graphic t-shirt which is perfect for any occasion. Crafted from a soft and breathable fabric, it offers superior comfort and style.'}
+            <p className="text-zinc-300 mb-6 leading-relaxed pb-6 border-b border-zinc-200/20">
+              {product.description || 'Producto de alta calidad seleccionado especialmente para acompañar tu rendimiento y estilo.'}
             </p>
 
             {/* TABLA NUTRICIONAL PARA SUPLEMENTOS */}
             {product.type === 'SUPPLEMENT' && suppInfo && (
-              <div className="mb-6 bg-zinc-50 border border-zinc-200 rounded-xl p-6">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-900 mb-4 flex items-center gap-2">
-                  <Tag className="w-4 h-4" />
+              <div className="mb-6 bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-100 mb-4 flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-emerald-400" />
                   Información Nutricional
                 </h3>
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
                   {suppInfo.flavor && (
                     <>
-                      <dt className="text-zinc-500">Sabor</dt>
-                      <dd className="font-medium text-zinc-900">{suppInfo.flavor}</dd>
+                      <dt className="text-zinc-400">Sabor</dt>
+                      <dd className="font-semibold text-zinc-100">{suppInfo.flavor}</dd>
                     </>
                   )}
                   {suppInfo.servings && (
                     <>
-                      <dt className="text-zinc-500">Servicios</dt>
-                      <dd className="font-medium text-zinc-900">{suppInfo.servings}</dd>
+                      <dt className="text-zinc-400">Servicios</dt>
+                      <dd className="font-semibold text-zinc-100">{suppInfo.servings}</dd>
                     </>
                   )}
                   {suppInfo.net_weight && (
                     <>
-                      <dt className="text-zinc-500">Peso Neto</dt>
-                      <dd className="font-medium text-zinc-900">{suppInfo.net_weight} g</dd>
+                      <dt className="text-zinc-400">Peso Neto</dt>
+                      <dd className="font-semibold text-zinc-100">{suppInfo.net_weight} g</dd>
                     </>
                   )}
                   {suppInfo.grams && (
                     <>
-                      <dt className="text-zinc-500">Tamaño de porción</dt>
-                      <dd className="font-medium text-zinc-900">{suppInfo.grams} g</dd>
+                      <dt className="text-zinc-400">Porción</dt>
+                      <dd className="font-semibold text-zinc-100">{suppInfo.grams} g</dd>
                     </>
                   )}
                 </dl>
@@ -222,9 +220,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
         {/* Tabs & Reviews Section */}
         <div className="mt-20">
-          <div className="flex border-b border-zinc-200 mb-8">
-            <button className="flex-1 pb-4 text-center text-zinc-900 font-medium border-b-2 border-zinc-900">
-              Reseñas
+          <div className="flex border-b border-zinc-200/20 mb-8">
+            <button className="flex-1 pb-4 text-center text-zinc-100 font-bold border-b-2 border-zinc-100">
+              Reseñas y Opiniones
             </button>
           </div>
           

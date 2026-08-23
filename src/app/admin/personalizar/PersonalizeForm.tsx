@@ -13,6 +13,8 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
   const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'gradient'>(initialSettings?.theme_mode || 'light');
   const [gradientFrom, setGradientFrom] = useState<string>(initialSettings?.gradient_color_from || '#18181b');
   const [gradientTo, setGradientTo] = useState<string>(initialSettings?.gradient_color_to || '#09090b');
+  const [gradientTextPrimary, setGradientTextPrimary] = useState<string>(initialSettings?.gradient_text_primary || '#ffffff');
+  const [gradientTextSecondary, setGradientTextSecondary] = useState<string>(initialSettings?.gradient_text_secondary || '#d4d4d8');
 
   // Image previews
   const [logoPreview, setLogoPreview] = useState<string>(initialSettings.store_logo_url || '');
@@ -176,136 +178,71 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
           <input type="hidden" name="gradient_color_from" value={gradientFrom} />
           <input type="hidden" name="gradient_color_to" value={gradientTo} />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
               type="button"
               onClick={() => setThemeMode('light')}
-              className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all ${
+              className={`p-5 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all ${
                 themeMode === 'light'
                   ? 'border-emerald-600 bg-emerald-50/40 text-emerald-950 shadow-md ring-2 ring-emerald-500/20'
                   : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
               }`}
             >
               <div className="p-3 bg-amber-100 text-amber-600 rounded-xl">
-                <Sun className="w-6 h-6" />
+                <Sun className="w-7 h-7" />
               </div>
               <div className="text-center">
-                <span className="font-extrabold text-sm block">Modo Claro</span>
-                <span className="text-[11px] text-gray-500">Fondo blanco clásico</span>
+                <span className="font-extrabold text-base block">Modo Claro</span>
+                <span className="text-xs text-gray-500">Fondo blanco clásico y limpio</span>
               </div>
             </button>
 
             <button
               type="button"
               onClick={() => setThemeMode('dark')}
-              className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all ${
+              className={`p-5 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all ${
                 themeMode === 'dark'
                   ? 'border-emerald-500 bg-zinc-900 text-white shadow-md ring-2 ring-emerald-500/30'
                   : 'border-gray-800 bg-zinc-950 text-gray-300 hover:bg-zinc-900'
               }`}
             >
               <div className="p-3 bg-zinc-800 text-zinc-100 rounded-xl">
-                <Moon className="w-6 h-6" />
+                <Moon className="w-7 h-7" />
               </div>
               <div className="text-center">
-                <span className="font-extrabold text-sm block">Modo Oscuro</span>
-                <span className="text-[11px] text-zinc-400">Estilo oscuro oficial del QR</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setThemeMode('gradient')}
-              className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all ${
-                themeMode === 'gradient'
-                  ? 'border-emerald-500 bg-gradient-to-br from-emerald-900 via-zinc-900 to-zinc-950 text-white shadow-md ring-2 ring-emerald-500/30'
-                  : 'border-emerald-900/40 bg-zinc-900 text-white hover:border-emerald-500'
-              }`}
-            >
-              <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl">
-                <Sparkles className="w-6 h-6" />
-              </div>
-              <div className="text-center">
-                <span className="font-extrabold text-sm block">Degradé</span>
-                <span className="text-[11px] text-zinc-300">Gradiente personalizado</span>
+                <span className="font-extrabold text-base block">Modo Oscuro (Estilo Klonfark)</span>
+                <span className="text-xs text-zinc-400">Fondo oscuro con títulos y precios en blanco nítido</span>
               </div>
             </button>
           </div>
 
-          {/* Selector de Colores del Degradé */}
-          {themeMode === 'gradient' && (
-            <div className="p-5 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-4 animate-in fade-in">
-              <h3 className="text-sm font-extrabold text-zinc-900 uppercase tracking-wider flex items-center gap-2">
-                <Palette className="w-4 h-4 text-emerald-600" />
-                Elegir colores del Degradé
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                    Color Inicial (Arriba)
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input 
-                      type="color" 
-                      value={gradientFrom} 
-                      onChange={(e) => setGradientFrom(e.target.value)} 
-                      className="h-10 w-16 cursor-pointer rounded-xl border border-zinc-300 p-1" 
-                    />
-                    <input 
-                      type="text" 
-                      value={gradientFrom} 
-                      onChange={(e) => setGradientFrom(e.target.value)} 
-                      className="border border-zinc-300 rounded-xl px-3 py-2 text-xs font-mono w-full" 
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                    Color Final (Abajo)
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input 
-                      type="color" 
-                      value={gradientTo} 
-                      onChange={(e) => setGradientTo(e.target.value)} 
-                      className="h-10 w-16 cursor-pointer rounded-xl border border-zinc-300 p-1" 
-                    />
-                    <input 
-                      type="text" 
-                      value={gradientTo} 
-                      onChange={(e) => setGradientTo(e.target.value)} 
-                      className="border border-zinc-300 rounded-xl px-3 py-2 text-xs font-mono w-full" 
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Previsualización del Tema */}
-          <div className="pt-2">
+          <div className="pt-3">
             <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-2">Previsualización de la Web</span>
             <div 
-              className="w-full rounded-2xl p-6 border transition-all duration-300 shadow-inner flex flex-col items-center justify-center text-center gap-2"
+              className="w-full rounded-2xl p-6 border transition-all duration-300 shadow-inner flex flex-col items-center justify-center text-center gap-3"
               style={{
-                background: themeMode === 'light' ? '#ffffff' : themeMode === 'dark' ? '#09090b' : `linear-gradient(180deg, ${gradientFrom} 0%, ${gradientTo} 100%)`,
-                color: themeMode === 'light' ? '#09090b' : '#ffffff',
-                borderColor: themeMode === 'light' ? '#e4e4e7' : '#27272a'
+                background: themeMode === 'dark' ? '#09090b' : '#ffffff',
+                color: themeMode === 'dark' ? '#ffffff' : '#09090b',
+                borderColor: themeMode === 'dark' ? '#27272a' : '#e4e4e7'
               }}
             >
               <span className="font-extrabold text-lg tracking-wider font-display uppercase">
-                {settings.store_logo_text || 'DRAVENIX'}
+                {settings.store_logo_text || 'KLONFARK'}
               </span>
-              <p className="text-xs max-w-md opacity-80">
-                Así se verá el fondo y la tipografía en las páginas principales de tu tienda.
+              <p className="text-xs max-w-md opacity-80" style={{ color: themeMode === 'dark' ? '#a1a1aa' : '#71717a' }}>
+                Así se verá el fondo, los títulos de productos y los precios en tu tienda.
               </p>
-              <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border" style={{
-                background: themeMode === 'light' ? '#f4f4f5' : 'rgba(255,255,255,0.1)',
-                borderColor: themeMode === 'light' ? '#e4e4e7' : 'rgba(255,255,255,0.2)'
-              }}>
-                ⭐ Ejemplo de Tarjeta / Botón
+              <div 
+                className="mt-1 flex items-center gap-3 px-4 py-2 rounded-xl text-xs font-bold border" 
+                style={{
+                  background: themeMode === 'dark' ? '#18181b' : '#f4f4f5',
+                  borderColor: themeMode === 'dark' ? '#27272a' : '#e4e4e7',
+                  color: themeMode === 'dark' ? '#ffffff' : '#09090b'
+                }}
+              >
+                <span>Calza Oxford Cross V</span>
+                <span className="font-extrabold" style={{ color: themeMode === 'dark' ? '#ffffff' : '#09090b' }}>$30.099,00</span>
               </div>
             </div>
           </div>
@@ -328,7 +265,7 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Texto del Logo (si no hay imagen)</label>
-              <input name="store_logo_text" defaultValue={settings.store_logo_text} className="w-full border rounded-lg p-2" placeholder="Ej: DRAVENIX" />
+              <input name="store_logo_text" defaultValue={settings.store_logo_text} className="w-full border rounded-lg p-2" placeholder="Ej: KLONFARK" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Subir Imagen del Logo</label>

@@ -3,8 +3,8 @@ import { redirect } from 'next/navigation';
 import { ProfileForm } from './ProfileForm';
 
 export const metadata = {
-  title: 'Mi Perfil | DRAVENIX',
-  description: 'Gestioná tus datos personales y dirección de envío en DRAVENIX.',
+  title: 'Mi Perfil | KLONFARK',
+  description: 'Gestioná tus datos personales y dirección de envío en KLONFARK.',
 };
 
 export default async function PerfilPage() {

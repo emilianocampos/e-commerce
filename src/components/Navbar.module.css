@@ -119,18 +119,22 @@
 }
 .badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  background-color: var(--shop-black);
-  color: white;
+  top: -6px;
+  right: -6px;
+  background-color: #ef4444;
+  color: #ffffff !important;
   font-size: 10px;
-  font-weight: bold;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
+  font-weight: 800;
+  border-radius: 9999px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid var(--background, #09090b);
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 .mobileMenuBtn {
   display: flex;

@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Términos y Condiciones | DRAVENIX',
+  title: 'Términos y Condiciones | KLONFARK',
   description: 'Términos y condiciones legales de uso y compra en nuestra tienda online.',
 };
 
@@ -17,7 +17,7 @@ export default function TerminosPage() {
         
         <div className="prose prose-zinc max-w-none text-zinc-600">
           <p className="mb-6">
-            Este documento describe los términos y condiciones generales aplicables al uso de los servicios ofrecidos por <strong>DRAVENIX</strong> dentro del sitio web.
+            Este documento describe los términos y condiciones generales aplicables al uso de los servicios ofrecidos por <strong>KLONFARK</strong> dentro del sitio web.
             Cualquier persona que desee acceder y/o usar el sitio o los servicios podrá hacerlo sujetándose a estos Términos y Condiciones Generales.
           </p>
 
@@ -29,7 +29,7 @@ export default function TerminosPage() {
 
           <h2 className="text-2xl font-bold text-zinc-900 mt-8 mb-4">2. Privacidad y Seguridad</h2>
           <p className="mb-4">
-            Para utilizar los servicios ofrecidos por DRAVENIX, los usuarios deberán facilitar determinados datos de carácter personal. Su información personal se procesa y almacena en servidores o 
+            Para utilizar los servicios ofrecidos por KLONFARK, los usuarios deberán facilitar determinados datos de carácter personal. Su información personal se procesa y almacena en servidores o 
             medios magnéticos que mantienen altos estándares de seguridad y protección física y tecnológica. Para mayor información, por favor revisa nuestra <Link href="/ayuda/privacidad" className="text-blue-600 underline">Política de Privacidad</Link>.
           </p>
 
@@ -40,7 +40,7 @@ export default function TerminosPage() {
           </p>
           <ul className="list-disc pl-6 space-y-2 mb-6">
             <li><strong>Medios de Pago:</strong> Tarjetas de crédito, tarjetas de débito, dinero en cuenta de Mercado Pago y otros medios en efectivo que la plataforma habilite.</li>
-            <li><strong>Seguridad de Datos:</strong> DRAVENIX <strong>NO almacena</strong> ni tiene acceso a los datos de tu tarjeta de crédito o débito. Toda la información sensible del pago es encriptada y procesada directamente por los servidores de Mercado Pago bajo sus estrictos protocolos de seguridad PCI-DSS.</li>
+            <li><strong>Seguridad de Datos:</strong> KLONFARK <strong>NO almacena</strong> ni tiene acceso a los datos de tu tarjeta de crédito o débito. Toda la información sensible del pago es encriptada y procesada directamente por los servidores de Mercado Pago bajo sus estrictos protocolos de seguridad PCI-DSS.</li>
             <li><strong>Acreditación:</strong> La acreditación del pago puede ser inmediata o demorar según el medio elegido. El pedido se comenzará a preparar una vez que Mercado Pago notifique la confirmación exitosa de la transacción.</li>
           </ul>
 
@@ -51,7 +51,7 @@ export default function TerminosPage() {
           </p>
           <p className="mb-4">
             El costo de envío por cambio de talle o modelo correrá por cuenta del cliente, a excepción de que el cambio sea por una falla de fábrica o error en el armado del pedido, 
-            en cuyo caso DRAVENIX asumirá la totalidad de los costos logísticos.
+            en cuyo caso KLONFARK asumirá la totalidad de los costos logísticos.
           </p>
           <p className="mb-4">
             Los reembolsos por cancelaciones se realizarán utilizando el mismo medio de pago original de la compra a través de Mercado Pago.
@@ -59,8 +59,8 @@ export default function TerminosPage() {
 
           <h2 className="text-2xl font-bold text-zinc-900 mt-8 mb-4">5. Propiedad Intelectual</h2>
           <p className="mb-4">
-            Los contenidos de las pantallas relativas a los servicios de DRAVENIX como así también los programas, bases de datos, redes, archivos que permiten al usuario acceder y usar su cuenta, 
-            son de propiedad de DRAVENIX y están protegidas por las leyes y los tratados internacionales de derecho de autor, marcas, patentes, modelos y diseños industriales. 
+            Los contenidos de las pantallas relativas a los servicios de KLONFARK como así también los programas, bases de datos, redes, archivos que permiten al usuario acceder y usar su cuenta, 
+            son de propiedad de KLONFARK y están protegidas por las leyes y los tratados internacionales de derecho de autor, marcas, patentes, modelos y diseños industriales. 
             El uso indebido y la reproducción total o parcial de dichos contenidos quedan prohibidos.
           </p>
 

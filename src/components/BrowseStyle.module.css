@@ -57,16 +57,17 @@
 }
 .cardTitle {
   position: absolute;
-  top: 24px;
-  left: 24px;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--shop-black);
+  top: 20px;
+  left: 20px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #09090b !important;
   z-index: 10;
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 4px 12px;
-  border-radius: 8px;
-  backdrop-filter: blur(4px);
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  padding: 6px 14px;
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 .image {
   object-fit: cover;

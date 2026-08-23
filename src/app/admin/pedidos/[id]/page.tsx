@@ -92,6 +92,14 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
               <dt className="text-zinc-500">Última Actualización</dt>
               <dd className="text-zinc-900 text-right">{new Date(order.updated_at || order.created_at).toLocaleString()}</dd>
             </div>
+            {order.vip_card_code && (
+              <div className="flex justify-between items-center bg-amber-50 p-2 rounded-lg border border-amber-200">
+                <dt className="text-xs font-bold text-amber-900 flex items-center gap-1">
+                  👑 Tarjeta VIP
+                </dt>
+                <dd className="font-mono text-xs font-black text-amber-900">{order.vip_card_code}</dd>
+              </div>
+            )}
             <div className="mt-4 pt-4 border-t border-zinc-100">
               <dt className="text-zinc-500 text-xs mb-1">ID Orden (Interno)</dt>
               <dd className="font-mono text-xs text-zinc-900 break-all bg-zinc-50 p-1 rounded">{order.id}</dd>
@@ -133,17 +141,37 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
               <tbody className="divide-y divide-zinc-100">
                 {order.order_items.map((item: any) => (
                   <tr key={item.id}>
-                    <td className="py-4">{item.product_title}</td>
+                    <td className="py-4 font-medium text-zinc-900">
+                      {item.product_title || 'Producto'} {item.selected_size && item.selected_size !== 'Único' && item.selected_size.trim() !== '' ? `(Talle: ${item.selected_size})` : ''}
+                    </td>
                     <td className="py-4 text-center">{item.quantity}</td>
-                    <td className="py-4 text-right">{formatCurrency(item.price)}</td>
-                    <td className="py-4 text-right font-medium text-zinc-900">{formatCurrency(item.subtotal)}</td>
+                    <td className="py-4 text-right">{formatCurrency(item.unit_price || item.price || 0)}</td>
+                    <td className="py-4 text-right font-medium text-zinc-900">{formatCurrency((item.unit_price || item.price || 0) * item.quantity)}</td>
                   </tr>
                 ))}
               </tbody>
-              <tfoot className="border-t border-zinc-200 font-bold text-zinc-900">
+              <tfoot className="border-t border-zinc-200 font-bold text-zinc-900 text-sm">
+                {order.subtotal_amount && Number(order.subtotal_amount) > 0 && (
+                  <tr>
+                    <td colSpan={3} className="pt-3 text-right text-zinc-500">Subtotal Original:</td>
+                    <td className="pt-3 text-right text-zinc-900">{formatCurrency(order.subtotal_amount)}</td>
+                  </tr>
+                )}
+                {order.promo_discount_amount && Number(order.promo_discount_amount) > 0 && (
+                  <tr>
+                    <td colSpan={3} className="pt-2 text-right text-emerald-600">Descuento Transferencia:</td>
+                    <td className="pt-2 text-right text-emerald-600">-{formatCurrency(order.promo_discount_amount)}</td>
+                  </tr>
+                )}
+                {order.vip_discount_amount && Number(order.vip_discount_amount) > 0 && (
+                  <tr>
+                    <td colSpan={3} className="pt-2 text-right text-amber-700">Beneficio VIP ({order.vip_card_code || 'VIP'}):</td>
+                    <td className="pt-2 text-right text-amber-700">-{formatCurrency(order.vip_discount_amount)}</td>
+                  </tr>
+                )}
                 <tr>
-                  <td colSpan={3} className="pt-4 text-right">Total Pagado:</td>
-                  <td className="pt-4 text-right text-lg text-green-600">{formatCurrency(order.total)}</td>
+                  <td colSpan={3} className="pt-4 text-right text-base">Total Pagado:</td>
+                  <td className="pt-4 text-right text-xl text-emerald-600">{formatCurrency(order.total_amount || order.total || 0)}</td>
                 </tr>
               </tfoot>
             </table>

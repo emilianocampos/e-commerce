@@ -16,6 +16,7 @@ import {
   Palette,
   Menu,
   X,
+  Crown,
   ChevronRight,
   ShieldCheck,
 } from 'lucide-react';
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/productos', label: 'Productos', icon: Package },
   { href: '/admin/crear', label: 'Crear Producto', icon: PlusCircle },
+  { href: '/admin/vip', label: 'Tarjetas VIP', icon: Crown, badge: 'VIP' },
   { href: '/admin/ventas', label: 'Ventas', icon: DollarSign },
   { href: '/admin/pedidos', label: 'Pedidos', icon: ShoppingBag },
   { href: '/admin/clientes', label: 'Clientes', icon: Users },
@@ -43,7 +45,7 @@ export function AdminNavigation({ children }: { children: React.ReactNode }) {
   const activeItem = NAV_ITEMS.find((item) => pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href)));
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col md:flex-row">
       {/* HEADER MOBILE (Visibilidad solo en dispositivos móviles) */}
       <header className="md:hidden sticky top-0 z-40 bg-zinc-950 text-white border-b border-zinc-800 shadow-md">
         <div className="flex items-center justify-between px-4 py-3">
@@ -54,7 +56,7 @@ export function AdminNavigation({ children }: { children: React.ReactNode }) {
             <div>
               <span className="font-extrabold text-sm tracking-tight text-white block">Panel Admin</span>
               <span className="text-[10px] font-semibold text-emerald-400 block -mt-0.5">
-                {activeItem?.label || 'Dravenix'}
+                {activeItem?.label || 'Klonfark'}
               </span>
             </div>
           </div>
@@ -116,7 +118,7 @@ export function AdminNavigation({ children }: { children: React.ReactNode }) {
               </button>
             </div>
 
-            <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+            <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
               {NAV_ITEMS.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
@@ -125,11 +127,9 @@ export function AdminNavigation({ children }: { children: React.ReactNode }) {
                     key={item.href}
                     href={item.href}
                     onClick={closeMenu}
-                    className={`flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all ${
+                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                       isActive
-                        ? 'bg-emerald-500 text-zinc-950 shadow-md font-bold'
-                        : item.highlight
-                        ? 'bg-blue-950/40 text-blue-300 border border-blue-800/40 hover:bg-blue-900/40'
+                        ? 'bg-emerald-500 text-zinc-950 font-bold shadow-md'
                         : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
                     }`}
                   >
@@ -138,14 +138,17 @@ export function AdminNavigation({ children }: { children: React.ReactNode }) {
                       <span>{item.label}</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                      {item.badge && (
-                        <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold uppercase">
-                          {item.badge}
-                        </span>
-                      )}
-                      <ChevronRight className={`w-4 h-4 ${isActive ? 'text-zinc-950' : 'text-zinc-600'}`} />
-                    </div>
+                    {item.badge && (
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                          isActive
+                            ? 'bg-zinc-950 text-emerald-400'
+                            : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        }`}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
@@ -164,18 +167,18 @@ export function AdminNavigation({ children }: { children: React.ReactNode }) {
       )}
 
       {/* SIDEBAR PARA PANTALLAS MEDIANAS / DESKTOP (md+) */}
-      <aside className="hidden md:flex flex-col w-64 border-r border-zinc-200 bg-white shrink-0">
-        <div className="p-5 border-b border-zinc-100 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-zinc-950 text-emerald-400 flex items-center justify-center shadow-sm">
+      <aside className="hidden md:flex flex-col w-64 border-r border-zinc-800 bg-zinc-950 shrink-0">
+        <div className="p-5 border-b border-zinc-800 flex items-center gap-3 bg-zinc-950">
+          <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 text-emerald-400 flex items-center justify-center shadow-sm">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-extrabold text-zinc-900 text-sm">Panel Admin</h2>
-            <p className="text-[11px] font-medium text-zinc-500">Gestión de E-Commerce</p>
+            <h2 className="font-extrabold text-white text-sm">Panel Admin</h2>
+            <p className="text-[11px] font-medium text-zinc-400">Gestión de E-Commerce</p>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
@@ -185,10 +188,10 @@ export function AdminNavigation({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-zinc-900 text-white shadow-sm font-bold'
+                    ? 'bg-zinc-800 text-white shadow-sm font-bold border border-zinc-700'
                     : item.highlight
-                    ? 'bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100/70'
-                    : 'text-zinc-700 hover:bg-zinc-100'
+                    ? 'bg-emerald-950/40 text-emerald-300 border border-emerald-800/60 hover:bg-emerald-900/50'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -206,10 +209,10 @@ export function AdminNavigation({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-zinc-100">
+        <div className="p-4 border-t border-zinc-800 bg-zinc-950">
           <Link
             href="/"
-            className="block text-center text-xs font-semibold text-zinc-600 hover:text-zinc-900 hover:underline"
+            className="block text-center text-xs font-semibold text-zinc-400 hover:text-emerald-400 hover:underline"
           >
             &larr; Ir a la Tienda
           </Link>
@@ -217,7 +220,7 @@ export function AdminNavigation({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* CONTENIDO PRINCIPAL ADAPTABLE */}
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0 max-w-full overflow-x-hidden">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0 max-w-full overflow-x-hidden bg-zinc-950 text-white">
         {children}
       </main>
     </div>

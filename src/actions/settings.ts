@@ -59,6 +59,8 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
     theme_mode: formData.get('theme_mode') || 'light',
     gradient_color_from: formData.get('gradient_color_from') || '#18181b',
     gradient_color_to: formData.get('gradient_color_to') || '#09090b',
+    gradient_text_primary: formData.get('gradient_text_primary') || '#ffffff',
+    gradient_text_secondary: formData.get('gradient_text_secondary') || '#d4d4d8',
     updated_at: new Date().toISOString(),
   };
 

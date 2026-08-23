@@ -6,8 +6,8 @@ import { CheckCircle2, ShoppingBag, ArrowLeft, PackageCheck, Mail, ShieldCheck }
 import { ClearCartOnSuccess } from '@/components/ClearCartOnSuccess';
 
 export const metadata = {
-  title: '¡Pago Exitoso! | Dravenix',
-  description: 'Tu compra ha sido procesada con éxito en Dravenix.',
+  title: '¡Pago Exitoso! | Klonfark',
+  description: 'Tu compra ha sido procesada con éxito en Klonfark.',
 };
 
 interface SuccessPageProps {

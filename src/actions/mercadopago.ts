@@ -14,66 +14,112 @@ import { createClient, createAdminClient } from '@/lib/supabase-server';
  *                   únicamente los IDs de los productos y la cantidad elegida, pero NO los precios 
  *                   por cuestiones de seguridad.
  */
-export async function createCheckoutPreference(cartItems: { productId: string, quantity: number, selectedSize?: string, selectedColor?: string }[]) {
+export async function createCheckoutPreference(
+  cartItems: { productId: string, quantity: number, selectedSize?: string, selectedColor?: string }[],
+  options?: {
+    vipCardCode?: string;
+    isTransferPromo?: boolean;
+    promoCode?: string;
+  }
+) {
   try {
     // supabase: Instancia del cliente de base de datos para ejecutar queries con nuestros permisos.
-    // Viene de nuestra función helper en lib/supabase-server.ts
     const supabase = await createClient();
 
     // Verificar que el usuario haya iniciado sesión antes de permitir la compra.
-    // supabase.auth.getUser() extrae la sesión actual basándose en las cookies del servidor.
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      // Si no hay usuario logueado, retornamos un aviso al frontend para que lo redirija al login.
       return { requireLogin: true };
     }
 
-    // productIds: Creamos un array simple ['uuid-1', 'uuid-2'] sacado del carrito.
-    // Se usa para buscar esos IDs específicos en la tabla de productos de Supabase de una sola vez.
     const productIds = cartItems.map(item => item.productId);
 
-    // products: Resultado de la consulta a Supabase. Trae la data REAL y SEGURA de los productos 
-    // (título, descripción, PRECIO verdadero e imagen) directamente desde la base de datos.
+    // products: Trae la data REAL y SEGURA de los productos con configuración VIP
     const { data: products, error } = await supabase
       .from('products')
-      .select('id, title, description, price, image')
+      .select('id, title, description, price, image, vip_discount_percentage, vip_stackable')
       .in('id', productIds);
 
     if (error || !products || products.length === 0) {
       throw new Error('Los productos del carrito ya no están disponibles');
     }
 
-    // preference: Es una clase que provee el SDK de MercadoPago para interactuar con la API.
-    // Le pasamos "mpClient", que es nuestra configuración inicializada con el ACCESS_TOKEN secreto.
+    // Validar tarjeta VIP en base de datos de forma segura si fue enviada
+    let validatedVipCard: { card_number: string; discount_percentage: number } | null = null;
+    if (options?.vipCardCode && options.vipCardCode.trim()) {
+      const { data: vipCard } = await supabase
+        .from('vip_cards')
+        .select('card_number, discount_percentage, active')
+        .ilike('card_number', options.vipCardCode.trim())
+        .maybeSingle();
+
+      if (vipCard && vipCard.active) {
+        validatedVipCard = {
+          card_number: vipCard.card_number,
+          discount_percentage: Number(vipCard.discount_percentage) || 10,
+        };
+      }
+    }
+
+    // Porcentaje de promo (transferencia o código)
+    let promoPercentage = 0;
+    if (options?.isTransferPromo) {
+      promoPercentage = 10;
+    }
+
     const preference = new Preference(mpClient);
 
-    // siteUrl: La URL base de nuestra web (ej: http://localhost:3000 o https://midominio.com).
-    // Viene de las variables de entorno (.env.local). Removemos cualquier barra final (trailing slash).
     const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const siteUrl = rawSiteUrl.endsWith('/') ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
 
-    // items: Un array con la estructura y validaciones exactas que exige Mercado Pago.
-    // Cruzamos la información del carrito local (cantidades) con la info de la BD (precios, títulos).
+    let orderSubtotal = 0;
+    let orderPromoDiscount = 0;
+    let orderVipDiscount = 0;
+
+    // Calculamos items con precios y descuentos exactos
     const items = cartItems.reduce((acc, cartItem) => {
-      // Buscamos el producto en la BD que coincide con este item del carrito
       const product = products.find(p => p.id === cartItem.productId);
 
       if (product) {
+        const qty = Number(cartItem.quantity);
+        const originalPrice = Number(product.price);
+        orderSubtotal += originalPrice * qty;
+
+        // Promo discount
+        const promoDiscountPerUnit = promoPercentage > 0 ? (originalPrice * (promoPercentage / 100)) : 0;
+        const priceAfterPromo = originalPrice - promoDiscountPerUnit;
+        orderPromoDiscount += promoDiscountPerUnit * qty;
+
+        // VIP discount
+        let vipDiscountPerUnit = 0;
+        if (validatedVipCard) {
+          const productVipPct = product.vip_discount_percentage !== null && product.vip_discount_percentage !== undefined
+            ? Number(product.vip_discount_percentage)
+            : validatedVipCard.discount_percentage;
+
+          const isStackable = product.vip_stackable !== false;
+
+          if (productVipPct > 0 && (isStackable || promoDiscountPerUnit === 0)) {
+            vipDiscountPerUnit = priceAfterPromo * (productVipPct / 100);
+            orderVipDiscount += vipDiscountPerUnit * qty;
+          }
+        }
+
+        const finalUnitPrice = Math.max(0, Math.round((priceAfterPromo - vipDiscountPerUnit) * 100) / 100);
+
         const variantSpecs = [
-          cartItem.selectedSize ? `Talle: ${cartItem.selectedSize}` : null,
+          cartItem.selectedSize && cartItem.selectedSize !== 'Único' && cartItem.selectedSize.trim() !== '' ? `Talle: ${cartItem.selectedSize}` : null,
           cartItem.selectedColor ? `Color: ${cartItem.selectedColor}` : null,
         ].filter(Boolean).join(', ');
 
         acc.push({
           id: product.id,
           title: `${product.title} ${variantSpecs ? `(${variantSpecs})` : ''}`,
-          quantity: Number(cartItem.quantity), // MP requiere un Number estricto
-          unit_price: Number(product.price),   // Precio sacado de la BD, NO del frontend
-          currency_id: 'ARS', // Moneda en Pesos Argentinos
-          // Aseguramos que la URL de la imagen sea absoluta, sino MP tira error
+          quantity: qty,
+          unit_price: finalUnitPrice,
+          currency_id: 'ARS',
           picture_url: product.image?.startsWith('http') ? product.image : `${siteUrl}${product.image || ''}`,
-          // Si no hay descripción, le ponemos el título para que no falle
           description: product.description || product.title,
         });
       }
@@ -85,9 +131,6 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
     }
 
     // 1. Crear la orden en estado "pending" antes de ir a MP
-    
-    // VERIFICACIÓN: Asegurarnos de que el usuario tenga un registro en "profiles" 
-    // para evitar el error de foreign key (orders_profile_id_fkey)
     const { data: profile } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle();
     if (!profile) {
       const adminClient = createAdminClient();
@@ -104,8 +147,12 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
       .insert({
         profile_id: user.id,
         total_amount: totalAmount,
+        subtotal_amount: orderSubtotal,
+        promo_discount_amount: orderPromoDiscount,
+        vip_discount_amount: orderVipDiscount,
+        vip_card_code: validatedVipCard ? validatedVipCard.card_number : null,
         status: 'pending',
-        mp_payment_id: `pending-${Date.now()}` // Temporary ID in case it's required
+        mp_payment_id: `pending-${Date.now()}`
       })
       .select('id')
       .single();
@@ -121,7 +168,7 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
        return {
          order_id: order.id,
          product_id: cartItem.productId,
-         selected_size: cartItem.selectedSize || '',
+         selected_size: (cartItem.selectedSize && cartItem.selectedSize !== 'Único') ? cartItem.selectedSize : '',
          quantity: cartItem.quantity,
          unit_price: p?.price || 0
        };
@@ -143,7 +190,7 @@ export async function createCheckoutPreference(cartItems: { productId: string, q
           email: user.email,
         },
         external_reference: order.id.toString(),
-        statement_descriptor: 'DRAVENIX',
+        statement_descriptor: 'KLONFARK',
         metadata: {
           order_id: order.id.toString(),
         },

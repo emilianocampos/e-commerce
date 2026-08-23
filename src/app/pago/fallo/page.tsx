@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { XCircle, RefreshCw, ArrowLeft, ShieldAlert } from 'lucide-react';
 
 export const metadata = {
-  title: 'Pago No Completado | Dravenix',
+  title: 'Pago No Completado | Klonfark',
   description: 'Hubo un inconveniente al procesar tu pago.',
 };
 

@@ -9,7 +9,12 @@ import { showToast } from 'nextjs-toast-notify';
 import { ArrowRight } from 'lucide-react';
 import styles from './Cart.module.css';
 
-export function CheckoutButton() {
+interface CheckoutButtonProps {
+  vipCardCode?: string;
+  isTransferPromo?: boolean;
+}
+
+export function CheckoutButton({ vipCardCode, isTransferPromo }: CheckoutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { items } = useCartStore();
   const router = useRouter();
@@ -26,7 +31,10 @@ export function CheckoutButton() {
         selectedColor: item.selectedColor,
       }));
       
-      const response = await createCheckoutPreference(cartItems);
+      const response = await createCheckoutPreference(cartItems, {
+        vipCardCode,
+        isTransferPromo,
+      });
 
       if (response.requireLogin) {
         showToast.warning('Debes iniciar sesión para poder continuar con la compra.', { position: 'top-center' });

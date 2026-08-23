@@ -30,24 +30,24 @@ const archivoBlack = Archivo_Black({
 // 2. Metadatos globales (título y descripción por defecto para SEO)
 export const metadata: Metadata = {
   title: {
-    template: "%s | DRAVENIX",
-    default: "DRAVENIX | Tu estilo, tu esencia",
+    template: "%s | KLONFARK",
+    default: "KLONFARK | Tu estilo, tu esencia",
   },
-  description: "Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida. DRAVENIX ofrece ropa de alta calidad para hombres y mujeres.",
-  keywords: ["ropa", "indumentaria", "moda", "dravenix", "ecommerce", "argentina", "suplementos", "ropa urbana", "estilo"],
-  authors: [{ name: "DRAVENIX" }],
-  creator: "DRAVENIX",
+  description: "Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida. KLONFARK ofrece ropa de alta calidad para hombres y mujeres.",
+  keywords: ["ropa", "indumentaria", "moda", "klonfark", "ecommerce", "argentina", "suplementos", "ropa urbana", "estilo"],
+  authors: [{ name: "KLONFARK" }],
+  creator: "KLONFARK",
   openGraph: {
-    title: "DRAVENIX | Tu estilo, tu esencia",
+    title: "KLONFARK | Tu estilo, tu esencia",
     description: "Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida.",
-    url: "https://dravenix.com",
-    siteName: "DRAVENIX",
+    url: "https://klonfark.com",
+    siteName: "KLONFARK",
     locale: "es_AR",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "DRAVENIX | Tu estilo, tu esencia",
+    title: "KLONFARK | Tu estilo, tu esencia",
     description: "Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida.",
   },
 };
@@ -72,6 +72,8 @@ export default async function RootLayout({
         style={{
           '--gradient-from': settings?.gradient_color_from || '#18181b',
           '--gradient-to': settings?.gradient_color_to || '#09090b',
+          '--gradient-text-primary': settings?.gradient_text_primary || '#ffffff',
+          '--gradient-text-secondary': settings?.gradient_text_secondary || '#d4d4d8',
         } as React.CSSProperties}
         className={`${inter.variable} ${archivoBlack.variable} min-h-screen flex flex-col font-sans antialiased selection:bg-shop-black selection:text-white transition-colors duration-300`}
       >

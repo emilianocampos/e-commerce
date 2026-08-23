@@ -15,12 +15,12 @@
 
 .button {
   background-color: #FACC15;
-  color: var(--shop-black);
+  color: #09090b !important;
   border: none;
   border-radius: 62px;
   padding: 16px 54px;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   display: inline-block;
   text-decoration: none;
@@ -28,6 +28,7 @@
   text-align: center;
   transition: transform 0.2s;
   margin-top: 36px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .button:hover {

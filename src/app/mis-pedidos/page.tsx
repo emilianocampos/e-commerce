@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Mis Pedidos | DRAVENIX',
+  title: 'Mis Pedidos | KLONFARK',
   description: 'Revisá el estado en tiempo real de tus compras y envíos.',
 };
 

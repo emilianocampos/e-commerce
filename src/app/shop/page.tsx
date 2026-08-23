@@ -9,10 +9,10 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Tienda',
-  description: 'Explora nuestra colección completa de ropa y accesorios. Encuentra lo que combina con tu estilo en DRAVENIX.',
+  description: 'Explora nuestra colección completa de ropa y accesorios. Encuentra lo que combina con tu estilo en KLONFARK.',
   openGraph: {
-    title: 'Tienda | DRAVENIX',
-    description: 'Explora nuestra colección completa de ropa y accesorios. Encuentra lo que combina con tu estilo en DRAVENIX.',
+    title: 'Tienda | KLONFARK',
+    description: 'Explora nuestra colección completa de ropa y accesorios. Encuentra lo que combina con tu estilo en KLONFARK.',
   }
 };
 

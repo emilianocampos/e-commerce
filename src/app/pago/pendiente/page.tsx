@@ -3,7 +3,7 @@ import { Clock, ShoppingBag, ArrowLeft, Info } from 'lucide-react';
 import { ClearCartOnSuccess } from '@/components/ClearCartOnSuccess';
 
 export const metadata = {
-  title: 'Pago Pendiente | Dravenix',
+  title: 'Pago Pendiente | Klonfark',
   description: 'Tu pago está en proceso de acreditación.',
 };
 

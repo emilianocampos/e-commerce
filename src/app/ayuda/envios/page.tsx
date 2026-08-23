@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Detalles de Envío | DRAVENIX',
+  title: 'Detalles de Envío | KLONFARK',
   description: 'Información sobre métodos, costos y tiempos de envío.',
 };
 
@@ -17,7 +17,7 @@ export default function EnviosPage() {
         
         <div className="prose prose-zinc max-w-none text-zinc-600">
           <p className="text-lg mb-6">
-            En <strong>DRAVENIX</strong> trabajamos para que tus pedidos lleguen de manera rápida y segura. Realizamos envíos a todo el territorio de la República Argentina a través de <strong>Correo Argentino</strong>.
+            En <strong>KLONFARK</strong> trabajamos para que tus pedidos lleguen de manera rápida y segura. Realizamos envíos a todo el territorio de la República Argentina a través de <strong>Correo Argentino</strong>.
           </p>
           
           <h2 className="text-2xl font-bold text-zinc-900 mt-8 mb-4">Opciones y Tiempos de Entrega</h2>

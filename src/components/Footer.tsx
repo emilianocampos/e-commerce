@@ -14,7 +14,7 @@ export function Footer({ settings }: { settings?: any }) {
               {settings?.store_logo_url ? (
                 <img src={settings.store_logo_url} alt={settings?.store_logo_text || 'Logo'} style={{ height: '32px', objectFit: 'contain' }} />
               ) : (
-                settings?.store_logo_text || 'DRAVENIX'
+                settings?.store_logo_text || 'KLONFARK'
               )}
             </Link>
             <p className={styles.description}>
@@ -60,7 +60,7 @@ export function Footer({ settings }: { settings?: any }) {
         </div>
 
         <div className={styles.bottom}>
-          <p className={styles.copyright}>Dravenix © 2000-2026, Todos los derechos reservados</p>
+          <p className={styles.copyright}>Klonfark © 2000-2026, Todos los derechos reservados</p>
         </div>
       </div>
     </footer>

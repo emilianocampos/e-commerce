@@ -153,7 +153,7 @@ export function ReviewCarousel({ reviews, isLoggedIn, createReviewAction }: Revi
                   name="message" 
                   rows={4} 
                   required
-                  placeholder="¿Qué te pareció tu experiencia en Dravenix?"
+                  placeholder="¿Qué te pareció tu experiencia en Klonfark?"
                   className="w-full border border-zinc-300 rounded-xl p-3 outline-none focus:border-black resize-none"
                 ></textarea>
               </div>

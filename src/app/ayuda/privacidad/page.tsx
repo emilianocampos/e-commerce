@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Política de Privacidad | DRAVENIX',
+  title: 'Política de Privacidad | KLONFARK',
   description: 'Política de privacidad y manejo de datos personales.',
 };
 
@@ -17,7 +17,7 @@ export default function PrivacidadPage() {
         
         <div className="prose prose-zinc max-w-none text-zinc-600">
           <p className="mb-6">
-            En <strong>DRAVENIX</strong>, valoramos su privacidad y nos comprometemos a proteger sus datos personales. 
+            En <strong>KLONFARK</strong>, valoramos su privacidad y nos comprometemos a proteger sus datos personales. 
             Esta Política de Privacidad describe cómo recopilamos, utilizamos, protegemos y compartimos la información que obtenemos de usted al utilizar nuestro sitio web.
           </p>
 
@@ -55,7 +55,7 @@ export default function PrivacidadPage() {
 
           <h2 className="text-2xl font-bold text-zinc-900 mt-8 mb-4">4. Pasarelas de Pago</h2>
           <p className="mb-4">
-            Nuestros pagos son procesados de forma segura a través de <strong>Mercado Pago</strong>. DRAVENIX no guarda ni tiene acceso a la información de su tarjeta de crédito o cuenta bancaria. 
+            Nuestros pagos son procesados de forma segura a través de <strong>Mercado Pago</strong>. KLONFARK no guarda ni tiene acceso a la información de su tarjeta de crédito o cuenta bancaria. 
             Esos datos son gestionados directamente por Mercado Pago bajo los más altos estándares internacionales de seguridad (PCI-DSS).
           </p>
 
@@ -67,7 +67,7 @@ export default function PrivacidadPage() {
 
           <h2 className="text-2xl font-bold text-zinc-900 mt-8 mb-4">6. Contacto para Gestión de Datos</h2>
           <p className="mb-4">
-            Para ejercer sus derechos de acceso, rectificación, actualización o supresión de sus datos personales, puede comunicarse con nosotros enviando un correo electrónico a <strong>privacidad@dravenix.com</strong>.
+            Para ejercer sus derechos de acceso, rectificación, actualización o supresión de sus datos personales, puede comunicarse con nosotros enviando un correo electrónico a <strong>privacidad@klonfark.com</strong>.
           </p>
 
           <p className="text-sm text-zinc-500 mt-12 pt-8 border-t border-zinc-200">

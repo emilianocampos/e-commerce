@@ -102,20 +102,20 @@ export function ProductPurchaseSection({
         {!showDiscountInput && !discountApplied ? (
           <button 
             onClick={() => setShowDiscountInput(true)}
-            className="text-sm font-medium text-black flex items-center gap-2 hover:underline"
+            className="text-sm font-semibold text-zinc-300 hover:text-white flex items-center gap-2 transition-colors"
           >
-            <Tag size={16} /> Añadir código descuento
+            <Tag size={16} className="text-emerald-400" /> Añadir código descuento
           </button>
         ) : !discountApplied ? (
-          <div className="flex flex-col gap-2 p-4 bg-zinc-50 border border-zinc-200 rounded-lg">
-            <label className="text-sm font-medium text-zinc-700">Ingresa tu código</label>
+          <div className="flex flex-col gap-2 p-4 bg-zinc-900/60 border border-zinc-800 rounded-xl">
+            <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Ingresa tu código</label>
             <div className="flex gap-2">
               <input 
                 type="text" 
                 value={discountCode}
                 onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
                 placeholder="OFERTA20"
-                className="flex-1 border border-zinc-300 rounded-md px-3 py-2 text-sm uppercase font-mono font-bold"
+                className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm uppercase font-mono font-bold text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 disabled={discountLoading}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -127,26 +127,26 @@ export function ProductPurchaseSection({
               <button 
                 onClick={handleApplyDiscount}
                 disabled={discountLoading}
-                className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50 hover:bg-zinc-800 transition"
+                className="bg-white text-black px-5 py-2 rounded-xl text-sm font-bold disabled:opacity-50 hover:bg-zinc-200 transition"
               >
                 {discountLoading ? '...' : 'Aplicar'}
               </button>
             </div>
             {discountMessage.text && (
-              <span className={`text-xs ${discountMessage.isError ? 'text-red-500' : 'text-green-600'}`}>
+              <span className={`text-xs font-medium ${discountMessage.isError ? 'text-red-400' : 'text-emerald-400'}`}>
                 {discountMessage.text}
               </span>
             )}
           </div>
         ) : (
-          <div className="inline-flex items-center justify-between gap-3 bg-green-50 text-green-700 px-4 py-2.5 rounded-xl text-sm font-medium border border-green-200 w-full sm:w-auto">
+          <div className="inline-flex items-center justify-between gap-3 bg-emerald-950/40 text-emerald-300 px-4 py-2.5 rounded-xl text-sm font-medium border border-emerald-800/60 w-full sm:w-auto">
             <div className="flex items-center gap-2">
-              <Tag size={16} />
+              <Tag size={16} className="text-emerald-400" />
               <span>{discountMessage.text}</span>
             </div>
             <button
               onClick={handleRemoveDiscount}
-              className="text-xs font-bold text-green-800 hover:text-red-600 underline ml-2"
+              className="text-xs font-bold text-emerald-400 hover:text-red-400 underline ml-2"
               title="Quitar o cambiar código"
             >
               Cambiar

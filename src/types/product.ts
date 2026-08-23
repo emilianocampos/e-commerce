@@ -87,6 +87,8 @@ export interface Product {
   active?: boolean;
   weight?: number | null;
   updated_at?: string | null;
+  vip_discount_percentage?: number | null;
+  vip_stackable?: boolean;
 
   // Relaciones (opcionales para no romper queries actuales)
   brands?: Brand | null;

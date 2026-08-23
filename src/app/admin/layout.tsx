@@ -9,5 +9,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect('/login');
   }
 
-  return <AdminNavigation>{children}</AdminNavigation>;
+  return (
+    <div className="admin-container min-h-screen bg-zinc-50 text-zinc-900 font-sans" data-theme="light">
+      <AdminNavigation>{children}</AdminNavigation>
+    </div>
+  );
 }

@@ -10,7 +10,7 @@ export default async function CustomizeWebPage() {
 
   const defaultSettings = {
     top_banner_text: 'Sign up and get 20% off to your first order.',
-    store_logo_text: 'DRAVENIX',
+    store_logo_text: 'KLONFARK',
     hero_title: 'ENCUENTRA LO\nQUE COMBINA CON\nTU ESTILO',
     hero_subtitle: 'Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida.',
     stats_1_number: '200+',
@@ -28,6 +28,10 @@ export default async function CustomizeWebPage() {
     style_3_link: '/shop?category_name=urbano',
     style_4_title: 'Suplementos',
     style_4_link: '/shop?type=SUPPLEMENT',
+    gradient_color_from: '#18181b',
+    gradient_color_to: '#09090b',
+    gradient_text_primary: '#ffffff',
+    gradient_text_secondary: '#d4d4d8',
   };
 
   const finalSettings = settings || defaultSettings;
