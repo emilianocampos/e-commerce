@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { showToast } from 'nextjs-toast-notify';
 import { compressImage } from '@/lib/imageCompression';
-import { Crown } from 'lucide-react';
+import { Crown, Trash2, X } from 'lucide-react';
 
 interface ProductFormProps {
   action: (state: any, formData: FormData) => Promise<any>;
@@ -90,12 +90,34 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
     if (file) setPreviewImage(URL.createObjectURL(file));
   };
 
+  const [deletedOptImages, setDeletedOptImages] = useState<boolean[]>([false, false, false]);
+
   const handleOptImageChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (file) {
       const newPreviews = [...previewImagesOpt];
       newPreviews[index] = URL.createObjectURL(file);
       setPreviewImagesOpt(newPreviews);
+      
+      const newDeleted = [...deletedOptImages];
+      newDeleted[index] = false;
+      setDeletedOptImages(newDeleted);
+    }
+  };
+
+  const handleRemoveOptImage = (index: number) => {
+    const newPreviews = [...previewImagesOpt];
+    newPreviews[index] = null;
+    setPreviewImagesOpt(newPreviews);
+
+    const newDeleted = [...deletedOptImages];
+    newDeleted[index] = true;
+    setDeletedOptImages(newDeleted);
+
+    // Reset file input element if it has a file selected
+    const inputElem = document.getElementById(`image_opt_${index + 1}`) as HTMLInputElement | null;
+    if (inputElem) {
+      inputElem.value = '';
     }
   };
 
@@ -512,15 +534,45 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
           {/* Optional Images */}
           {[1, 2, 3].map((num, idx) => (
             <div key={num} className="space-y-2">
-              <label className="block text-xs font-medium text-zinc-500">Opcional {num}</label>
-              <div className="relative h-32 w-full overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 transition-colors">
-                {previewImagesOpt[idx] ? (
-                  <Image src={previewImagesOpt[idx]!} alt={`Opcional ${num}`} fill unoptimized className="object-cover" />
-                ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center text-xs text-zinc-400">Extra {num}</div>
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-medium text-zinc-500">Opcional {num}</label>
+                {previewImagesOpt[idx] && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveOptImage(idx);
+                    }}
+                    className="text-[11px] text-red-500 hover:text-red-700 font-semibold flex items-center gap-0.5 transition-colors z-20 cursor-pointer"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Eliminar
+                  </button>
                 )}
-                <input type="file" name={`image_opt_${num}`} accept="image/*" onChange={(e) => handleOptImageChange(e, idx)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
               </div>
+              <div className="relative h-32 w-full overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 transition-colors group">
+                {previewImagesOpt[idx] ? (
+                  <>
+                    <Image src={previewImagesOpt[idx]!} alt={`Opcional ${num}`} fill unoptimized className="object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pointer-events-none">
+                      <span className="text-[11px] text-white font-medium bg-black/60 px-2 py-1 rounded">Cambiar foto</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex h-full w-full flex-col items-center justify-center text-xs text-zinc-400">
+                    <span>+ Extra {num}</span>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  id={`image_opt_${num}`}
+                  name={`image_opt_${num}`}
+                  accept="image/*"
+                  onChange={(e) => handleOptImageChange(e, idx)}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+              </div>
+              <input type="hidden" name={`delete_opt_${num}`} value={deletedOptImages[idx] ? 'true' : 'false'} />
             </div>
           ))}
         </div>

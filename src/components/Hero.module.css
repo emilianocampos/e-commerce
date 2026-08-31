@@ -18,26 +18,30 @@
   color: #09090b !important;
   border: none;
   border-radius: 62px;
-  padding: 16px 54px;
-  font-size: 18px;
+  padding: 12px 32px;
+  font-size: 15px;
   font-weight: 800;
   cursor: pointer;
   display: inline-block;
   text-decoration: none;
   width: 100%;
+  max-width: 280px;
   text-align: center;
-  transition: transform 0.2s;
-  margin-top: 36px;
+  transition: transform 0.2s, background-color 0.2s;
+  margin-top: 16px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .button:hover {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 @media (min-width: 768px) {
   .button {
     width: auto;
+    max-width: none;
+    padding: 16px 54px;
+    font-size: 18px;
     margin-top: 0;
   }
 }
@@ -46,7 +50,7 @@
   max-width: 1240px;
   width: 100%;
   margin: 0 auto;
-  padding: 40px 16px;
+  padding: 32px 16px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -65,13 +69,13 @@
 
 .title {
   font-family: var(--font-display), sans-serif;
-  font-size: 48px;
+  font-size: clamp(30px, 7.5vw, 44px);
   font-weight: 900;
   text-transform: uppercase;
-  line-height: 1;
+  line-height: 1.05;
   color: #FACC15;
   /* yellow-400 */
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   white-space: pre-wrap;
   text-shadow:
     -2px -2px 0 #000,
@@ -91,17 +95,19 @@
 
 .description {
   color: var(--shop-white);
-  font-size: 16px;
-  line-height: 1.6;
-  margin-bottom: 32px;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 20px;
   max-width: 550px;
   font-weight: 500;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 @media (min-width: 768px) {
   .description {
     font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 32px;
   }
 }
 

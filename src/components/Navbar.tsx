@@ -173,25 +173,25 @@ export function Navbar({ user, role, settings }: NavbarProps) {
                     <UserIcon size={24} />
                   </button>
                   {isUserMenuOpen && (
-                    <div style={{ position: 'absolute', right: 0, top: '40px', background: 'white', border: '1px solid #ddd', borderRadius: '8px', padding: '8px', width: '200px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-                      <div style={{ padding: '8px', borderBottom: '1px solid #eee', fontSize: '12px' }}>
+                    <div style={{ position: 'absolute', right: 0, top: '40px', background: '#ffffff', border: '1px solid #e4e4e7', borderRadius: '12px', padding: '8px', width: '220px', boxShadow: '0 10px 25px rgba(0,0,0,0.15)', zIndex: 100 }}>
+                      <div style={{ padding: '8px 12px', borderBottom: '1px solid #f4f4f5', fontSize: '12px', color: '#71717a', wordBreak: 'break-all' }}>
                         {user.email}
                       </div>
-                      <Link href="/perfil" style={{ display: 'block', padding: '8px', textDecoration: 'none', color: 'black' }}>
+                      <Link href="/perfil" style={{ display: 'block', padding: '8px 12px', textDecoration: 'none', color: '#18181b', fontSize: '14px', borderRadius: '6px' }}>
                         Mi Perfil
                       </Link>
                       {role === 'admin' && (
-                        <Link href="/admin" style={{ display: 'block', padding: '8px', textDecoration: 'none', color: 'black' }}>
+                        <Link href="/admin" style={{ display: 'block', padding: '8px 12px', textDecoration: 'none', color: '#18181b', fontSize: '14px', borderRadius: '6px' }}>
                           Panel de Administrador
                         </Link>
                       )}
                       {role !== 'admin' && (
-                        <Link href="/mis-pedidos" style={{ display: 'block', padding: '8px', textDecoration: 'none', color: 'black' }}>
+                        <Link href="/mis-pedidos" style={{ display: 'block', padding: '8px 12px', textDecoration: 'none', color: '#18181b', fontSize: '14px', borderRadius: '6px' }}>
                           Mis Pedidos
                         </Link>
                       )}
                       <form action={logout}>
-                        <button type="submit" style={{ width: '100%', textAlign: 'left', padding: '8px', background: 'none', border: 'none', cursor: 'pointer' }}>
+                        <button type="submit" style={{ width: '100%', textAlign: 'left', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: '14px', borderRadius: '6px' }}>
                           Cerrar Sesión
                         </button>
                       </form>
@@ -252,10 +252,10 @@ export function Navbar({ user, role, settings }: NavbarProps) {
 
         {/* Mobile Menu Overlay */}
         {isMobileMenuOpen && (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex' }}>
-            <div style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={() => setIsMobileMenuOpen(false)}></div>
-            <div style={{ width: '80%', maxWidth: '300px', backgroundColor: 'white', height: '100%', position: 'absolute', left: 0, top: 0, padding: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <div className={styles.mobileDrawerOverlay}>
+            <div className={styles.mobileDrawerBackdrop} onClick={() => setIsMobileMenuOpen(false)}></div>
+            <div className={styles.mobileDrawer}>
+              <div className={styles.mobileDrawerHeader}>
                 <span className={styles.logo}>
                   {settings?.store_logo_url ? (
                     <img src={settings.store_logo_url} alt={settings?.store_logo_text || 'Logo'} style={{ height: '36px', objectFit: 'contain' }} />
@@ -263,7 +263,11 @@ export function Navbar({ user, role, settings }: NavbarProps) {
                     settings?.store_logo_text || 'KLONFARK'
                   )}
                 </span>
-                <button onClick={() => setIsMobileMenuOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={styles.mobileCloseBtn}
+                  aria-label="Cerrar menú"
+                >
                   <X size={24} />
                 </button>
               </div>
@@ -287,7 +291,8 @@ export function Navbar({ user, role, settings }: NavbarProps) {
               <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div className={styles.mobileAccordeon}>
                   <button onClick={() => setMobileSuplementosOpen(!mobileSuplementosOpen)} className={styles.mobileAccordeonHeader}>
-                    Suplementos <ChevronDown size={16} style={{ transform: mobileSuplementosOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
+                    <span>Suplementos</span>
+                    <ChevronDown size={16} style={{ transform: mobileSuplementosOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
                   </button>
                   {mobileSuplementosOpen && (
                     <div className={styles.mobileAccordeonContent}>
@@ -304,7 +309,8 @@ export function Navbar({ user, role, settings }: NavbarProps) {
                 
                 <div className={styles.mobileAccordeon}>
                   <button onClick={() => setMobileUrbanoOpen(!mobileUrbanoOpen)} className={styles.mobileAccordeonHeader}>
-                    Urbano <ChevronDown size={16} style={{ transform: mobileUrbanoOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
+                    <span>Urbano</span>
+                    <ChevronDown size={16} style={{ transform: mobileUrbanoOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
                   </button>
                   {mobileUrbanoOpen && (
                     <div className={styles.mobileAccordeonContent}>
@@ -316,7 +322,7 @@ export function Navbar({ user, role, settings }: NavbarProps) {
                   )}
                 </div>
 
-                <Link href="/shop?on_sale=true" onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonHeader} style={{ paddingLeft: '0', color: 'var(--shop-red, #ef4444)', fontWeight: 'bold' }}>Ofertas</Link>
+                <Link href="/shop?on_sale=true" onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonHeader} style={{ paddingLeft: '0', color: '#ef4444', fontWeight: 'bold' }}>Ofertas</Link>
               </nav>
             </div>
           </div>

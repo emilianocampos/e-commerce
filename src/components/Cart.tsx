@@ -8,6 +8,7 @@ import { Minus, Plus, Trash2, Tag, ArrowRight, Crown, Check, X, Sparkles, HelpCi
 import { formatCurrency } from '@/lib/utils';
 import { CheckoutButton } from './CheckoutButton';
 import { validateVipCard } from '@/actions/vip';
+import { validateDiscountCode } from '@/actions/settings';
 import { showToast } from 'nextjs-toast-notify';
 import styles from './Cart.module.css';
 
@@ -22,6 +23,14 @@ export function Cart() {
     cardNumber: string;
     clientName: string;
     discountPercentage: number;
+  } | null>(null);
+
+  // Coupon Code State (e.g. POWERFEMME, DECATLON, etc.)
+  const [couponInput, setCouponInput] = useState('');
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    percentage: number;
   } | null>(null);
 
   // Transfer Promo State (10% descuento por transferencia)
@@ -71,12 +80,41 @@ export function Cart() {
     showToast.info('Tarjeta VIP removida', { position: 'top-center' });
   };
 
+  // Handle Coupon validation
+  const handleApplyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponInput.trim()) return;
+
+    setIsValidatingCoupon(true);
+    try {
+      const res = await validateDiscountCode(couponInput);
+      if (res.success && res.code && res.percentage) {
+        setAppliedCoupon({ code: res.code, percentage: res.percentage });
+        showToast.success(`¡Cupón ${res.code} aplicado! (${res.percentage}% OFF)`, { position: 'top-center' });
+        setCouponInput('');
+      } else {
+        showToast.error(res.error || 'Cupón de descuento no válido', { position: 'top-center' });
+      }
+    } catch (err: any) {
+      showToast.error('Error al verificar cupón', { position: 'top-center' });
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    showToast.info('Cupón removido', { position: 'top-center' });
+  };
+
   // Calculations per item and totals
   let subtotalAmount = 0;
   let promoDiscountAmount = 0;
+  let couponDiscountAmount = 0;
   let vipDiscountAmount = 0;
 
   const promoRate = isTransferPromo ? 0.10 : 0.0;
+  const couponRate = appliedCoupon ? appliedCoupon.percentage / 100 : 0.0;
 
   const calculatedItems = items.map((item) => {
     const qty = item.quantity;
@@ -87,9 +125,14 @@ export function Cart() {
     // 1. Promo transferencia
     const itemPromoDiscount = itemSubtotal * promoRate;
     promoDiscountAmount += itemPromoDiscount;
-    const priceAfterPromo = itemSubtotal - itemPromoDiscount;
 
-    // 2. Beneficio VIP
+    // 2. Cupón de descuento
+    const itemCouponDiscount = itemSubtotal * couponRate;
+    couponDiscountAmount += itemCouponDiscount;
+
+    const priceAfterBasePromos = itemSubtotal - itemPromoDiscount - itemCouponDiscount;
+
+    // 3. Beneficio VIP
     let itemVipDiscount = 0;
     let itemVipRate = 0;
     let isVipExcluded = false;
@@ -103,21 +146,22 @@ export function Cart() {
 
       if (productVip === 0) {
         isVipExcluded = true;
-      } else if (!isStackable && promoRate > 0) {
-        isVipExcluded = true; // No acumulable si ya tiene promo
+      } else if (!isStackable && (promoRate > 0 || couponRate > 0)) {
+        isVipExcluded = true; // No acumulable si ya tiene promo o cupón
       } else {
         itemVipRate = productVip / 100;
-        itemVipDiscount = priceAfterPromo * itemVipRate;
+        itemVipDiscount = Math.max(0, priceAfterBasePromos) * itemVipRate;
         vipDiscountAmount += itemVipDiscount;
       }
     }
 
-    const itemFinalTotal = priceAfterPromo - itemVipDiscount;
+    const itemFinalTotal = Math.max(0, priceAfterBasePromos - itemVipDiscount);
 
     return {
       ...item,
       itemSubtotal,
       itemPromoDiscount,
+      itemCouponDiscount,
       itemVipDiscount,
       itemVipRate,
       isVipExcluded,
@@ -125,7 +169,7 @@ export function Cart() {
     };
   });
 
-  const totalAmount = subtotalAmount - promoDiscountAmount - vipDiscountAmount;
+  const totalAmount = Math.max(0, subtotalAmount - promoDiscountAmount - couponDiscountAmount - vipDiscountAmount);
 
   return (
     <div className={styles.container}>
@@ -313,6 +357,59 @@ export function Cart() {
             )}
           </div>
           
+          {/* COUPON CODE INPUT / ACTIVE COUPON */}
+          <div className="mb-5">
+            {!appliedCoupon ? (
+              <form onSubmit={handleApplyCoupon} className="space-y-2">
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-zinc-600" />
+                  ¿Tenés un cupón de descuento?
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      placeholder="Ej: POWERFEMME"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-xs font-mono font-bold text-zinc-900 placeholder:font-sans placeholder:font-normal placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isValidatingCoupon || !couponInput.trim()}
+                    className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs shadow-sm disabled:opacity-50 transition-colors whitespace-nowrap"
+                  >
+                    {isValidatingCoupon ? 'Validando...' : 'Aplicar'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-zinc-100 border border-zinc-300 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-zinc-900 text-white flex items-center justify-center shrink-0">
+                    <Tag className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-zinc-950 block">
+                      Cupón {appliedCoupon.code} (-{appliedCoupon.percentage}%)
+                    </span>
+                    <span className="text-[11px] text-zinc-600 block">
+                      Descuento aplicado en el resumen
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={handleRemoveCoupon}
+                  className="p-1.5 rounded-lg text-zinc-600 hover:bg-zinc-200 hover:text-zinc-950 transition-colors"
+                  title="Quitar cupón"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+          
           {/* DETAILED SUMMARY BREAKDOWN */}
           <div className="space-y-3 pt-2 text-sm border-t border-zinc-100">
             <div className={styles.summaryRow}>
@@ -324,6 +421,13 @@ export function Cart() {
               <div className="flex justify-between items-center text-emerald-600 font-medium">
                 <span>Promo transferencia (-10%)</span>
                 <span>-{formatCurrency(promoDiscountAmount)}</span>
+              </div>
+            )}
+
+            {couponDiscountAmount > 0 && (
+              <div className="flex justify-between items-center text-blue-600 font-medium">
+                <span>Cupón de descuento ({appliedCoupon?.code} -{appliedCoupon?.percentage}%)</span>
+                <span>-{formatCurrency(couponDiscountAmount)}</span>
               </div>
             )}
 
@@ -348,6 +452,7 @@ export function Cart() {
           <CheckoutButton 
             vipCardCode={appliedVipCard?.cardNumber}
             isTransferPromo={isTransferPromo}
+            promoCode={appliedCoupon?.code}
           />
         </div>
       </div>

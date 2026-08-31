@@ -61,6 +61,8 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
     gradient_color_to: formData.get('gradient_color_to') || '#09090b',
     gradient_text_primary: formData.get('gradient_text_primary') || '#ffffff',
     gradient_text_secondary: formData.get('gradient_text_secondary') || '#d4d4d8',
+    google_tag_id: formData.get('google_tag_id') ? String(formData.get('google_tag_id')).trim() : null,
+    google_site_verification: formData.get('google_site_verification') ? String(formData.get('google_site_verification')).trim() : null,
     updated_at: new Date().toISOString(),
   };
 
@@ -90,9 +92,9 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
     }
   }
 
-  // Image uploads (optional)
   const storeLogoFile = formData.get('store_logo_file') as File;
   const heroImageFile = formData.get('hero_image_file') as File;
+  const heroMobileImageFile = formData.get('hero_mobile_image_file') as File;
 
   if (storeLogoFile && storeLogoFile.size > 0) {
     const fileExt = storeLogoFile.name.split('.').pop();
@@ -123,6 +125,22 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
         .from('products')
         .getPublicUrl(`settings/${fileName}`);
       updates.hero_image_url = publicUrlData.publicUrl;
+    }
+  }
+
+  if (heroMobileImageFile && heroMobileImageFile.size > 0) {
+    const fileExt = heroMobileImageFile.name.split('.').pop();
+    const fileName = `hero_mobile_${Date.now()}.${fileExt}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('products')
+      .upload(`settings/${fileName}`, heroMobileImageFile, { upsert: true });
+
+    if (!uploadError) {
+      const { data: publicUrlData } = supabase.storage
+        .from('products')
+        .getPublicUrl(`settings/${fileName}`);
+      updates.hero_mobile_image_url = publicUrlData.publicUrl;
     }
   }
 

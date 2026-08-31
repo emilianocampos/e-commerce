@@ -52,6 +52,8 @@ export const metadata: Metadata = {
   },
 };
 
+import Script from 'next/script';
+
 // 3. El componente asíncrono principal que recibe "children" (la página activa)
 export default async function RootLayout({
   children,
@@ -63,9 +65,58 @@ export default async function RootLayout({
   const profile = await getProfile();
   const settings = await getStoreSettings();
 
+  const googleTagId = settings?.google_tag_id || process.env.NEXT_PUBLIC_GOOGLE_TAG_ID;
+  const googleSiteVerification = settings?.google_site_verification || process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://klonfark.com';
+  const baseUrl = rawSiteUrl.endsWith('/') ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
+
+  const orgJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'KLONFARK',
+    url: baseUrl,
+    logo: settings?.store_logo_url || `${baseUrl}/logo.png`,
+    sameAs: [
+      settings?.instagram_url,
+      settings?.facebook_url,
+    ].filter(Boolean),
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: settings?.whatsapp_number ? `+${settings.whatsapp_number}` : undefined,
+      contactType: 'customer service',
+    },
+  };
+
   // b. Retornamos la estructura HTML fundamental
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        {googleSiteVerification && (
+          <meta name="google-site-verification" content={googleSiteVerification} />
+        )}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
+        {googleTagId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${googleTagId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${googleTagId}', {
+                  page_path: window.location.pathname,
+                });
+              `}
+            </Script>
+          </>
+        )}
+      </head>
       <body
         suppressHydrationWarning
         data-theme={settings?.theme_mode || 'light'}

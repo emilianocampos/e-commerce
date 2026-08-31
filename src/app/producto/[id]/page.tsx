@@ -115,8 +115,53 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const currentPrice = hasDiscount && product.sale_price ? product.sale_price : product.price;
   const originalPrice = hasDiscount ? product.price : null;
 
+  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://klonfark.com';
+  const baseUrl = rawSiteUrl.endsWith('/') ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
+  const productUrl = `${baseUrl}/producto/${product.id}`;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.title,
+    image: allImages.length > 0 ? allImages : (product.image ? [product.image] : []),
+    description: product.description || product.title,
+    sku: product.id,
+    brand: {
+      '@type': 'Brand',
+      name: product.brands?.name || 'KLONFARK',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: productUrl,
+      priceCurrency: 'ARS',
+      price: currentPrice,
+      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      itemCondition: 'https://schema.org/NewCondition',
+      availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Organization',
+        name: 'KLONFARK',
+      },
+    },
+    ...(reviewsList.length > 0
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: avgRating.toFixed(1),
+            reviewCount: reviewsList.length,
+          },
+        }
+      : {}),
+  };
+
   return (
     <div className="w-full">
+      {/* Schema.org JSON-LD Structured Data for Google Shopping & Search Console */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Breadcrumbs */}
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="flex items-center text-sm text-zinc-400 gap-2">

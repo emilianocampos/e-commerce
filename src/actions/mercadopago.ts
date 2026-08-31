@@ -62,10 +62,37 @@ export async function createCheckoutPreference(
       }
     }
 
-    // Porcentaje de promo (transferencia o código)
+    // Porcentaje de promo (transferencia y/o cupón de descuento)
     let promoPercentage = 0;
     if (options?.isTransferPromo) {
-      promoPercentage = 10;
+      promoPercentage += 10;
+    }
+
+    if (options?.promoCode && options.promoCode.trim()) {
+      const cleanCode = options.promoCode.trim().toUpperCase();
+      const { data: storeSettings } = await supabase
+        .from('store_settings')
+        .select('discount_codes, discount_code, discount_percentage')
+        .eq('id', 1)
+        .maybeSingle();
+
+      if (storeSettings) {
+        let codesList: { code: string; percentage: number }[] = [];
+        if (storeSettings.discount_codes) {
+          if (typeof storeSettings.discount_codes === 'string') {
+            try { codesList = JSON.parse(storeSettings.discount_codes); } catch (e) {}
+          } else if (Array.isArray(storeSettings.discount_codes)) {
+            codesList = storeSettings.discount_codes;
+          }
+        }
+        if ((!codesList || codesList.length === 0) && storeSettings.discount_code) {
+          codesList.push({ code: storeSettings.discount_code, percentage: Number(storeSettings.discount_percentage) || 0 });
+        }
+        const foundPromo = codesList.find(c => c && typeof c.code === 'string' && c.code.trim().toUpperCase() === cleanCode);
+        if (foundPromo && Number(foundPromo.percentage) > 0) {
+          promoPercentage += Number(foundPromo.percentage);
+        }
+      }
     }
 
     const preference = new Preference(mpClient);

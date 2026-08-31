@@ -12,9 +12,10 @@ import styles from './Cart.module.css';
 interface CheckoutButtonProps {
   vipCardCode?: string;
   isTransferPromo?: boolean;
+  promoCode?: string;
 }
 
-export function CheckoutButton({ vipCardCode, isTransferPromo }: CheckoutButtonProps) {
+export function CheckoutButton({ vipCardCode, isTransferPromo, promoCode }: CheckoutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { items } = useCartStore();
   const router = useRouter();
@@ -34,6 +35,7 @@ export function CheckoutButton({ vipCardCode, isTransferPromo }: CheckoutButtonP
       const response = await createCheckoutPreference(cartItems, {
         vipCardCode,
         isTransferPromo,
+        promoCode,
       });
 
       if (response.requireLogin) {

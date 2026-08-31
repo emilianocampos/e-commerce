@@ -253,36 +253,56 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     }
   }
 
-  // We are skipping deletion of optional images here for simplicity,
-  // but we can upload new optional images that replace or add.
+  // Handle optional images (upload, replace, or delete)
   const optFiles = [
     formData.get('image_opt_1') as File | null,
     formData.get('image_opt_2') as File | null,
     formData.get('image_opt_3') as File | null
   ];
 
-  for (let i = 0; i < optFiles.length; i++) {
+  for (let i = 0; i < 3; i++) {
+    const orderNum = i + 1;
     const file = optFiles[i];
-    if (file && file.size > 0) {
+    const isDeleted = formData.get(`delete_opt_${orderNum}`) === 'true';
+
+    // If marked for deletion or replacing with a new file
+    if (isDeleted || (file && file.size > 0)) {
       try {
-        const { data: oldOptImage } = await supabase.from('product_images').select('url').eq('product_id', id).eq('order', i + 1).maybeSingle();
+        const { data: oldOptImage } = await supabase
+          .from('product_images')
+          .select('url')
+          .eq('product_id', id)
+          .eq('order', orderNum)
+          .maybeSingle();
+
         if (oldOptImage?.url) {
           try {
             await deleteProductImage(oldOptImage.url);
-            await supabase.from('product_images').delete().eq('product_id', id).eq('order', i + 1);
           } catch (delError) {
-            console.error("Error deleting old optional image:", delError);
+            console.error(`Error deleting storage file for optional image ${orderNum}:`, delError);
           }
+          await supabase
+            .from('product_images')
+            .delete()
+            .eq('product_id', id)
+            .eq('order', orderNum);
         }
+      } catch (delErr) {
+        console.error(`Error removing old optional image ${orderNum}:`, delErr);
+      }
+    }
 
+    // If uploading a new file
+    if (file && file.size > 0) {
+      try {
         const url = await uploadProductImage(file);
         await supabase.from('product_images').insert({
           product_id: id,
           url: url,
-          order: i + 1
+          order: orderNum
         });
       } catch (e: any) {
-        console.error("Error uploading optional image:", e);
+        console.error(`Error uploading optional image ${orderNum}:`, e);
       }
     }
   }

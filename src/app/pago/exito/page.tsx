@@ -4,6 +4,7 @@ import { getOrderById } from '@/actions/orders';
 import { formatCurrency } from '@/lib/utils';
 import { CheckCircle2, ShoppingBag, ArrowLeft, PackageCheck, Mail, ShieldCheck } from 'lucide-react';
 import { ClearCartOnSuccess } from '@/components/ClearCartOnSuccess';
+import { GoogleAdsConversionTracker } from '@/components/GoogleAdsConversionTracker';
 
 export const metadata = {
   title: '¡Pago Exitoso! | Klonfark',
@@ -34,6 +35,13 @@ export default async function PagoExitoPage({ searchParams }: SuccessPageProps) 
     <div className="min-h-[80vh] bg-zinc-950 text-white flex items-center justify-center py-12 px-4">
       {/* Resetea el carrito local */}
       <ClearCartOnSuccess />
+
+      {/* Dispara evento de conversión de compra a Google Ads / GA4 */}
+      <GoogleAdsConversionTracker
+        transactionId={orderId || mpPaymentId}
+        value={order?.total_amount}
+        currency="ARS"
+      />
 
       <div className="w-full max-w-2xl bg-zinc-900/80 border border-zinc-800 backdrop-blur-xl rounded-3xl p-6 sm:p-10 shadow-2xl shadow-emerald-950/20 relative overflow-hidden">
         {/* Glow de fondo verde */}

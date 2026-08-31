@@ -19,6 +19,7 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
   // Image previews
   const [logoPreview, setLogoPreview] = useState<string>(initialSettings.store_logo_url || '');
   const [heroPreview, setHeroPreview] = useState<string>(initialSettings.hero_image_url || '');
+  const [heroMobilePreview, setHeroMobilePreview] = useState<string>(initialSettings.hero_mobile_image_url || '');
   const [style1Preview, setStyle1Preview] = useState<string>(initialSettings.style_1_image || '');
   const [style2Preview, setStyle2Preview] = useState<string>(initialSettings.style_2_image || '');
   const [style3Preview, setStyle3Preview] = useState<string>(initialSettings.style_3_image || '');
@@ -53,7 +54,6 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
     }
     return [];
   });
-
   const handleAddDiscountCode = () => {
     setDiscountCodes(prev => [...prev, { code: '', percentage: 10 }]);
   };
@@ -74,12 +74,13 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
     setDiscountCodes(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'hero' | 'style1' | 'style2' | 'style3' | 'style4') => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'hero' | 'heroMobile' | 'style1' | 'style2' | 'style3' | 'style4') => {
     const file = e.target.files?.[0];
     if (file) {
       const url = URL.createObjectURL(file);
       if (type === 'logo') setLogoPreview(url);
       if (type === 'hero') setHeroPreview(url);
+      if (type === 'heroMobile') setHeroMobilePreview(url);
       if (type === 'style1') setStyle1Preview(url);
       if (type === 'style2') setStyle2Preview(url);
       if (type === 'style3') setStyle3Preview(url);
@@ -319,14 +320,27 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
                 </div>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Imagen Principal</label>
-              <input type="file" name="hero_image_file" accept="image/*" onChange={(e) => handleImageChange(e, 'hero')} className="w-full border rounded-lg p-2" />
-              {heroPreview && (
-                <div className="mt-4 p-2 bg-gray-50 border rounded-lg h-64 overflow-hidden relative">
-                  <img src={heroPreview} alt="Hero preview" className="w-full h-full object-cover object-top" />
-                </div>
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Imagen Desktop (Computadora)</label>
+                <input type="file" name="hero_image_file" accept="image/*" onChange={(e) => handleImageChange(e, 'hero')} className="w-full border rounded-lg p-2" />
+                {heroPreview && (
+                  <div className="mt-3 p-2 bg-gray-50 border rounded-lg h-48 overflow-hidden relative">
+                    <img src={heroPreview} alt="Hero Desktop preview" className="w-full h-full object-cover object-center" />
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Imagen Mobile (Celular - Opcional)</label>
+                <input type="file" name="hero_mobile_image_file" accept="image/*" onChange={(e) => handleImageChange(e, 'heroMobile')} className="w-full border rounded-lg p-2" />
+                {heroMobilePreview ? (
+                  <div className="mt-3 p-2 bg-gray-50 border rounded-lg h-48 overflow-hidden relative">
+                    <img src={heroMobilePreview} alt="Hero Mobile preview" className="w-full h-full object-cover object-center" />
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 mt-2">Si no cargas una específica para mobile, se adaptará automáticamente la imagen desktop.</p>
+                )}
+              </div>
             </div>
           </div>
           
@@ -516,6 +530,67 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
                 </div>
               );
             })}
+          </div>
+        </section>
+
+        {/* GOOGLE ADS, MERCHANT & SEARCH CONSOLE */}
+        <section className="bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-transparent p-6 rounded-xl border border-blue-200 shadow-sm">
+          <div className="flex items-center gap-3 mb-2 border-b border-blue-100 pb-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-base shadow-sm">
+              G
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-zinc-900">Google Ads, Search Console y Merchant Center</h2>
+              <p className="text-xs text-zinc-500">Conecta tu tienda con Google para publicidad, catálogo de Google Shopping y posicionamiento web.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1">
+                ID de Google Tag / Google Ads / GA4
+              </label>
+              <input
+                type="text"
+                name="google_tag_id"
+                defaultValue={settings.google_tag_id || ''}
+                placeholder="Ej: AW-1234567890 o G-ABCDEF1234"
+                className="w-full border border-zinc-300 rounded-lg p-2.5 text-sm font-mono bg-white"
+              />
+              <p className="text-[11px] text-zinc-500 mt-1">
+                Pega tu código de Google Ads (AW-...) o Google Analytics (G-...) para medir visitas y conversiones de compra.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1">
+                Código de Verificación de Google Search Console
+              </label>
+              <input
+                type="text"
+                name="google_site_verification"
+                defaultValue={settings.google_site_verification || ''}
+                placeholder="Ej: abc123def456ghi789..."
+                className="w-full border border-zinc-300 rounded-lg p-2.5 text-sm font-mono bg-white"
+              />
+              <p className="text-[11px] text-zinc-500 mt-1">
+                Código HTML de verificación que te da Search Console (el valor del tag meta google-site-verification).
+              </p>
+            </div>
+
+            <div className="md:col-span-2 bg-white p-4 rounded-xl border border-blue-200">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-blue-900 mb-2">
+                🛍️ URL del Feed de Google Merchant Center (Google Shopping)
+              </h4>
+              <p className="text-xs text-zinc-600 mb-2">
+                Copia este enlace y pégalo en Google Merchant Center como tu <strong>Feed Primario</strong> de productos:
+              </p>
+              <div className="flex items-center gap-2 bg-zinc-50 p-2.5 rounded-lg border border-zinc-200">
+                <code className="text-xs font-mono text-blue-600 font-semibold select-all flex-1 truncate">
+                  {typeof window !== 'undefined' ? `${window.location.origin}/api/merchant-feed` : 'https://tudominio.com/api/merchant-feed'}
+                </code>
+              </div>
+            </div>
           </div>
         </section>
 
