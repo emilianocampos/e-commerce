@@ -8,12 +8,18 @@ export function BrandsBanner({ settings }: { settings?: any }) {
   
   const renderItems = () => {
     if (hasCustomBrands) {
-      const textBrands = settings.brands_images.filter((item: any) => item?.type === 'text');
-      if (textBrands.length > 0) {
-        return textBrands.map((item: any, i: number) => (
-          <div key={i} className={styles.brand}>{item.value}</div>
-        ));
-      }
+      return settings.brands_images.map((item: any, i: number) => {
+        if (item?.type === 'image' && item?.value) {
+          return (
+            <div key={i} className={styles.brandImageWrapper}>
+              <img src={item.value} alt="Logo de Marca" className={styles.brandImage} />
+            </div>
+          );
+        }
+        return (
+          <div key={i} className={styles.brand}>{item.value || item}</div>
+        );
+      });
     }
     return defaultBrands.map((brand, i) => (
       <div key={i} className={styles.brand}>{brand}</div>

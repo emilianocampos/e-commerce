@@ -29,7 +29,8 @@ ADD COLUMN IF NOT EXISTS style_3_link TEXT DEFAULT '/shop?category_name=urbano',
 ADD COLUMN IF NOT EXISTS style_3_image TEXT,
 ADD COLUMN IF NOT EXISTS style_4_title TEXT DEFAULT '',
 ADD COLUMN IF NOT EXISTS style_4_link TEXT DEFAULT '',
-ADD COLUMN IF NOT EXISTS style_4_image TEXT;
+ADD COLUMN IF NOT EXISTS style_4_image TEXT,
+ADD COLUMN IF NOT EXISTS favicon_url TEXT;
 
 -- 2. Asegurar campos individuales de registro y perfil en profiles
 ALTER TABLE public.profiles 

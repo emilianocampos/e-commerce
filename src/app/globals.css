@@ -32,15 +32,15 @@ body[data-theme="dark"] header:not(.admin-container *) {
   border-bottom-color: #27272a !important;
 }
 
-body[data-theme="dark"] main:not(.admin-container *) .bg-white {
+body[data-theme="dark"] main:not(.admin-container *) .bg-white:not(button):not(input):not(.price-track-white) {
   background-color: #18181b !important;
   color: #ffffff !important;
   border-color: #27272a !important;
 }
 
-body[data-theme="dark"] main:not(.admin-container *) .text-zinc-900,
-body[data-theme="dark"] main:not(.admin-container *) .text-zinc-800,
-body[data-theme="dark"] main:not(.admin-container *) .text-zinc-700,
+body[data-theme="dark"] main:not(.admin-container *) .text-zinc-900:not(button):not(.keep-text-color),
+body[data-theme="dark"] main:not(.admin-container *) .text-zinc-800:not(button):not(.keep-text-color),
+body[data-theme="dark"] main:not(.admin-container *) .text-zinc-700:not(button):not(.keep-text-color),
 body[data-theme="dark"] main:not(.admin-container *) h1,
 body[data-theme="dark"] main:not(.admin-container *) h2,
 body[data-theme="dark"] main:not(.admin-container *) h3,
@@ -49,14 +49,14 @@ body[data-theme="dark"] main:not(.admin-container *) .title {
   color: #ffffff !important;
 }
 
-body[data-theme="dark"] main:not(.admin-container *) .text-zinc-500,
-body[data-theme="dark"] main:not(.admin-container *) .text-zinc-600,
-body[data-theme="dark"] main:not(.admin-container *) .text-zinc-400 {
+body[data-theme="dark"] main:not(.admin-container *) .text-zinc-500:not(button),
+body[data-theme="dark"] main:not(.admin-container *) .text-zinc-600:not(button),
+body[data-theme="dark"] main:not(.admin-container *) .text-zinc-400:not(button) {
   color: #a1a1aa !important;
 }
 
-body[data-theme="dark"] main:not(.admin-container *) .bg-zinc-50,
-body[data-theme="dark"] main:not(.admin-container *) .bg-zinc-100 {
+body[data-theme="dark"] main:not(.admin-container *) .bg-zinc-50:not(button),
+body[data-theme="dark"] main:not(.admin-container *) .bg-zinc-100:not(button) {
   background-color: #27272a !important;
 }
 
@@ -64,6 +64,16 @@ body[data-theme="dark"] main:not(.admin-container *) .border-zinc-200,
 body[data-theme="dark"] main:not(.admin-container *) .border-zinc-100,
 body[data-theme="dark"] main:not(.admin-container *) .border-zinc-300 {
   border-color: #27272a !important;
+}
+
+/* ========================================================= */
+/* BARRA DEL FILTRO DE PRECIO (FONDO BLANCO)                 */
+/* ========================================================= */
+.price-track-white,
+body[data-theme="dark"] .price-track-white,
+body[data-theme="dark"] main .price-track-white {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
 }
 
 /* ========================================================= */

@@ -43,9 +43,16 @@ export function Cart() {
           <Link href="/">Inicio</Link> &gt; <span>Carrito</span>
         </div>
         <h1 className={styles.title}>TU CARRITO</h1>
-        <div style={{ textAlign: 'center', padding: '64px', border: '1px solid #E5E5E5', borderRadius: '20px' }}>
-          <p style={{ fontSize: '20px', color: 'var(--shop-gray-dark)' }}>Tu carrito está vacío.</p>
-          <Link href="/shop" style={{ display: 'inline-block', marginTop: '24px', backgroundColor: 'var(--shop-black)', color: 'white', padding: '16px 32px', borderRadius: '62px', textDecoration: 'none' }}>
+        <div className="text-center py-20 px-6 border border-zinc-200/20 rounded-[28px] bg-zinc-900/40 my-6 flex flex-col items-center justify-center shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-zinc-800/80 border border-zinc-700 flex items-center justify-center text-zinc-400 mb-4">
+            <Tag className="w-8 h-8 text-zinc-400" />
+          </div>
+          <p className="text-2xl font-black text-white mb-2 tracking-tight">Tu carrito está vacío</p>
+          <p className="text-sm text-zinc-400 mb-8 max-w-md">Descubre nuestros productos y encuentra todo lo que necesitas con las mejores promociones.</p>
+          <Link 
+            href="/shop" 
+            className="inline-flex items-center justify-center bg-white hover:bg-zinc-200 text-zinc-950 font-black px-10 py-4 rounded-full text-sm tracking-wide transition-all shadow-xl active:scale-98"
+          >
             Explorar catálogo
           </Link>
         </div>

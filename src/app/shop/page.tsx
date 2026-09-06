@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase-server';
 import { ProductCard } from '@/components/ProductCard';
 import { ShopFilters } from '@/components/ShopFilters';
 import { ShopSearchBar } from '@/components/ShopSearchBar';
-import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -20,7 +19,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   const params = await searchParams;
   const supabase = await createClient();
 
-  let query = supabase.from('products').select('*, reviews(rating)');
+  let query = supabase.from('products').select('*, reviews(rating), product_variants(size, color)');
 
   // URL Params mappings for Type and Gender
   if (params.type) query = query.eq('type', params.type);
@@ -37,15 +36,17 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     query = query.eq('brand_id', params.brand_id);
   }
 
-
   // On Sale Filter
   if (params.on_sale === 'true' || params.ofertas === 'true') {
     query = query.not('sale_price', 'is', null).gt('sale_price', 0);
   }
 
-  // Search by name
+  // Search by title or description
   if (params.q) {
-    query = query.ilike('name', `%${params.q}%`);
+    const searchVal = String(params.q).trim();
+    if (searchVal) {
+      query = query.or(`title.ilike.%${searchVal}%,description.ilike.%${searchVal}%`);
+    }
   }
 
   // Price Filters
@@ -69,6 +70,17 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   }
 
   const { data: products, error } = await query;
+
+  // Filtrado en memoria por Color si se especificó
+  let filteredProducts = products || [];
+  if (params.color) {
+    const filterColors = Array.isArray(params.color) ? params.color : [params.color];
+    filteredProducts = filteredProducts.filter((p: any) => {
+      return p.product_variants?.some((v: any) => 
+        v.color && filterColors.some((fc: string) => fc.trim().toLowerCase() === v.color.trim().toLowerCase())
+      );
+    });
+  }
 
   // Determine dynamic title
   let pageTitle = 'Todos los productos';
@@ -130,26 +142,26 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             </h1>
             
             <div className="flex flex-wrap items-center gap-2 text-zinc-500 text-sm">
-              <span>{products?.length || 0} {products?.length === 1 ? 'Producto' : 'Productos'}</span>
+              <span>{filteredProducts.length} {filteredProducts.length === 1 ? 'Producto' : 'Productos'}</span>
               <span className="hidden sm:inline mx-1 text-zinc-300">|</span>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs text-zinc-400">Ordenar:</span>
-                <div className="flex items-center gap-1 text-xs font-bold bg-zinc-100 p-1 rounded-lg">
+                <div className="flex items-center gap-1 text-xs font-bold bg-zinc-800/90 border border-zinc-700/80 p-1 rounded-xl">
                   <Link
                     href={buildSortUrl('newest')}
-                    className={`px-2.5 py-1 rounded-md transition ${sort === 'newest' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
+                    className={`px-3 py-1.5 rounded-lg transition ${sort === 'newest' ? 'bg-white text-zinc-950 shadow-sm font-black' : 'text-zinc-400 hover:text-white'}`}
                   >
                     Recientes
                   </Link>
                   <Link
                     href={buildSortUrl('price_asc')}
-                    className={`px-2.5 py-1 rounded-md transition ${sort === 'price_asc' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
+                    className={`px-3 py-1.5 rounded-lg transition ${sort === 'price_asc' ? 'bg-white text-zinc-950 shadow-sm font-black' : 'text-zinc-400 hover:text-white'}`}
                   >
                     $ Menor
                   </Link>
                   <Link
                     href={buildSortUrl('price_desc')}
-                    className={`px-2.5 py-1 rounded-md transition ${sort === 'price_desc' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
+                    className={`px-3 py-1.5 rounded-lg transition ${sort === 'price_desc' ? 'bg-white text-zinc-950 shadow-sm font-black' : 'text-zinc-400 hover:text-white'}`}
                   >
                     $ Mayor
                   </Link>
@@ -164,9 +176,9 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             </div>
           )}
 
-          {products && products.length > 0 ? (
+          {filteredProducts && filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-8">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product as any} />
               ))}
             </div>

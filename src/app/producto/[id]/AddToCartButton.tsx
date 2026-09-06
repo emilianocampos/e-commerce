@@ -84,6 +84,25 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     }
   };
 
+  const getColorHex = (colorName: string): string | null => {
+    const c = colorName.toLowerCase().trim();
+    if (c.includes('negro') || c.includes('black')) return '#18181b';
+    if (c.includes('blanco') || c.includes('white')) return '#ffffff';
+    if (c.includes('gris') || c.includes('gray') || c.includes('melange')) return '#71717a';
+    if (c.includes('azul') || c.includes('blue') || c.includes('marino') || c.includes('retro')) return '#2563eb';
+    if (c.includes('rojo') || c.includes('red')) return '#ef4444';
+    if (c.includes('verde') || c.includes('green') || c.includes('militar')) return '#16a34a';
+    if (c.includes('amarillo') || c.includes('yellow')) return '#eab308';
+    if (c.includes('beige') || c.includes('crema') || c.includes('arena')) return '#d4c5a9';
+    if (c.includes('rosa') || c.includes('pink')) return '#ec4899';
+    if (c.includes('violeta') || c.includes('morado') || c.includes('purple')) return '#a855f7';
+    if (c.includes('naranja') || c.includes('orange')) return '#f97316';
+    if (c.includes('marrón') || c.includes('marron') || c.includes('brown')) return '#78350f';
+    if (c.includes('celeste') || c.includes('sky')) return '#38bdf8';
+    if (c.includes('bordo') || c.includes('vino') || c.includes('burgundy')) return '#800020';
+    return null;
+  };
+
   if (isOutOfStock) {
     return (
       <div className="w-full bg-zinc-800 text-zinc-400 rounded-full font-bold text-sm h-14 flex items-center justify-center border border-zinc-700">
@@ -99,67 +118,88 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
       {product.sizes && product.sizes.length > 0 && (
         <div className="space-y-4 pb-6 border-b border-zinc-200/20">
           <div className="flex justify-between items-center text-sm">
-            <span className="text-zinc-400 font-medium">Elegir Talle</span>
+            <span className="text-zinc-300 font-bold uppercase tracking-wider text-xs">Elegir Talle</span>
             {selectedSize && (
               <span className="text-xs text-zinc-400">
-                Talle seleccionado: <strong className="text-white">{selectedSize}</strong>
+                Seleccionado: <strong className="text-white font-black bg-zinc-800 px-2 py-0.5 rounded-md border border-zinc-700">{selectedSize}</strong>
               </span>
             )}
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            {product.sizes.map((size) => (
-              <button
-                key={size}
-                type="button"
-                onClick={() => {
-                  setSelectedSize(size);
-                  const colors = Array.from(
-                    new Set(
-                      (product.product_variants || [])
-                        .filter((v: any) => v.size === size && v.color)
-                        .map((v: any) => v.color as string)
-                    )
-                  );
-                  if (colors.length > 0) {
-                    setSelectedColor(colors[0]);
-                  } else {
-                    setSelectedColor(null);
-                  }
-                }}
-                className={`flex px-6 h-12 cursor-pointer items-center justify-center rounded-full text-sm font-bold transition-all ${
-                  selectedSize === size
-                    ? 'bg-white text-black shadow-lg scale-105'
-                    : 'bg-zinc-800 text-zinc-200 border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-700'
-                }`}
-              >
-                {size}
-              </button>
-            ))}
+          <div className="flex flex-wrap gap-2.5">
+            {product.sizes.map((size) => {
+              const isSelected = selectedSize === size;
+              return (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => {
+                    setSelectedSize(size);
+                    const colors = Array.from(
+                      new Set(
+                        (product.product_variants || [])
+                          .filter((v: any) => v.size === size && v.color)
+                          .map((v: any) => v.color as string)
+                      )
+                    );
+                    if (colors.length > 0) {
+                      setSelectedColor(colors[0]);
+                    } else {
+                      setSelectedColor(null);
+                    }
+                  }}
+                  className={`flex px-5 h-11 cursor-pointer items-center justify-center rounded-full text-sm font-black transition-all ${
+                    isSelected
+                      ? 'bg-white text-zinc-950 border-2 border-white shadow-lg scale-105'
+                      : 'bg-zinc-800/90 text-zinc-200 border border-zinc-700 hover:border-zinc-500 hover:text-white hover:bg-zinc-700'
+                  }`}
+                >
+                  {size}
+                </button>
+              );
+            })}
           </div>
 
           {/* Muestra los colores del talle seleccionado */}
           {selectedSize ? (
             availableColorsForSize.length > 0 ? (
               <div className="pt-2 space-y-3">
-                <div className="text-sm text-zinc-300">
-                  Color: <span className="font-bold text-white">{selectedColor || 'Seleccionar...'}</span>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-zinc-300 font-bold uppercase tracking-wider text-xs">Color Disponible</span>
+                  {selectedColor && (
+                    <span className="text-xs text-emerald-400 font-bold flex items-center gap-1.5">
+                      {getColorHex(selectedColor) && (
+                        <span 
+                          className="inline-block w-2.5 h-2.5 rounded-full border border-zinc-600" 
+                          style={{ backgroundColor: getColorHex(selectedColor)! }} 
+                        />
+                      )}
+                      {selectedColor}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2.5">
                   {availableColorsForSize.map((color) => {
                     const isSelectedColor = selectedColor === color;
+                    const hex = getColorHex(color);
                     return (
                       <button
                         key={color}
                         type="button"
                         onClick={() => setSelectedColor(color)}
-                        className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                        className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
                           isSelectedColor
-                            ? 'border-2 border-emerald-400 text-white bg-zinc-800 shadow-sm'
-                            : 'border border-zinc-700 text-zinc-300 bg-zinc-900 hover:border-zinc-500'
+                            ? 'border-2 border-emerald-400 text-white bg-zinc-800 ring-2 ring-emerald-400/20 shadow-md scale-102'
+                            : 'border border-zinc-700 text-zinc-300 bg-zinc-900/90 hover:border-zinc-500 hover:text-white hover:bg-zinc-800'
                         }`}
                       >
-                        {color}
+                        {hex && (
+                          <span 
+                            className="w-3.5 h-3.5 rounded-full border border-zinc-600/80 shrink-0 shadow-xs" 
+                            style={{ backgroundColor: hex }} 
+                          />
+                        )}
+                        <span>{color}</span>
                       </button>
                     );
                   })}

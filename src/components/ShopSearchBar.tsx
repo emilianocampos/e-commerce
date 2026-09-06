@@ -8,7 +8,7 @@ export function ShopSearchBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentQ = searchParams.get('q') || '';
-  
+
   const [searchTerm, setSearchTerm] = useState(currentQ);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export function ShopSearchBar() {
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const params = new URLSearchParams(searchParams.toString());
-    
+
     if (searchTerm.trim()) {
       params.set('q', searchTerm.trim());
     } else {
@@ -45,13 +45,13 @@ export function ShopSearchBar() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar productos por nombre, marca o modelo..."
-            className="w-full pl-11 pr-10 py-3 bg-zinc-50 hover:bg-zinc-100/80 focus:bg-white border border-zinc-200 focus:border-zinc-900 rounded-2xl text-sm md:text-base text-zinc-900 placeholder:text-zinc-400 outline-none transition-all shadow-sm"
+            className="w-full pl-11 pr-10 py-3 bg-zinc-800/80 hover:bg-zinc-800 focus:bg-zinc-800 border border-zinc-700 focus:border-zinc-400 rounded-2xl text-sm md:text-base text-white placeholder:text-zinc-400 outline-none transition-all shadow-sm"
           />
           {searchTerm && (
             <button
               type="button"
               onClick={handleClear}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-700 rounded-full hover:bg-zinc-200 transition"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white rounded-full hover:bg-zinc-700 transition"
               title="Borrar búsqueda"
             >
               <X className="w-4 h-4" />
@@ -60,7 +60,7 @@ export function ShopSearchBar() {
         </div>
         <button
           type="submit"
-          className="bg-black hover:bg-zinc-800 text-white font-semibold text-sm px-5 py-3 rounded-2xl transition-all shadow-sm shrink-0 flex items-center gap-2"
+          className="bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-sm px-5 py-3 rounded-2xl transition-all shadow-sm shrink-0 flex items-center gap-2 cursor-pointer"
         >
           <Search className="w-4 h-4 hidden sm:inline" />
           Buscar

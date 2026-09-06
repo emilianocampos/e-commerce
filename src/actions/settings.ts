@@ -96,6 +96,23 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
   const heroImageFile = formData.get('hero_image_file') as File;
   const heroMobileImageFile = formData.get('hero_mobile_image_file') as File;
 
+  const faviconFile = formData.get('favicon_file') as File;
+  if (faviconFile && faviconFile.size > 0) {
+    const fileExt = faviconFile.name.split('.').pop() || 'png';
+    const fileName = `favicon_${Date.now()}.${fileExt}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('products')
+      .upload(`settings/${fileName}`, faviconFile, { upsert: true });
+
+    if (!uploadError) {
+      const { data: publicUrlData } = supabase.storage
+        .from('products')
+        .getPublicUrl(`settings/${fileName}`);
+      updates.favicon_url = publicUrlData.publicUrl;
+    }
+  }
+
   if (storeLogoFile && storeLogoFile.size > 0) {
     const fileExt = storeLogoFile.name.split('.').pop();
     const fileName = `logo_${Date.now()}.${fileExt}`;
@@ -179,18 +196,24 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
   const brandFiles = formData.getAll('new_brand_files') as File[];
   for (const file of brandFiles) {
     if (file && file.size > 0) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `brand_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      // Validar estrictamente que sea formato PNG
+      if (fileExt !== 'png' && file.type !== 'image/png') {
+        return { success: false, error: 'Solo se permiten imágenes en formato PNG para los logos de las marcas.' };
+      }
+      const fileName = `brand_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.png`;
       
       const { error: uploadError } = await supabase.storage
         .from('products')
-        .upload(`settings/${fileName}`, file, { upsert: true });
+        .upload(`settings/${fileName}`, file, { upsert: true, contentType: 'image/png' });
 
       if (!uploadError) {
         const { data: publicUrlData } = supabase.storage
           .from('products')
           .getPublicUrl(`settings/${fileName}`);
         currentBrands.push({ type: 'image', value: publicUrlData.publicUrl });
+      } else {
+        console.error('Error al subir logo de marca:', uploadError);
       }
     }
   }

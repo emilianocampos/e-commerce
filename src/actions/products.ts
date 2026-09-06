@@ -178,12 +178,7 @@ export async function createProduct(_prevState: any, formData: FormData) {
     await supabase.from('supplement_information').insert(suppData);
   }
 
-  revalidatePath('/');
-  revalidatePath('/shop');
-  revalidatePath('/hombre');
-  revalidatePath('/mujer');
-  revalidatePath('/suplementos');
-  revalidatePath('/ofertas');
+  revalidatePath('/', 'layout');
   revalidatePath('/admin/productos');
   revalidatePath(`/producto/${newProduct.id}`);
 
@@ -386,12 +381,7 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     await supabase.from('supplement_information').upsert(suppData);
   }
 
-  revalidatePath('/');
-  revalidatePath('/shop');
-  revalidatePath('/hombre');
-  revalidatePath('/mujer');
-  revalidatePath('/suplementos');
-  revalidatePath('/ofertas');
+  revalidatePath('/', 'layout');
   revalidatePath('/admin/productos');
   revalidatePath(`/producto/${id}`);
 

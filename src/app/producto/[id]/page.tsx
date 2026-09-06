@@ -56,6 +56,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     notFound();
   } else {
     console.error("Error al consultar producto con relaciones, ejecutando fallback:", productError);
+
     const { data: baseProduct } = await supabase
       .from('products')
       .select('*')

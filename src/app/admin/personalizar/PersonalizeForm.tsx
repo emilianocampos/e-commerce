@@ -18,6 +18,7 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
 
   // Image previews
   const [logoPreview, setLogoPreview] = useState<string>(initialSettings.store_logo_url || '');
+  const [faviconPreview, setFaviconPreview] = useState<string>(initialSettings.favicon_url || '');
   const [heroPreview, setHeroPreview] = useState<string>(initialSettings.hero_image_url || '');
   const [heroMobilePreview, setHeroMobilePreview] = useState<string>(initialSettings.hero_mobile_image_url || '');
   const [style1Preview, setStyle1Preview] = useState<string>(initialSettings.style_1_image || '');
@@ -34,17 +35,16 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
     });
   });
   const [newTextBrand, setNewTextBrand] = useState('');
+  const [pendingBrandFiles, setPendingBrandFiles] = useState<{ file: File; preview: string }[]>([]);
 
   // Discount codes logic
   const [discountCodes, setDiscountCodes] = useState<{ code: string; percentage: number }[]>(() => {
     if (initialSettings.discount_codes) {
-      if (typeof initialSettings.discount_codes === 'string') {
-        try {
-          return JSON.parse(initialSettings.discount_codes);
-        } catch (e) {}
-      } else if (Array.isArray(initialSettings.discount_codes)) {
-        return initialSettings.discount_codes;
+      let dc = initialSettings.discount_codes;
+      if (typeof dc === 'string') {
+        try { dc = JSON.parse(dc); } catch(e){}
       }
+      if (Array.isArray(dc) && dc.length > 0) return dc;
     }
     if (initialSettings.discount_code) {
       return [{
@@ -74,11 +74,12 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
     setDiscountCodes(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'hero' | 'heroMobile' | 'style1' | 'style2' | 'style3' | 'style4') => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'favicon' | 'hero' | 'heroMobile' | 'style1' | 'style2' | 'style3' | 'style4') => {
     const file = e.target.files?.[0];
     if (file) {
       const url = URL.createObjectURL(file);
       if (type === 'logo') setLogoPreview(url);
+      if (type === 'favicon') setFaviconPreview(url);
       if (type === 'hero') setHeroPreview(url);
       if (type === 'heroMobile') setHeroMobilePreview(url);
       if (type === 'style1') setStyle1Preview(url);
@@ -99,10 +100,39 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
     }
   };
 
+  const handleBrandImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const validNewFiles: { file: File; preview: string }[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
+      if (!isPng) {
+        alert(`El archivo "${file.name}" no es formato PNG. Solo se permiten imágenes en formato .PNG (con fondo transparente preferentemente).`);
+        continue;
+      }
+      validNewFiles.push({
+        file,
+        preview: URL.createObjectURL(file)
+      });
+    }
+
+    if (validNewFiles.length > 0) {
+      setPendingBrandFiles(prev => [...prev, ...validNewFiles]);
+    }
+    e.target.value = '';
+  };
+
+  const removePendingBrand = (index: number) => {
+    setPendingBrandFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (brands.length > 0 && brands.length < 5) {
+    const totalBrands = brands.length + pendingBrandFiles.length;
+    if (totalBrands > 0 && totalBrands < 5) {
       setMessage('Error: Debes agregar al menos 5 marcas (o ninguna para usar las predeterminadas).');
       return;
     }
@@ -114,9 +144,15 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
     formData.append('brands_images_json', JSON.stringify(brands));
     formData.append('discount_codes_json', JSON.stringify(discountCodes));
 
+    // Append new PNG brand logo files
+    pendingBrandFiles.forEach(({ file }) => {
+      formData.append('new_brand_files', file);
+    });
+
     const res = await updateStoreSettings(null, formData);
     if (res?.success) {
       setMessage('¡Configuración guardada exitosamente!');
+      setPendingBrandFiles([]);
       // Reload settings to get updated URLs
       const data = await getStoreSettings();
       if (data) {
@@ -127,6 +163,7 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
         });
         setBrands(mapped);
         setLogoPreview(data.store_logo_url || '');
+        setFaviconPreview(data.favicon_url || '');
         setHeroPreview(data.hero_image_url || '');
         if (data.theme_mode) setThemeMode(data.theme_mode);
         if (data.gradient_color_from) setGradientFrom(data.gradient_color_from);
@@ -260,9 +297,9 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
           </div>
         </section>
 
-        {/* LOGO */}
+        {/* LOGO & FAVICON */}
         <section className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <h2 className="text-xl font-bold mb-4 border-b pb-2">Logo de la Tienda</h2>
+          <h2 className="text-xl font-bold mb-4 border-b pb-2">Identidad: Logo y Favicon</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Texto del Logo (si no hay imagen)</label>
@@ -276,6 +313,51 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
                   <img src={logoPreview} alt="Logo preview" className="max-h-16 object-contain" />
                 </div>
               )}
+            </div>
+
+            {/* SUBIR FAVICON */}
+            <div className="md:col-span-2 pt-4 border-t border-zinc-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                <div>
+                  <h3 className="text-base font-bold text-zinc-900">Favicon (Ícono del Navegador)</h3>
+                  <p className="text-xs text-zinc-500">Es el ícono pequeño que se muestra en la pestaña del navegador junto al título de la página.</p>
+                </div>
+                <span className="text-xs font-semibold px-2.5 py-1 bg-zinc-100 text-zinc-700 rounded-full shrink-0">
+                  Recomendado: 32x32 o 64x64 px (PNG / ICO)
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                <div>
+                  <input 
+                    type="file" 
+                    name="favicon_file" 
+                    accept=".ico,.png,.svg,.jpg,.jpeg,image/*" 
+                    onChange={(e) => handleImageChange(e, 'favicon')} 
+                    className="w-full border rounded-lg p-2 text-sm bg-white" 
+                  />
+                  <p className="text-[11px] text-zinc-400 mt-1">Sube el ícono de tu marca en formato PNG, ICO o SVG.</p>
+                </div>
+
+                {/* Previsualización en pestaña simulada */}
+                <div className="bg-zinc-100 p-3 rounded-xl border border-zinc-200">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-1.5">
+                    Previsualización en Pestaña:
+                  </span>
+                  <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-zinc-300 shadow-xs max-w-[240px]">
+                    {faviconPreview ? (
+                      <img src={faviconPreview} alt="Favicon preview" className="w-4 h-4 object-contain shrink-0" />
+                    ) : (
+                      <div className="w-4 h-4 bg-zinc-800 rounded-xs flex items-center justify-center text-[9px] text-white font-bold shrink-0">
+                        K
+                      </div>
+                    )}
+                    <span className="text-xs font-semibold text-zinc-800 truncate">
+                      {settings.store_logo_text || 'KLONFARK'} | Tienda
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -454,43 +536,106 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
 
         {/* BRANDS CAROUSEL */}
         <section className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <h2 className="text-xl font-bold mb-4 border-b pb-2">Carrusel de Marcas</h2>
-          <p className="text-sm text-gray-500 mb-4">Estas imágenes o textos aparecerán en la barra en movimiento debajo del Hero.</p>
-          
-          <div className="mb-6 flex flex-wrap items-end gap-4">
-            <div className="flex items-center gap-2">
-              <div>
-                <input 
-                  type="text" 
-                  value={newTextBrand} 
-                  onChange={(e) => setNewTextBrand(e.target.value)} 
-                  placeholder="Escribir marca (ej. NIKE)"
-                  className="border rounded-lg p-2 h-[42px]" 
-                />
-              </div>
-              <button type="button" onClick={handleAddTextBrand} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition h-[42px] flex items-center gap-2">
-                <Plus size={16} /> Agregar Texto
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 mb-4 gap-2">
+            <div>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-500" />
+                Carrusel de Marcas (Banner en Movimiento)
+              </h2>
+              <p className="text-xs text-gray-500 mt-0.5">Agrega marcas en texto o sube logos oficiales en formato <strong>PNG</strong> (fondo transparente).</p>
+            </div>
+            <span className="text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full shrink-0">
+              Solo formato .PNG
+            </span>
+          </div>
+
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            {/* Agregar por Texto */}
+            <div className="flex items-center gap-2 flex-1 min-w-[260px]">
+              <input 
+                type="text" 
+                value={newTextBrand} 
+                onChange={(e) => setNewTextBrand(e.target.value)} 
+                placeholder="Escribir marca en texto (ej. NIKE, STAR NUTRITION)"
+                className="flex-1 border rounded-xl p-2.5 text-sm font-semibold bg-white" 
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddTextBrand();
+                  }
+                }}
+              />
+              <button 
+                type="button" 
+                onClick={handleAddTextBrand} 
+                className="bg-zinc-800 hover:bg-zinc-900 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+              >
+                <Plus size={16} /> + Texto
               </button>
+            </div>
+
+            <div className="text-xs font-bold text-gray-400">O</div>
+
+            {/* Subir Logo PNG */}
+            <div>
+              <label className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer">
+                <ImageIcon size={16} /> + Subir Logo (PNG)
+                <input 
+                  type="file" 
+                  accept=".png,image/png" 
+                  multiple 
+                  onChange={handleBrandImageUpload} 
+                  className="sr-only" 
+                />
+              </label>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {/* Existing brands */}
+          {/* Grid de Marcas Guardadas y Nuevas */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {/* Guardadas */}
             {brands.map((item, index) => (
-              <div key={`existing-${index}`} className="relative border rounded-lg p-4 bg-gray-100 flex items-center justify-center h-24 group overflow-hidden">
+              <div key={`existing-${index}`} className="relative border border-zinc-200 rounded-xl p-3 bg-zinc-900 text-white flex flex-col items-center justify-center h-24 group overflow-hidden shadow-xs">
                 {item.type === 'image' ? (
-                  <img src={item.value} alt={`Brand ${index}`} className="max-h-12 max-w-full object-contain" />
+                  <img src={item.value} alt={`Marca ${index + 1}`} className="max-h-12 max-w-full object-contain p-1" />
                 ) : (
-                  <span className="font-display font-bold uppercase truncate px-2">{item.value}</span>
+                  <span className="font-display font-bold uppercase text-xs text-center px-1 truncate w-full text-zinc-100">{item.value}</span>
                 )}
-                <button type="button" onClick={() => removeExistingBrand(index)} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="absolute bottom-1 text-[9px] uppercase font-bold text-zinc-400 tracking-wider">
+                  {item.type === 'image' ? 'PNG' : 'Texto'}
+                </span>
+                <button 
+                  type="button" 
+                  onClick={() => removeExistingBrand(index)} 
+                  className="absolute top-1.5 right-1.5 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 shadow-sm cursor-pointer"
+                  title="Eliminar marca"
+                >
+                  <Trash size={12} />
+                </button>
+              </div>
+            ))}
+
+            {/* Pendientes de Guardar (Nuevas) */}
+            {pendingBrandFiles.map((item, index) => (
+              <div key={`pending-${index}`} className="relative border-2 border-dashed border-emerald-500 rounded-xl p-3 bg-emerald-950/30 text-white flex flex-col items-center justify-center h-24 group overflow-hidden shadow-xs">
+                <img src={item.preview} alt={`Nueva Marca ${index + 1}`} className="max-h-12 max-w-full object-contain p-1" />
+                <span className="absolute bottom-1 text-[9px] uppercase font-bold text-emerald-400 tracking-wider">
+                  Por Guardar (PNG)
+                </span>
+                <button 
+                  type="button" 
+                  onClick={() => removePendingBrand(index)} 
+                  className="absolute top-1.5 right-1.5 bg-red-600 text-white p-1 rounded-full transition-opacity hover:bg-red-700 shadow-sm cursor-pointer"
+                  title="Quitar"
+                >
                   <Trash size={12} />
                 </button>
               </div>
             ))}
           </div>
-          {brands.length === 0 && (
-            <div className="text-center p-8 text-gray-400 border-2 border-dashed rounded-lg">
+
+          {brands.length === 0 && pendingBrandFiles.length === 0 && (
+            <div className="text-center p-8 text-gray-400 border-2 border-dashed rounded-xl">
               No hay marcas personalizadas. Se mostrarán los textos por defecto (VERSACE, ZARA...).
             </div>
           )}

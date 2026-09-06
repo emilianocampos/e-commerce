@@ -91,6 +91,15 @@ export default async function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        {settings?.favicon_url ? (
+          <>
+            <link rel="icon" href={settings.favicon_url} sizes="any" />
+            <link rel="shortcut icon" href={settings.favicon_url} />
+            <link rel="apple-touch-icon" href={settings.favicon_url} />
+          </>
+        ) : (
+          <link rel="icon" href="/favicon.ico" sizes="any" />
+        )}
         {googleSiteVerification && (
           <meta name="google-site-verification" content={googleSiteVerification} />
         )}
