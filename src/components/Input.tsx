@@ -14,7 +14,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         name={name}
         type={type}
         className={cn(
-          'flex h-10 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 disabled:cursor-not-allowed disabled:opacity-50',
+          'flex h-11 w-full rounded-xl border border-zinc-300 px-3.5 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
           className
         )}
         ref={ref}
@@ -24,8 +24,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     if (label) {
       return (
-        <div className="space-y-2">
-          <label htmlFor={inputId} className="block text-sm font-medium text-zinc-900">
+        <div className="space-y-1.5">
+          <label htmlFor={inputId} className="block text-sm font-semibold">
             {label}
           </label>
           {input}

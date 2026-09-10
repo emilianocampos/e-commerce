@@ -253,12 +253,22 @@ export default function AdminQRPage() {
                 : 'bg-gradient-to-b from-zinc-900 via-zinc-950 to-emerald-950 text-white border-emerald-800/60 shadow-emerald-950/40'
             }`}
           >
-            {/* Adorno Glow de Fondo */}
-            <div className="absolute -top-20 -right-20 w-44 h-44 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+            {/* Adorno Glow de Fondo Dinámico */}
+            <div 
+              className="absolute -top-20 -right-20 w-44 h-44 rounded-full blur-3xl pointer-events-none transition-all duration-300" 
+              style={{ backgroundColor: 'var(--card-glow-color, #10b981)', opacity: 0.28 }}
+            />
 
             {/* Header del Negocio */}
             <div className="mb-6 relative z-10">
-              <div className="inline-block px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-[10px] font-extrabold tracking-widest uppercase mb-2">
+              <div 
+                className="inline-block px-3 py-1 border rounded-full text-[10px] font-extrabold tracking-widest uppercase mb-2"
+                style={{
+                  backgroundColor: 'rgba(var(--card-glow-rgb, 16, 185, 129), 0.12)',
+                  borderColor: 'rgba(var(--card-glow-rgb, 16, 185, 129), 0.35)',
+                  color: 'var(--card-glow-color, #10b981)',
+                }}
+              >
                 TIENDA OFICIAL
               </div>
               <h2 className="text-3xl font-black tracking-tight">{storeName}</h2>

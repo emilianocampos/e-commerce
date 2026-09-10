@@ -16,7 +16,7 @@ export function NavbarWrapper({ user, role, settings }: NavbarWrapperProps) {
   const isAdminRoute = pathname?.startsWith('/admin');
 
   if (isAdminRoute) {
-    return <AdminNavbar userEmail={user?.email} />;
+    return <AdminNavbar userEmail={user?.email} settings={settings} />;
   }
 
   return <Navbar user={user} role={role} settings={settings} />;

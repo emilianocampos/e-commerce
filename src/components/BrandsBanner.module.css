@@ -1,16 +1,18 @@
 .banner {
   background-color: var(--shop-black);
-  padding: 32px 0;
+  padding: 28px 0;
   width: 100%;
   overflow: hidden;
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .marqueeContainer {
   display: flex;
   white-space: nowrap;
   width: max-content;
-  animation: scroll 30s linear infinite;
+  animation: scroll 35s linear infinite;
 }
 
 .marqueeContainer:hover {
@@ -20,14 +22,15 @@
 .marqueeContent {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 48px;
   padding: 0 24px;
 }
 
 @media (min-width: 768px) {
   .marqueeContent {
-    gap: 96px;
-    padding: 0 48px;
+    gap: 80px;
+    padding: 0 40px;
   }
 }
 
@@ -45,24 +48,41 @@
   font-family: var(--font-display), sans-serif;
   color: var(--shop-white);
   font-size: 24px;
-  font-weight: 400;
+  font-weight: 500;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
 }
 
 @media (min-width: 768px) {
   .brand {
-    font-size: 36px;
+    font-size: 32px;
   }
 }
 
+.brandImageWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
 .brandImage {
-  height: 30px;
+  max-height: 44px;
+  max-width: 180px;
+  width: auto;
+  height: auto;
   object-fit: contain;
-  filter: brightness(0) invert(1);
+  display: block;
+  user-select: none;
+  pointer-events: none;
 }
 
 @media (min-width: 768px) {
   .brandImage {
-    height: 40px;
+    max-height: 52px;
+    max-width: 220px;
   }
 }

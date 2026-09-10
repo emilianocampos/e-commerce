@@ -63,9 +63,21 @@
 }
 .reviewCard {
   width: 100%;
-  border: 1px solid var(--shop-gray-light);
+  border: 1px solid rgba(var(--card-glow-rgb, 16, 185, 129), 0.22);
+  background: radial-gradient(circle at 100% 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.22) 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.04) 38%, var(--shop-white) 70%);
   border-radius: 20px;
   padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+:global(body[data-theme="dark"]) .reviewCard {
+  background: radial-gradient(circle at 100% 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.22) 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.03) 38%, #18181b 75%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.reviewCard:hover {
+  border-color: rgba(var(--card-glow-rgb, 16, 185, 129), 0.5);
+  box-shadow: 0 10px 25px -5px rgba(var(--card-glow-rgb, 16, 185, 129), 0.22);
 }
 @media (min-width: 768px) {
   .reviewCard {

@@ -12,6 +12,7 @@ import { FooterWrapper } from "@/components/FooterWrapper";
 import { getUser, getProfile } from "@/lib/auth";
 import { getStoreSettings } from "@/actions/settings";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { hexToRgb } from "@/lib/utils";
 
 import NextTopLoader from 'nextjs-toploader';
 
@@ -79,6 +80,7 @@ export default async function RootLayout({
     sameAs: [
       settings?.instagram_url,
       settings?.facebook_url,
+      settings?.tiktok_url,
     ].filter(Boolean),
     contactPoint: {
       '@type': 'ContactPoint',
@@ -134,6 +136,8 @@ export default async function RootLayout({
           '--gradient-to': settings?.gradient_color_to || '#09090b',
           '--gradient-text-primary': settings?.gradient_text_primary || '#ffffff',
           '--gradient-text-secondary': settings?.gradient_text_secondary || '#d4d4d8',
+          '--card-glow-color': settings?.card_glow_color || '#10b981',
+          '--card-glow-rgb': hexToRgb(settings?.card_glow_color || '#10b981'),
         } as React.CSSProperties}
         className={`${inter.variable} ${archivoBlack.variable} min-h-screen flex flex-col font-sans antialiased selection:bg-shop-black selection:text-white transition-colors duration-300`}
       >

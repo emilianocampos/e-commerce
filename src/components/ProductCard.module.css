@@ -9,6 +9,7 @@
 
 .imageWrapper {
   background-color: var(--shop-gray-light);
+  background-image: radial-gradient(circle at 100% 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.26) 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.05) 38%, transparent 70%);
   border-radius: 20px;
   aspect-ratio: 1;
   position: relative;
@@ -17,6 +18,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(var(--card-glow-rgb, 16, 185, 129), 0.20);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+:global(body[data-theme="dark"]) .imageWrapper {
+  background-color: #18181b;
+  background-image: radial-gradient(circle at 100% 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.25) 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.04) 40%, transparent 70%);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.card:hover .imageWrapper {
+  border-color: rgba(var(--card-glow-rgb, 16, 185, 129), 0.55);
+  box-shadow: 0 10px 25px -5px rgba(var(--card-glow-rgb, 16, 185, 129), 0.22);
 }
 
 .image {

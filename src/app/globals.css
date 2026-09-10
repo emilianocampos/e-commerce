@@ -11,6 +11,10 @@
   --shop-gray-dark: #606060;
   --shop-red: #FF3333;
   --shop-white: #ffffff;
+
+  /* Card Glow Default */
+  --card-glow-color: #10b981;
+  --card-glow-rgb: 16, 185, 129;
 }
 
 /* ========================================================= */
@@ -32,10 +36,31 @@ body[data-theme="dark"] header:not(.admin-container *) {
   border-bottom-color: #27272a !important;
 }
 
-body[data-theme="dark"] main:not(.admin-container *) .bg-white:not(button):not(input):not(.price-track-white) {
-  background-color: #18181b !important;
+body[data-theme="dark"] main:not(.admin-container *) .bg-white:not(button):not(input):not(.price-track-white),
+body[data-theme="dark"] .corner-glow-card {
+  background: radial-gradient(circle at 100% 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.22) 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.04) 35%, #18181b 75%) !important;
   color: #ffffff !important;
   border-color: #27272a !important;
+}
+
+/* ========================================================= */
+/* MODO CLARO & DEFAULT: CARDS CON DEGRADÉ DE ESQUINA ELEGANTE */
+/* ========================================================= */
+body:not([data-theme="dark"]):not([data-theme="gradient"]) main:not(.admin-container *) .bg-white:not(button):not(input):not(select):not(textarea):not(.price-track-white):not(header *):not(nav *):not(.navbar-element),
+body[data-theme="light"] main:not(.admin-container *) .bg-white:not(button):not(input):not(select):not(textarea):not(.price-track-white):not(header *):not(nav *):not(.navbar-element),
+body:not([data-theme="dark"]):not([data-theme="gradient"]) .corner-glow-card,
+body[data-theme="light"] .corner-glow-card,
+.corner-glow-card-light {
+  background: radial-gradient(circle at 100% 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.20) 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.03) 38%, #ffffff 72%) !important;
+  border-color: rgba(var(--card-glow-rgb, 16, 185, 129), 0.20) !important;
+}
+
+body:not([data-theme="dark"]):not([data-theme="gradient"]) main:not(.admin-container *) .bg-white:not(button):not(input):not(select):not(textarea):not(.price-track-white):not(header *):not(nav *):hover,
+body[data-theme="light"] main:not(.admin-container *) .bg-white:not(button):not(input):not(select):not(textarea):not(.price-track-white):not(header *):not(nav *):hover,
+body:not([data-theme="dark"]):not([data-theme="gradient"]) .corner-glow-card:hover,
+body[data-theme="light"] .corner-glow-card:hover {
+  border-color: rgba(var(--card-glow-rgb, 16, 185, 129), 0.40) !important;
+  box-shadow: 0 10px 25px -5px rgba(var(--card-glow-rgb, 16, 185, 129), 0.16) !important;
 }
 
 body[data-theme="dark"] main:not(.admin-container *) .text-zinc-900:not(button):not(.keep-text-color),
@@ -67,6 +92,83 @@ body[data-theme="dark"] main:not(.admin-container *) .border-zinc-300 {
 }
 
 /* ========================================================= */
+/* FORMULARIOS: TEXTO SIEMPRE NÍTIDO EN MODO OSCURO Y CLARO  */
+/* ========================================================= */
+
+/* MODO OSCURO: Fondo oscuro y letras SIEMPRE BLANCAS NÍTIDAS */
+body[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+body[data-theme="dark"] select,
+body[data-theme="dark"] textarea {
+  background-color: #18181b !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: #3f3f46 !important;
+}
+
+body[data-theme="dark"] input::placeholder,
+body[data-theme="dark"] textarea::placeholder {
+  color: #a1a1aa !important;
+  -webkit-text-fill-color: #a1a1aa !important;
+}
+
+body[data-theme="dark"] input:focus,
+body[data-theme="dark"] select:focus,
+body[data-theme="dark"] textarea:focus {
+  border-color: var(--card-glow-color, #10b981) !important;
+  outline: none !important;
+}
+
+body[data-theme="dark"] label {
+  color: #ffffff !important;
+}
+
+/* Chrome/Edge Autofill en modo oscuro */
+body[data-theme="dark"] input:-webkit-autofill,
+body[data-theme="dark"] input:-webkit-autofill:hover, 
+body[data-theme="dark"] input:-webkit-autofill:focus,
+body[data-theme="dark"] input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #18181b inset !important;
+  box-shadow: 0 0 0 1000px #18181b inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: #ffffff !important;
+}
+
+/* MODO CLARO: Fondo blanco y letras SIEMPRE NEGRAS NÍTIDAS */
+body[data-theme="light"]:not(.admin-container) input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+body[data-theme="light"]:not(.admin-container) select,
+body[data-theme="light"]:not(.admin-container) textarea {
+  background-color: #ffffff !important;
+  color: #09090b !important;
+  -webkit-text-fill-color: #09090b !important;
+  border-color: #e4e4e7 !important;
+}
+
+body[data-theme="light"]:not(.admin-container) input::placeholder,
+body[data-theme="light"]:not(.admin-container) textarea::placeholder {
+  color: #71717a !important;
+  -webkit-text-fill-color: #71717a !important;
+}
+
+body[data-theme="light"]:not(.admin-container) label {
+  color: #09090b !important;
+}
+
+/* Chrome/Edge Autofill en modo claro */
+body[data-theme="light"]:not(.admin-container) input:-webkit-autofill,
+body[data-theme="light"]:not(.admin-container) input:-webkit-autofill:hover, 
+body[data-theme="light"]:not(.admin-container) input:-webkit-autofill:focus,
+body[data-theme="light"]:not(.admin-container) input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #09090b !important;
+  color: #09090b !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: #09090b !important;
+}
+
+/* ========================================================= */
 /* BARRA DEL FILTRO DE PRECIO (FONDO BLANCO)                 */
 /* ========================================================= */
 .price-track-white,
@@ -77,10 +179,157 @@ body[data-theme="dark"] main .price-track-white {
 }
 
 /* ========================================================= */
-/* PANEL DE ADMINISTRACIÓN DARK PROFESIONAL (.admin-container)*/
-/* TODOS LOS TEXTOS, LABELS Y TÍTULOS EN BLANCO NÍTIDO       */
+/* PANEL DE ADMINISTRACIÓN (.admin-container)                */
+/* MODO CLARO (ESTILO MODERNO SOFT UI) Y MODO OSCURO         */
 /* ========================================================= */
-.admin-container {
+
+/* --------------------------------------------------------- */
+/* A) MODO CLARO EN ADMIN (default o data-theme="light")     */
+/* Canvas #f1f4f9, Cards blancas redondeadas, Inputs suaves  */
+/* --------------------------------------------------------- */
+.admin-container:not([data-theme="dark"]) {
+  background-color: #f1f4f9 !important;
+  color: #0f172a !important;
+  color-scheme: light !important;
+  --background: #f1f4f9 !important;
+  --foreground: #0f172a !important;
+}
+
+/* Textos, encabezados, labels y párrafos en oscuro nítido */
+.admin-container:not([data-theme="dark"]) h1,
+.admin-container:not([data-theme="dark"]) h2,
+.admin-container:not([data-theme="dark"]) h3,
+.admin-container:not([data-theme="dark"]) h4,
+.admin-container:not([data-theme="dark"]) h5,
+.admin-container:not([data-theme="dark"]) h6,
+.admin-container:not([data-theme="dark"]) label,
+.admin-container:not([data-theme="dark"]) p:not(.keep-light-text),
+.admin-container:not([data-theme="dark"]) dt,
+.admin-container:not([data-theme="dark"]) dd,
+.admin-container:not([data-theme="dark"]) th,
+.admin-container:not([data-theme="dark"]) td,
+.admin-container:not([data-theme="dark"]) .text-zinc-900,
+.admin-container:not([data-theme="dark"]) .text-zinc-800,
+.admin-container:not([data-theme="dark"]) .text-zinc-700,
+.admin-container:not([data-theme="dark"]) .text-zinc-600,
+.admin-container:not([data-theme="dark"]) .text-gray-900,
+.admin-container:not([data-theme="dark"]) .text-gray-800,
+.admin-container:not([data-theme="dark"]) .text-gray-700,
+.admin-container:not([data-theme="dark"]) .text-gray-600,
+.admin-container:not([data-theme="dark"]) .text-black {
+  color: #0f172a !important;
+}
+
+.admin-container:not([data-theme="dark"]) .text-zinc-500,
+.admin-container:not([data-theme="dark"]) .text-zinc-400,
+.admin-container:not([data-theme="dark"]) .text-gray-500,
+.admin-container:not([data-theme="dark"]) .text-gray-400 {
+  color: #64748b !important;
+}
+
+/* CARDS EN MODO CLARO ADMIN: BLANCAS IMPECABLES CON SOMBRA SUAVE */
+.admin-container:not([data-theme="dark"]) .bg-white:not(button):not(input):not(select):not(textarea):not(span):not(img):not(.badge),
+.admin-container:not([data-theme="dark"]) section,
+.admin-container:not([data-theme="dark"]) .admin-card {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04) !important;
+  position: relative;
+}
+
+.admin-container:not([data-theme="dark"]) .bg-zinc-50,
+.admin-container:not([data-theme="dark"]) .bg-gray-50 {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.admin-container:not([data-theme="dark"]) .bg-zinc-100,
+.admin-container:not([data-theme="dark"]) .bg-gray-100 {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* INPUTS EN MODO CLARO ADMIN: FONDO GRIS SUAVE #f1f4f9 Y BORDES LIMPIOS */
+.admin-container:not([data-theme="dark"]) input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+.admin-container:not([data-theme="dark"]) select,
+.admin-container:not([data-theme="dark"]) textarea {
+  background-color: #f1f4f9 !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 0.75rem !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.admin-container:not([data-theme="dark"]) input::placeholder,
+.admin-container:not([data-theme="dark"]) textarea::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+}
+
+.admin-container:not([data-theme="dark"]) input:hover,
+.admin-container:not([data-theme="dark"]) select:hover,
+.admin-container:not([data-theme="dark"]) textarea:hover {
+  background-color: #edf1f7 !important;
+  border-color: #cbd5e1 !important;
+}
+
+.admin-container:not([data-theme="dark"]) input:focus,
+.admin-container:not([data-theme="dark"]) select:focus,
+.admin-container:not([data-theme="dark"]) textarea:focus {
+  background-color: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+  outline: none !important;
+}
+
+/* TABLAS EN MODO CLARO ADMIN */
+.admin-container:not([data-theme="dark"]) table {
+  color: #0f172a !important;
+}
+
+.admin-container:not([data-theme="dark"]) thead {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+.admin-container:not([data-theme="dark"]) thead th {
+  color: #334155 !important;
+  font-weight: 700 !important;
+  font-size: 0.8125rem !important;
+  letter-spacing: 0.025em !important;
+}
+
+.admin-container:not([data-theme="dark"]) tr {
+  border-color: #f1f5f9 !important;
+}
+
+.admin-container:not([data-theme="dark"]) tbody tr:hover {
+  background-color: #f8fafc !important;
+}
+
+.admin-container:not([data-theme="dark"]) .divide-y > * + * {
+  border-color: #f1f5f9 !important;
+}
+
+.admin-container:not([data-theme="dark"]) .border-zinc-200,
+.admin-container:not([data-theme="dark"]) .border-zinc-100,
+.admin-container:not([data-theme="dark"]) .border-zinc-300,
+.admin-container:not([data-theme="dark"]) .border-gray-200,
+.admin-container:not([data-theme="dark"]) .border-gray-100,
+.admin-container:not([data-theme="dark"]) .border-gray-300,
+.admin-container:not([data-theme="dark"]) hr,
+.admin-container:not([data-theme="dark"]) .border-b {
+  border-color: #e2e8f0 !important;
+}
+
+/* --------------------------------------------------------- */
+/* B) MODO OSCURO EN ADMIN (.admin-container[data-theme="dark"]) */
+/* --------------------------------------------------------- */
+.admin-container[data-theme="dark"] {
   background-color: #09090b !important;
   color: #ffffff !important;
   color-scheme: dark !important;
@@ -89,31 +338,22 @@ body[data-theme="dark"] main .price-track-white {
 }
 
 /* Títulos, encabezados, labels, párrafos y spans en blanco */
-.admin-container h1,
-.admin-container h2,
-.admin-container h3,
-.admin-container h4,
-.admin-container h5,
-.admin-container h6,
-.admin-container label,
-.admin-container p,
-.admin-container dt,
-.admin-container dd,
-.admin-container th,
-.admin-container td,
-.admin-container .text-zinc-900,
-.admin-container .text-zinc-800,
-.admin-container .text-zinc-700,
-.admin-container .text-zinc-600,
-.admin-container .text-zinc-500,
-.admin-container .text-zinc-400,
-.admin-container .text-gray-900,
-.admin-container .text-gray-800,
-.admin-container .text-gray-700,
-.admin-container .text-gray-600,
-.admin-container .text-gray-500,
-.admin-container .text-gray-400,
-.admin-container .text-black {
+.admin-container[data-theme="dark"] h1,
+.admin-container[data-theme="dark"] h2,
+.admin-container[data-theme="dark"] h3,
+.admin-container[data-theme="dark"] h4,
+.admin-container[data-theme="dark"] h5,
+.admin-container[data-theme="dark"] h6,
+.admin-container[data-theme="dark"] label,
+.admin-container[data-theme="dark"] p,
+.admin-container[data-theme="dark"] dt,
+.admin-container[data-theme="dark"] dd,
+.admin-container[data-theme="dark"] th,
+.admin-container[data-theme="dark"] td,
+.admin-container[data-theme="dark"] .text-zinc-900,
+.admin-container[data-theme="dark"] .text-zinc-800,
+.admin-container[data-theme="dark"] .text-zinc-700,
+.admin-container[data-theme="dark"] .text-black {
   color: #ffffff !important;
 }
 
@@ -138,79 +378,80 @@ body[data-theme="dark"] main .price-track-white {
   color: #f43f5e !important;
 }
 
-/* Tarjetas y Secciones */
-.admin-container .bg-white,
-.admin-container section {
-  background-color: #121215 !important;
+/* Tarjetas y Secciones con degradé de esquina */
+.admin-container[data-theme="dark"] .bg-white:not(button):not(input):not(span):not(img):not(.badge),
+.admin-container[data-theme="dark"] section,
+.admin-container[data-theme="dark"] .admin-card {
+  background: radial-gradient(circle at 100% 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.22) 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.04) 35%, #121215 70%) !important;
   color: #ffffff !important;
-  border-color: #27272a !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  position: relative;
 }
 
-.admin-container .bg-zinc-50,
-.admin-container .bg-gray-50 {
+.admin-container[data-theme="dark"] .bg-zinc-50,
+.admin-container[data-theme="dark"] .bg-gray-50 {
   background-color: #18181b !important;
   border-color: #27272a !important;
 }
 
-.admin-container .bg-zinc-100,
-.admin-container .bg-gray-100 {
+.admin-container[data-theme="dark"] .bg-zinc-100,
+.admin-container[data-theme="dark"] .bg-gray-100 {
   background-color: #27272a !important;
   color: #ffffff !important;
 }
 
-/* Bordes y separadores */
-.admin-container .border-zinc-200,
-.admin-container .border-zinc-100,
-.admin-container .border-zinc-300,
-.admin-container .border-gray-200,
-.admin-container .border-gray-100,
-.admin-container .border-gray-300,
-.admin-container hr,
-.admin-container .border-b {
+.admin-container[data-theme="dark"] .border-zinc-200,
+.admin-container[data-theme="dark"] .border-zinc-100,
+.admin-container[data-theme="dark"] .border-zinc-300,
+.admin-container[data-theme="dark"] .border-gray-200,
+.admin-container[data-theme="dark"] .border-gray-100,
+.admin-container[data-theme="dark"] .border-gray-300,
+.admin-container[data-theme="dark"] hr,
+.admin-container[data-theme="dark"] .border-b {
   border-color: #27272a !important;
 }
 
-/* Formularios: Inputs, Selects y Textareas */
-.admin-container input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
-.admin-container select,
-.admin-container textarea {
+/* Formularios Dark: Inputs, Selects y Textareas */
+.admin-container[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+.admin-container[data-theme="dark"] select,
+.admin-container[data-theme="dark"] textarea {
   background-color: #18181b !important;
   color: #ffffff !important;
   border: 1px solid #3f3f46 !important;
   border-radius: 0.75rem !important;
 }
 
-.admin-container input::placeholder,
-.admin-container textarea::placeholder {
+.admin-container[data-theme="dark"] input::placeholder,
+.admin-container[data-theme="dark"] textarea::placeholder {
   color: #71717a !important;
 }
 
-.admin-container input:focus,
-.admin-container select:focus,
-.admin-container textarea:focus {
-  border-color: #10b981 !important;
+.admin-container[data-theme="dark"] input:focus,
+.admin-container[data-theme="dark"] select:focus,
+.admin-container[data-theme="dark"] textarea:focus {
+  border-color: var(--card-glow-color, #10b981) !important;
   outline: none !important;
 }
 
-/* Tablas */
-.admin-container table {
+/* Tablas Dark */
+.admin-container[data-theme="dark"] table {
   color: #ffffff !important;
 }
 
-.admin-container thead {
+.admin-container[data-theme="dark"] thead {
   background-color: #121215 !important;
   border-color: #27272a !important;
 }
 
-.admin-container tr {
+.admin-container[data-theme="dark"] tr {
   border-color: #27272a !important;
 }
 
-.admin-container tbody tr:hover {
+.admin-container[data-theme="dark"] tbody tr:hover {
   background-color: rgba(255, 255, 255, 0.04) !important;
 }
 
-.admin-container .divide-y > * + * {
+.admin-container[data-theme="dark"] .divide-y > * + * {
   border-color: #27272a !important;
 }
 

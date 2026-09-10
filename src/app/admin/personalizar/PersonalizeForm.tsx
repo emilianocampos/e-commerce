@@ -15,6 +15,7 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
   const [gradientTo, setGradientTo] = useState<string>(initialSettings?.gradient_color_to || '#09090b');
   const [gradientTextPrimary, setGradientTextPrimary] = useState<string>(initialSettings?.gradient_text_primary || '#ffffff');
   const [gradientTextSecondary, setGradientTextSecondary] = useState<string>(initialSettings?.gradient_text_secondary || '#d4d4d8');
+  const [cardGlowColor, setCardGlowColor] = useState<string>(initialSettings?.card_glow_color || '#10b981');
 
   // Image previews
   const [logoPreview, setLogoPreview] = useState<string>(initialSettings.store_logo_url || '');
@@ -28,7 +29,15 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
   
   // Brands logic
   const [brands, setBrands] = useState<any[]>(() => {
-    const rawBrands = initialSettings.brands_images || [];
+    let rawBrands = initialSettings?.brands_images || [];
+    if (typeof rawBrands === 'string') {
+      try {
+        rawBrands = JSON.parse(rawBrands);
+      } catch (e) {
+        rawBrands = [];
+      }
+    }
+    if (!Array.isArray(rawBrands)) return [];
     return rawBrands.map((b: any) => {
       if (typeof b === 'string') return { type: 'image', value: b };
       return b;
@@ -107,9 +116,8 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
     const validNewFiles: { file: File; preview: string }[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
-      if (!isPng) {
-        alert(`El archivo "${file.name}" no es formato PNG. Solo se permiten imágenes en formato .PNG (con fondo transparente preferentemente).`);
+      if (!file.type.startsWith('image/') && !/\.(png|jpg|jpeg|webp|svg|gif|avif)$/i.test(file.name)) {
+        alert(`El archivo "${file.name}" no es una imagen válida.`);
         continue;
       }
       validNewFiles.push({
@@ -144,7 +152,7 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
     formData.append('brands_images_json', JSON.stringify(brands));
     formData.append('discount_codes_json', JSON.stringify(discountCodes));
 
-    // Append new PNG brand logo files
+    // Append new brand logo files
     pendingBrandFiles.forEach(({ file }) => {
       formData.append('new_brand_files', file);
     });
@@ -156,18 +164,28 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
       // Reload settings to get updated URLs
       const data = await getStoreSettings();
       if (data) {
-        const rawBrands = data.brands_images || [];
-        const mapped = rawBrands.map((b: any) => {
-          if (typeof b === 'string') return { type: 'image', value: b };
-          return b;
-        });
-        setBrands(mapped);
+        let rawBrands = data.brands_images || [];
+        if (typeof rawBrands === 'string') {
+          try {
+            rawBrands = JSON.parse(rawBrands);
+          } catch(e) {
+            rawBrands = [];
+          }
+        }
+        if (Array.isArray(rawBrands)) {
+          const mapped = rawBrands.map((b: any) => {
+            if (typeof b === 'string') return { type: 'image', value: b };
+            return b;
+          });
+          setBrands(mapped);
+        }
         setLogoPreview(data.store_logo_url || '');
         setFaviconPreview(data.favicon_url || '');
         setHeroPreview(data.hero_image_url || '');
         if (data.theme_mode) setThemeMode(data.theme_mode);
         if (data.gradient_color_from) setGradientFrom(data.gradient_color_from);
         if (data.gradient_color_to) setGradientTo(data.gradient_color_to);
+        if (data.card_glow_color) setCardGlowColor(data.card_glow_color);
         if (data.discount_codes) {
           let dc = data.discount_codes;
           if (typeof dc === 'string') {
@@ -185,6 +203,17 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
   };
 
   const [showStatsNumbers, setShowStatsNumbers] = useState<boolean>(initialSettings.show_stats_numbers !== false);
+
+  const cardGlowPresets = [
+    { name: 'Esmeralda', hex: '#10b981' },
+    { name: 'Azul Neón', hex: '#3b82f6' },
+    { name: 'Violeta', hex: '#8b5cf6' },
+    { name: 'Fucsia', hex: '#ec4899' },
+    { name: 'Rojo Rubí', hex: '#ef4444' },
+    { name: 'Dorado', hex: '#f59e0b' },
+    { name: 'Cian', hex: '#06b6d4' },
+    { name: 'Blanco', hex: '#ffffff' },
+  ];
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -208,13 +237,14 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
                 <Palette className="w-5 h-5 text-purple-600" />
                 Modo de Tema & Apariencia Web
               </h2>
-              <p className="text-xs text-gray-500 mt-1">Elegí la paleta de colores global de tu tienda online: Modo Claro, Modo Oscuro (estilo QR) o Degradé personalizado.</p>
+              <p className="text-xs text-gray-500 mt-1">Elegí la paleta de colores global de tu tienda online: Modo Claro o Modo Oscuro.</p>
             </div>
           </div>
 
           <input type="hidden" name="theme_mode" value={themeMode} />
           <input type="hidden" name="gradient_color_from" value={gradientFrom} />
           <input type="hidden" name="gradient_color_to" value={gradientTo} />
+          <input type="hidden" name="card_glow_color" value={cardGlowColor} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
@@ -254,33 +284,116 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
             </button>
           </div>
 
-          {/* Previsualización del Tema */}
-          <div className="pt-3">
-            <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-2">Previsualización de la Web</span>
-            <div 
-              className="w-full rounded-2xl p-6 border transition-all duration-300 shadow-inner flex flex-col items-center justify-center text-center gap-3"
-              style={{
-                background: themeMode === 'dark' ? '#09090b' : '#ffffff',
-                color: themeMode === 'dark' ? '#ffffff' : '#09090b',
-                borderColor: themeMode === 'dark' ? '#27272a' : '#e4e4e7'
-              }}
-            >
-              <span className="font-extrabold text-lg tracking-wider font-display uppercase">
-                {settings.store_logo_text || 'KLONFARK'}
+          {/* COLOR DEL DEGRADÉ DE ESQUINA EN LAS CARDS */}
+          <div className="pt-6 border-t border-zinc-100 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-base font-bold text-zinc-900 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-emerald-500" />
+                  Color de Degradé en Esquina (Cards & Paneles)
+                </h3>
+                <p className="text-xs text-zinc-500">
+                  Define el color del resplandor/degradé que aparece en la esquina superior de todas las tarjetas de la web y del panel de administración.
+                </p>
+              </div>
+
+              {/* Selector Hex y Color Picker */}
+              <div className="flex items-center gap-2 shrink-0">
+                <input
+                  type="color"
+                  value={cardGlowColor}
+                  onChange={(e) => setCardGlowColor(e.target.value)}
+                  className="w-10 h-10 rounded-xl cursor-pointer border border-zinc-300 p-0.5 bg-white shadow-xs"
+                  title="Elegir color personalizado"
+                />
+                <input
+                  type="text"
+                  value={cardGlowColor}
+                  onChange={(e) => setCardGlowColor(e.target.value)}
+                  placeholder="#10b981"
+                  className="w-24 px-2.5 py-1.5 border border-zinc-300 rounded-xl text-xs font-mono font-bold uppercase"
+                />
+              </div>
+            </div>
+
+            {/* Presets de Color */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-bold text-zinc-400 mr-1 uppercase">Paletas Rápidas:</span>
+              {cardGlowPresets.map((preset) => (
+                <button
+                  key={preset.hex}
+                  type="button"
+                  onClick={() => setCardGlowColor(preset.hex)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border ${
+                    cardGlowColor.toLowerCase() === preset.hex.toLowerCase()
+                      ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm ring-2 ring-zinc-900/20 font-bold'
+                      : 'border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100'
+                  }`}
+                >
+                  <span
+                    className="w-3.5 h-3.5 rounded-full shadow-xs shrink-0"
+                    style={{ backgroundColor: preset.hex }}
+                  />
+                  <span>{preset.name}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Previsualización en Vivo de la Card con Degradé de Esquina */}
+            <div className="pt-2 space-y-3">
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
+                Vista Previa de Cards (Efecto en Modo Claro y Modo Oscuro):
               </span>
-              <p className="text-xs max-w-md opacity-80" style={{ color: themeMode === 'dark' ? '#a1a1aa' : '#71717a' }}>
-                Así se verá el fondo, los títulos de productos y los precios en tu tienda.
-              </p>
-              <div 
-                className="mt-1 flex items-center gap-3 px-4 py-2 rounded-xl text-xs font-bold border" 
-                style={{
-                  background: themeMode === 'dark' ? '#18181b' : '#f4f4f5',
-                  borderColor: themeMode === 'dark' ? '#27272a' : '#e4e4e7',
-                  color: themeMode === 'dark' ? '#ffffff' : '#09090b'
-                }}
-              >
-                <span>Calza Oxford Cross V</span>
-                <span className="font-extrabold" style={{ color: themeMode === 'dark' ? '#ffffff' : '#09090b' }}>$30.099,00</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Preview Modo Claro */}
+                <div
+                  className="relative overflow-hidden rounded-2xl border p-5 shadow-sm transition-all duration-300"
+                  style={{
+                    backgroundColor: '#ffffff',
+                    backgroundImage: `radial-gradient(circle at 100% 0%, ${cardGlowColor}38 0%, ${cardGlowColor}0d 38%, #ffffff 72%)`,
+                    borderColor: `${cardGlowColor}40`,
+                    color: '#09090b',
+                  }}
+                >
+                  <div
+                    className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-widest uppercase mb-2 border"
+                    style={{
+                      backgroundColor: `${cardGlowColor}18`,
+                      borderColor: `${cardGlowColor}45`,
+                      color: cardGlowColor,
+                    }}
+                  >
+                    MODO CLARO
+                  </div>
+                  <h4 className="text-base font-black tracking-tight text-zinc-900">Card en Fondo Claro</h4>
+                  <p className="text-xs text-zinc-600 mt-1">
+                    Degradé en la esquina superior derecha con el color personalizado sobre blanco.
+                  </p>
+                </div>
+
+                {/* Preview Modo Oscuro */}
+                <div
+                  className="relative overflow-hidden rounded-2xl border p-5 bg-zinc-950 text-white shadow-md transition-all duration-300"
+                  style={{
+                    backgroundImage: `radial-gradient(circle at 100% 0%, ${cardGlowColor}40 0%, ${cardGlowColor}0d 38%, #09090b 75%)`,
+                    borderColor: `${cardGlowColor}45`,
+                  }}
+                >
+                  <div
+                    className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-widest uppercase mb-2 border"
+                    style={{
+                      backgroundColor: `${cardGlowColor}20`,
+                      borderColor: `${cardGlowColor}50`,
+                      color: cardGlowColor,
+                    }}
+                  >
+                    MODO OSCURO & ADMIN
+                  </div>
+                  <h4 className="text-base font-black tracking-tight text-white">Card en Fondo Oscuro</h4>
+                  <p className="text-xs text-zinc-400 mt-1">
+                    Resplandor neón en la esquina sobre fondo oscuro de tienda y panel admin.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -365,7 +478,7 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
         {/* REDES SOCIALES */}
         <section className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h2 className="text-xl font-bold mb-4 border-b pb-2">Redes Sociales</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Instagram URL</label>
               <input name="instagram_url" defaultValue={settings.instagram_url} className="w-full border rounded-lg p-2" placeholder="https://instagram.com/tu_cuenta" />
@@ -373,6 +486,10 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Facebook URL</label>
               <input name="facebook_url" defaultValue={settings.facebook_url} className="w-full border rounded-lg p-2" placeholder="https://facebook.com/tu_pagina" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">TikTok URL</label>
+              <input name="tiktok_url" defaultValue={settings.tiktok_url} className="w-full border rounded-lg p-2" placeholder="https://tiktok.com/@tu_cuenta" />
             </div>
           </div>
         </section>
@@ -542,10 +659,10 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
                 <Sparkles className="w-5 h-5 text-amber-500" />
                 Carrusel de Marcas (Banner en Movimiento)
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5">Agrega marcas en texto o sube logos oficiales en formato <strong>PNG</strong> (fondo transparente).</p>
+              <p className="text-xs text-gray-500 mt-0.5">Agrega marcas en texto o sube logos oficiales (PNG, JPG, SVG, WebP con fondo transparente preferentemente).</p>
             </div>
             <span className="text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full shrink-0">
-              Solo formato .PNG
+              Imágenes o Texto
             </span>
           </div>
 
@@ -576,13 +693,13 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
 
             <div className="text-xs font-bold text-gray-400">O</div>
 
-            {/* Subir Logo PNG */}
+            {/* Subir Logo */}
             <div>
               <label className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer">
-                <ImageIcon size={16} /> + Subir Logo (PNG)
+                <ImageIcon size={16} /> + Subir Logo (PNG/JPG/SVG)
                 <input 
                   type="file" 
-                  accept=".png,image/png" 
+                  accept="image/*,.png,.jpg,.jpeg,.webp,.svg" 
                   multiple 
                   onChange={handleBrandImageUpload} 
                   className="sr-only" 
@@ -602,7 +719,7 @@ export function PersonalizeForm({ initialSettings }: { initialSettings: any }) {
                   <span className="font-display font-bold uppercase text-xs text-center px-1 truncate w-full text-zinc-100">{item.value}</span>
                 )}
                 <span className="absolute bottom-1 text-[9px] uppercase font-bold text-zinc-400 tracking-wider">
-                  {item.type === 'image' ? 'PNG' : 'Texto'}
+                  {item.type === 'image' ? 'Imagen' : 'Texto'}
                 </span>
                 <button 
                   type="button" 

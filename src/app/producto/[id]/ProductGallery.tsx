@@ -61,8 +61,12 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
               key={i} 
               type="button"
               onClick={() => setCurrentIndex(i)}
+              style={currentIndex === i ? {
+                borderColor: 'var(--card-glow-color, #10b981)',
+                boxShadow: '0 0 12px rgba(var(--card-glow-rgb, 16, 185, 129), 0.35)',
+              } : undefined}
               className={`w-[75px] h-[75px] lg:w-[120px] lg:h-[120px] rounded-2xl bg-white relative overflow-hidden shrink-0 border-2 cursor-pointer transition-all ${
-                currentIndex === i ? 'border-emerald-400 shadow-md scale-105 ring-2 ring-emerald-400/30' : 'border-zinc-800 hover:border-zinc-600 opacity-70 hover:opacity-100'
+                currentIndex === i ? 'scale-105' : 'border-zinc-200 hover:border-zinc-400 opacity-70 hover:opacity-100'
               }`}
             >
               <Image src={img} alt={`${title} - miniatura ${i + 1}`} fill unoptimized className="object-contain p-2" />

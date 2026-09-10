@@ -35,6 +35,7 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
     store_logo_text: formData.get('store_logo_text'),
     instagram_url: formData.get('instagram_url'),
     facebook_url: formData.get('facebook_url'),
+    tiktok_url: formData.get('tiktok_url'),
     hero_title: formData.get('hero_title'),
     hero_title_color: formData.get('hero_title_color'),
     hero_subtitle: formData.get('hero_subtitle'),
@@ -61,6 +62,7 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
     gradient_color_to: formData.get('gradient_color_to') || '#09090b',
     gradient_text_primary: formData.get('gradient_text_primary') || '#ffffff',
     gradient_text_secondary: formData.get('gradient_text_secondary') || '#d4d4d8',
+    card_glow_color: formData.get('card_glow_color') || '#10b981',
     google_tag_id: formData.get('google_tag_id') ? String(formData.get('google_tag_id')).trim() : null,
     google_site_verification: formData.get('google_site_verification') ? String(formData.get('google_site_verification')).trim() : null,
     updated_at: new Date().toISOString(),
@@ -196,16 +198,17 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
   const brandFiles = formData.getAll('new_brand_files') as File[];
   for (const file of brandFiles) {
     if (file && file.size > 0) {
-      const fileExt = file.name.split('.').pop()?.toLowerCase();
-      // Validar estrictamente que sea formato PNG
-      if (fileExt !== 'png' && file.type !== 'image/png') {
-        return { success: false, error: 'Solo se permiten imágenes en formato PNG para los logos de las marcas.' };
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const isImg = file.type.startsWith('image/') || ['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif', 'avif'].includes(fileExt);
+      if (!isImg) {
+        return { success: false, error: 'Solo se permiten archivos de imagen para los logos de las marcas.' };
       }
-      const fileName = `brand_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.png`;
+      const mimeType = file.type || (fileExt === 'svg' ? 'image/svg+xml' : fileExt === 'jpg' ? 'image/jpeg' : `image/${fileExt}`);
+      const fileName = `brand_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('products')
-        .upload(`settings/${fileName}`, file, { upsert: true, contentType: 'image/png' });
+        .upload(`settings/${fileName}`, file, { upsert: true, contentType: mimeType });
 
       if (!uploadError) {
         const { data: publicUrlData } = supabase.storage
