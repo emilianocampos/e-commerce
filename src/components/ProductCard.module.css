@@ -109,3 +109,40 @@
   font-size: 12px;
   font-weight: 700;
 }
+
+.transferBadge {
+  background-color: #F59E0B;
+  color: #09090B;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  margin-top: 6px;
+  margin-bottom: 4px;
+  display: inline-block;
+  width: fit-content;
+  letter-spacing: -0.01em;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.installmentsRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--shop-gray-dark);
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+.installmentsRow strong {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.mpBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}

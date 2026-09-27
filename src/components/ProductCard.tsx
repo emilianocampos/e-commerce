@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Product } from '@/types/product';
 import { formatCurrency } from '@/lib/utils';
 import { Star } from 'lucide-react';
+import { MercadoPagoLogo } from './MercadoPagoLogo';
 import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
@@ -24,6 +25,11 @@ export function ProductCard({ product }: ProductCardProps) {
   // Determine which price to show where
   const currentPrice = hasDiscount && product.sale_price ? product.sale_price : product.price;
   const originalPrice = hasDiscount ? product.price : null;
+
+  // 10% por Transferencia (precio calculado con 10% menos)
+  const transferPrice = Math.round(currentPrice * 0.9);
+  // 3 cuotas sin interés
+  const installmentPrice = Math.round(currentPrice / 3);
 
   // Calculate Average Rating
   let avgRating = 0;
@@ -96,6 +102,20 @@ export function ProductCard({ product }: ProductCardProps) {
             <span className={styles.price}>{formatCurrency(currentPrice)}</span>
           </div>
         )}
+
+        {/* 10% por Transferencia */}
+        <div className={styles.transferBadge}>
+          {formatCurrency(transferPrice)} por Transferencia
+        </div>
+
+        {/* 3 cuotas con Mercado Pago */}
+        <div className={styles.installmentsRow}>
+          <span>3 cuotas de <strong>{formatCurrency(installmentPrice)}</strong> sin interés</span>
+          <div className={styles.mpBadge}>
+            <span>con</span>
+            <MercadoPagoLogo height={15} />
+          </div>
+        </div>
       </div>
     </Link>
   );

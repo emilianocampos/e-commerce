@@ -138,6 +138,7 @@ export default async function RootLayout({
           '--gradient-text-secondary': settings?.gradient_text_secondary || '#d4d4d8',
           '--card-glow-color': settings?.card_glow_color || '#10b981',
           '--card-glow-rgb': hexToRgb(settings?.card_glow_color || '#10b981'),
+          colorScheme: (settings?.theme_mode === 'dark' || settings?.theme_mode === 'gradient') ? 'dark' : 'light',
         } as React.CSSProperties}
         className={`${inter.variable} ${archivoBlack.variable} min-h-screen flex flex-col font-sans antialiased selection:bg-shop-black selection:text-white transition-colors duration-300`}
       >

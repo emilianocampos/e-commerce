@@ -40,12 +40,22 @@ export function ImportExcel() {
           parsedPrice = parseFloat(cleanStr) || 0;
         }
 
+        const entrada = Number(getVal('entrada')) || 0;
+        const salida = Number(getVal('salida')) || 0;
+        const stockRaw = getVal('stock');
+        let calculatedStock = 0;
+        if (stockRaw !== undefined && stockRaw !== null && String(stockRaw).trim() !== '') {
+          calculatedStock = Number(stockRaw) || 0;
+        } else if (entrada > 0 || salida > 0) {
+          calculatedStock = Math.max(0, entrada - salida);
+        }
+
         return {
           producto: getVal('producto') || getVal('product') || '',
           marca: getVal('marca') || getVal('brand') || '',
-          entrada: Number(getVal('entrada')) || 0,
-          salida: Number(getVal('salida')) || 0,
-          stock: Number(getVal('stock')) || 0,
+          entrada,
+          salida,
+          stock: calculatedStock,
           precio: parsedPrice,
         };
       }).filter(r => r.producto);
@@ -85,7 +95,7 @@ export function ImportExcel() {
             <select 
               value={productType} 
               onChange={(e) => setProductType(e.target.value)} 
-              className="w-full rounded-md border border-zinc-300 p-2 text-zinc-900 bg-white"
+              className="w-full rounded-xl border border-zinc-300 p-2.5 text-sm font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="CLOTHES">Ropa</option>
               <option value="SUPPLEMENT">Suplementos</option>
@@ -98,7 +108,7 @@ export function ImportExcel() {
               <select 
                 value={gender} 
                 onChange={(e) => setGender(e.target.value)} 
-                className="w-full rounded-md border border-zinc-300 p-2 text-zinc-900 bg-white"
+                className="w-full rounded-xl border border-zinc-300 p-2.5 text-sm font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 <option value="MEN">Hombre</option>
                 <option value="WOMEN">Mujer</option>

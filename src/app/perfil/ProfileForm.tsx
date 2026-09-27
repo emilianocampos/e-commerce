@@ -446,10 +446,10 @@ export function ProfileForm({ initialProfile }: { initialProfile: any }) {
                   </div>
                   <div>
                     <h4 className="font-bold text-emerald-950 text-sm">
-                      ✅ Zona de Envío Gratis (Trelew, Chubut)
+                      🚀 Zona de Envío Local: Trelew (En el día) - GRATIS
                     </h4>
                     <p className="text-xs text-emerald-800 leading-relaxed mt-1">
-                      Tu dirección se encuentra dentro de nuestra zona de entrega local sin costo.
+                      Tu dirección se encuentra en Trelew: entrega en el día sin costo de envío adicional.
                     </p>
                   </div>
                 </div>
@@ -462,10 +462,16 @@ export function ProfileForm({ initialProfile }: { initialProfile: any }) {
                   </div>
                   <div>
                     <h4 className="font-bold text-sky-950 text-sm">
-                      🚚 Envío por Correo Argentino
+                      🚚 Envíos y Tiempos de Entrega
                     </h4>
-                    <p className="text-xs text-sky-800 leading-relaxed mt-1">
-                      El costo de envío al resto del país es cotizado al momento del despacho.
+                    <div className="bg-white/80 rounded-xl p-3 border border-sky-200/80 my-2 space-y-1 text-xs text-sky-950 font-medium">
+                      <p>• <strong>Trelew:</strong> Envíos en el día.</p>
+                      <p>• <strong>Zonas aledañas:</strong> 1 día de demora.</p>
+                      <p>• <strong>Resto de Chubut:</strong> 2 a 5 días.</p>
+                      <p>• <strong>Interior del país:</strong> 3 a 7 días.</p>
+                    </div>
+                    <p className="text-xs text-sky-800 leading-relaxed">
+                      El costo de envío al resto del país es cotizado por Correo Argentino tras confirmar tu compra.
                     </p>
                   </div>
                 </div>

@@ -67,6 +67,74 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
   const [productType, setProductType] = useState<string>(initialData?.type || 'CLOTHES');
   const [productGender, setProductGender] = useState<string>(initialData?.gender || 'UNISEX');
 
+  // Stock, Entrada y Salida (Aumenta con entrada, disminuye con salida)
+  const initialStockNum = initialData?.stock !== undefined && initialData?.stock !== null ? Number(initialData.stock) : 0;
+  const initialEntradaNum = initialData?.supplement_information?.entrada !== null && initialData?.supplement_information?.entrada !== undefined
+    ? Number(initialData.supplement_information.entrada)
+    : null;
+  const initialSalidaNum = initialData?.supplement_information?.salida !== null && initialData?.supplement_information?.salida !== undefined
+    ? Number(initialData.supplement_information.salida)
+    : null;
+
+  // initialStock = baseStock + initialEntrada - initialSalida
+  // baseStock = initialStock - (initialEntrada || 0) + (initialSalida || 0)
+  const [baseStock, setBaseStock] = useState<number>(() => {
+    const e = initialEntradaNum ?? 0;
+    const s = initialSalidaNum ?? 0;
+    return initialStockNum - e + s;
+  });
+
+  const [entrada, setEntrada] = useState<string>(
+    initialEntradaNum !== null ? String(initialEntradaNum) : ''
+  );
+  const [salida, setSalida] = useState<string>(
+    initialSalidaNum !== null ? String(initialSalidaNum) : ''
+  );
+  const [stock, setStock] = useState<string | number>(
+    initialData?.stock !== undefined && initialData?.stock !== null ? initialData.stock : ''
+  );
+
+  const handleStockChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setStock(val);
+    if (val === '') {
+      setBaseStock(0);
+    } else {
+      const num = parseInt(val, 10);
+      if (!isNaN(num)) {
+        const eNum = entrada === '' ? 0 : Math.max(0, parseInt(entrada, 10) || 0);
+        const sNum = salida === '' ? 0 : Math.max(0, parseInt(salida, 10) || 0);
+        setBaseStock(num - eNum + sNum);
+      }
+    }
+  };
+
+  const handleEntradaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setEntrada(val);
+    const eNum = val === '' ? 0 : Math.max(0, parseInt(val, 10) || 0);
+    const sNum = salida === '' ? 0 : Math.max(0, parseInt(salida, 10) || 0);
+    const computedStock = Math.max(0, baseStock + eNum - sNum);
+    if (val === '' && salida === '' && baseStock === 0 && !initialData) {
+      setStock('');
+    } else {
+      setStock(computedStock);
+    }
+  };
+
+  const handleSalidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setSalida(val);
+    const eNum = entrada === '' ? 0 : Math.max(0, parseInt(entrada, 10) || 0);
+    const sNum = val === '' ? 0 : Math.max(0, parseInt(val, 10) || 0);
+    const computedStock = Math.max(0, baseStock + eNum - sNum);
+    if (val === '' && entrada === '' && baseStock === 0 && !initialData) {
+      setStock('');
+    } else {
+      setStock(computedStock);
+    }
+  };
+
   // VIP Benefit logic
   const getInitialVipType = () => {
     if (initialData?.vip_discount_percentage === undefined || initialData?.vip_discount_percentage === null) return 'default';
@@ -217,7 +285,7 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
           name="type" 
           value={productType} 
           onChange={(e) => setProductType(e.target.value)} 
-          className="w-full rounded-md border border-zinc-300 p-2 text-zinc-900 bg-white"
+          className="w-full rounded-xl border border-zinc-300 p-2.5 text-sm font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
         >
           <option value="CLOTHES">Ropa</option>
           <option value="SUPPLEMENT">Suplementos</option>
@@ -231,7 +299,7 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
           <div className="space-y-4 md:col-span-2">
             <div className="space-y-2">
               <label className="block text-sm font-bold text-zinc-900">Subcategoría</label>
-              <select name="gender" value={productGender} onChange={(e) => setProductGender(e.target.value)} className="w-full rounded-md border border-zinc-300 p-2 text-zinc-900 bg-white">
+              <select name="gender" value={productGender} onChange={(e) => setProductGender(e.target.value)} className="w-full rounded-xl border border-zinc-300 p-2.5 text-sm font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="MEN">Hombre</option>
                 <option value="WOMEN">Mujer</option>
                 <option value="UNISEX">Urbano</option>
@@ -241,7 +309,7 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
             {productGender === 'UNISEX' && (
               <div className="space-y-2">
                 <label className="block text-sm font-bold text-zinc-900">Género Urbano</label>
-                <select name="urbano_category" defaultValue={initialData?.urbano_category || 'UNISEX'} className="w-full rounded-md border border-zinc-300 p-2 text-zinc-900 bg-white">
+                <select name="urbano_category" defaultValue={initialData?.urbano_category || 'UNISEX'} className="w-full rounded-xl border border-zinc-300 p-2.5 text-sm font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
                   <option value="UNISEX">Unisex</option>
                   <option value="MEN">Hombre</option>
                   <option value="WOMEN">Mujer</option>
@@ -270,7 +338,23 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
         </div>
 
         <Input label="Precio ($)" name="price" type="number" step="0.01" required defaultValue={initialData?.price} placeholder="0.00" />
-        <Input label="Cantidad de stock" name="stock" type="number" required defaultValue={initialData?.stock} placeholder="Ej: 100" />
+        <div className="space-y-1.5">
+          <Input 
+            label="Cantidad de stock" 
+            name="stock" 
+            type="number" 
+            min="0"
+            required 
+            value={stock} 
+            onChange={handleStockChange} 
+            placeholder="Ej: 100" 
+          />
+          {productType === 'SUPPLEMENT' && (
+            <p className="text-[11px] text-zinc-500">
+              ⚡ Se ajusta dinámicamente con <strong>Entrada</strong> (+) y <strong>Salida</strong> (-). También podés editarlo directamente.
+            </p>
+          )}
+        </div>
         <Input label="Precio Oferta ($)" name="sale_price" type="number" step="0.01" defaultValue={initialData?.sale_price || ''} placeholder="0.00 (Opcional)" />
         
         {/* BENEFICIO TARJETA VIP KLONFARK */}
@@ -298,7 +382,7 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
               <select
                 value={vipDiscountType}
                 onChange={(e) => setVipDiscountType(e.target.value)}
-                className="w-full rounded-xl border border-zinc-300 p-2.5 text-sm font-semibold text-zinc-900 bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                className="w-full rounded-xl border border-zinc-300 p-2.5 text-sm font-semibold cursor-pointer focus:ring-2 focus:ring-amber-500 focus:outline-none"
               >
                 <option value="default">✨ Heredar de Tarjeta del Cliente (10% o 15% según tarjeta)</option>
                 <option value="15">15% de Descuento VIP</option>
@@ -487,12 +571,77 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
             <h3 className="font-bold text-blue-900 border-b border-blue-200 pb-2">Información del Suplemento</h3>
             
             <div className="grid gap-4 md:grid-cols-2">
-              <Input label="Entrada (Stock Ingresado)" name="supp_entrada" type="number" defaultValue={initialData?.supplement_information?.entrada || ''} />
-              <Input label="Salida (Stock Retirado)" name="supp_salida" type="number" defaultValue={initialData?.supplement_information?.salida || ''} />
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="supp_entrada" className="block text-sm font-semibold text-zinc-900">
+                    Entrada (Stock Ingresado)
+                  </label>
+                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full border border-emerald-300 flex items-center gap-1">
+                    <span>▲</span> Aumenta Stock (+)
+                  </span>
+                </div>
+                <input
+                  id="supp_entrada"
+                  name="supp_entrada"
+                  type="number"
+                  min="0"
+                  value={entrada}
+                  onChange={handleEntradaChange}
+                  placeholder="0"
+                  className="flex h-11 w-full rounded-xl border border-zinc-300 px-3.5 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors bg-white text-zinc-900"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="supp_salida" className="block text-sm font-semibold text-zinc-900">
+                    Salida (Stock Retirado)
+                  </label>
+                  <span className="text-[11px] font-bold text-rose-700 bg-rose-100/80 px-2 py-0.5 rounded-full border border-rose-300 flex items-center gap-1">
+                    <span>▼</span> Disminuye Stock (-)
+                  </span>
+                </div>
+                <input
+                  id="supp_salida"
+                  name="supp_salida"
+                  type="number"
+                  min="0"
+                  value={salida}
+                  onChange={handleSalidaChange}
+                  placeholder="0"
+                  className="flex h-11 w-full rounded-xl border border-zinc-300 px-3.5 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 transition-colors bg-white text-zinc-900"
+                />
+              </div>
+
+              {/* Panel de Balance de Stock en Tiempo Real */}
+              <div className="md:col-span-2 bg-white/95 rounded-xl p-3.5 border border-blue-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="text-xs font-bold text-blue-950 flex items-center gap-1.5">
+                    <span>📦 Balance de Inventario Calculado</span>
+                  </div>
+                  <div className="text-[11px] text-zinc-500 flex items-center gap-2 flex-wrap">
+                    <span>Stock Base: <strong className="text-zinc-800">{baseStock}</strong></span>
+                    <span>•</span>
+                    <span className="text-emerald-700 font-bold">
+                      {entrada !== '' && Number(entrada) > 0 ? `+${entrada}` : '+0'} Entrada
+                    </span>
+                    <span>•</span>
+                    <span className="text-rose-700 font-bold">
+                      {salida !== '' && Number(salida) > 0 ? `-${salida}` : '-0'} Salida
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 self-start sm:self-auto">
+                  <span className="text-xs font-semibold text-blue-800">Stock Resultante:</span>
+                  <span className="text-sm font-black text-blue-950">
+                    {stock === '' ? 0 : stock} unidades
+                  </span>
+                </div>
+              </div>
             </div>
             <div className="mt-4 space-y-2">
               <label className="block text-sm font-bold text-zinc-900">Sabor</label>
-              <select name="supp_flavor" defaultValue={initialData?.supplement_information?.flavor || ''} className="w-full rounded-md border border-zinc-300 p-2 text-zinc-900 bg-white">
+              <select name="supp_flavor" defaultValue={initialData?.supplement_information?.flavor || ''} className="w-full rounded-xl border border-zinc-300 p-2.5 text-sm font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">Seleccionar Sabor...</option>
                 <option value="Neutro/sin sabor">Neutro/sin sabor</option>
                 <option value="Chocolate">Chocolate</option>

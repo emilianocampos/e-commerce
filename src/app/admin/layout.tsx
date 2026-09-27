@@ -25,6 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       style={{
         '--card-glow-color': cardGlowColor,
         '--card-glow-rgb': cardGlowRgb,
+        colorScheme: themeMode === 'dark' ? 'dark' : 'light',
       } as React.CSSProperties}
     >
       <AdminNavigation themeMode={themeMode}>{children}</AdminNavigation>

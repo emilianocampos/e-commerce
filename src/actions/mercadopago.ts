@@ -33,6 +33,21 @@ export async function createCheckoutPreference(
       return { requireLogin: true };
     }
 
+    // Verificar que el cliente tenga número de teléfono registrado antes de comprar
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('id, phone')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    const cleanPhoneDigits = (userProfile?.phone || '').replace(/\D/g, '');
+    if (!cleanPhoneDigits || cleanPhoneDigits.length < 6) {
+      return {
+        requirePhone: true,
+        message: 'Para coordinar la entrega y el despacho, necesitamos tu número de teléfono o WhatsApp antes de pagar.'
+      };
+    }
+
     const productIds = cartItems.map(item => item.productId);
 
     // products: Trae la data REAL y SEGURA de los productos con configuración VIP

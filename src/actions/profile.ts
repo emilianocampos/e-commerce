@@ -27,6 +27,8 @@ export async function getUserProfile() {
   return {
     ...profile,
     email: profile?.email || user.email || '',
+    phone: profile?.phone || '',
+    telefono: profile?.phone || '',
   };
 }
 
@@ -57,6 +59,10 @@ export async function updateUserProfile(prevState: any, formData: FormData) {
     return { success: false, error: 'Por favor completa todos los campos obligatorios (*).' };
   }
 
+  if (telefono.replace(/\D/g, '').length < 6) {
+    return { success: false, error: 'El número de teléfono debe tener al menos 6 dígitos numéricos.' };
+  }
+
   const full_name = `${nombre} ${apellido}`.trim();
   const fullAddress = [
     `${calle} ${numero}`,
@@ -74,7 +80,6 @@ export async function updateUserProfile(prevState: any, formData: FormData) {
     apellido,
     dni,
     phone: telefono,
-    telefono,
     address: fullAddress,
     calle,
     numero,
@@ -87,7 +92,6 @@ export async function updateUserProfile(prevState: any, formData: FormData) {
     postal_code: codigo_postal,
     codigo_postal,
     shipping_quote_required,
-    updated_at: new Date().toISOString(),
   };
 
   const { error } = await supabase
@@ -102,6 +106,39 @@ export async function updateUserProfile(prevState: any, formData: FormData) {
 
   revalidatePath('/perfil');
   revalidatePath('/mis-pedidos');
+  revalidatePath('/cart');
 
   return { success: true, message: '¡Perfil actualizado exitosamente!' };
+}
+
+/**
+ * Permite guardar rápidamente el número de teléfono/WhatsApp de un usuario
+ * si no lo tenía configurado previamente antes de comprar.
+ */
+export async function updateUserPhone(phone: string) {
+  const user = await getUser();
+  if (!user) {
+    return { success: false, error: 'Usuario no autenticado' };
+  }
+
+  const cleanPhone = phone.trim();
+  if (!cleanPhone || cleanPhone.replace(/\D/g, '').length < 6) {
+    return { success: false, error: 'Por favor ingresa un número de teléfono válido (mínimo 6 dígitos).' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('profiles')
+    .update({ phone: cleanPhone })
+    .eq('id', user.id);
+
+  if (error) {
+    console.error('Error saving user phone:', error.message);
+    return { success: false, error: 'Error al guardar el teléfono: ' + error.message };
+  }
+
+  revalidatePath('/perfil');
+  revalidatePath('/cart');
+
+  return { success: true };
 }

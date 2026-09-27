@@ -95,30 +95,75 @@ body[data-theme="dark"] main:not(.admin-container *) .border-zinc-300 {
 /* FORMULARIOS: TEXTO SIEMPRE NÍTIDO EN MODO OSCURO Y CLARO  */
 /* ========================================================= */
 
+/* SELECT Y OPTIONS: REGLAS BASE Y VISIBILIDAD UNIVERSAL */
+select {
+  color-scheme: light dark;
+}
+
+select option,
+select optgroup {
+  font-family: inherit;
+  font-size: 14px;
+}
+
 /* MODO OSCURO: Fondo oscuro y letras SIEMPRE BLANCAS NÍTIDAS */
 body[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
 body[data-theme="dark"] select,
-body[data-theme="dark"] textarea {
+body[data-theme="dark"] textarea,
+body[data-theme="gradient"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+body[data-theme="gradient"] select,
+body[data-theme="gradient"] textarea {
+  color-scheme: dark !important;
   background-color: #18181b !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
   border-color: #3f3f46 !important;
 }
 
+/* Opciones de los SELECT en MODO OSCURO (Tienda y Admin) */
+body[data-theme="dark"] select option,
+body[data-theme="dark"] select optgroup,
+body[data-theme="gradient"] select option,
+body[data-theme="gradient"] select optgroup,
+.admin-container[data-theme="dark"] select option,
+.admin-container[data-theme="dark"] select optgroup,
+.admin-container[data-theme="gradient"] select option,
+.admin-container[data-theme="gradient"] select optgroup {
+  color-scheme: dark !important;
+  background-color: #18181b !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+body[data-theme="dark"] select option:checked,
+body[data-theme="gradient"] select option:checked,
+.admin-container[data-theme="dark"] select option:checked,
+.admin-container[data-theme="gradient"] select option:checked {
+  background-color: #27272a !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
 body[data-theme="dark"] input::placeholder,
-body[data-theme="dark"] textarea::placeholder {
+body[data-theme="dark"] textarea::placeholder,
+body[data-theme="gradient"] input::placeholder,
+body[data-theme="gradient"] textarea::placeholder {
   color: #a1a1aa !important;
   -webkit-text-fill-color: #a1a1aa !important;
 }
 
 body[data-theme="dark"] input:focus,
 body[data-theme="dark"] select:focus,
-body[data-theme="dark"] textarea:focus {
+body[data-theme="dark"] textarea:focus,
+body[data-theme="gradient"] input:focus,
+body[data-theme="gradient"] select:focus,
+body[data-theme="gradient"] textarea:focus {
   border-color: var(--card-glow-color, #10b981) !important;
   outline: none !important;
 }
 
-body[data-theme="dark"] label {
+body[data-theme="dark"] label,
+body[data-theme="gradient"] label {
   color: #ffffff !important;
 }
 
@@ -126,7 +171,11 @@ body[data-theme="dark"] label {
 body[data-theme="dark"] input:-webkit-autofill,
 body[data-theme="dark"] input:-webkit-autofill:hover, 
 body[data-theme="dark"] input:-webkit-autofill:focus,
-body[data-theme="dark"] input:-webkit-autofill:active {
+body[data-theme="dark"] input:-webkit-autofill:active,
+body[data-theme="gradient"] input:-webkit-autofill,
+body[data-theme="gradient"] input:-webkit-autofill:hover, 
+body[data-theme="gradient"] input:-webkit-autofill:focus,
+body[data-theme="gradient"] input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px #18181b inset !important;
   box-shadow: 0 0 0 1000px #18181b inset !important;
   -webkit-text-fill-color: #ffffff !important;
@@ -138,11 +187,36 @@ body[data-theme="dark"] input:-webkit-autofill:active {
 /* MODO CLARO: Fondo blanco y letras SIEMPRE NEGRAS NÍTIDAS */
 body[data-theme="light"]:not(.admin-container) input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
 body[data-theme="light"]:not(.admin-container) select,
-body[data-theme="light"]:not(.admin-container) textarea {
+body[data-theme="light"]:not(.admin-container) textarea,
+body:not([data-theme="dark"]):not([data-theme="gradient"]) main:not(.admin-container *) input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+body:not([data-theme="dark"]):not([data-theme="gradient"]) main:not(.admin-container *) select,
+body:not([data-theme="dark"]):not([data-theme="gradient"]) main:not(.admin-container *) textarea {
+  color-scheme: light !important;
   background-color: #ffffff !important;
   color: #09090b !important;
   -webkit-text-fill-color: #09090b !important;
   border-color: #e4e4e7 !important;
+}
+
+/* Opciones de los SELECT en MODO CLARO (Tienda y Admin) */
+body[data-theme="light"]:not(.admin-container) select option,
+body[data-theme="light"]:not(.admin-container) select optgroup,
+body:not([data-theme="dark"]):not([data-theme="gradient"]) select option,
+body:not([data-theme="dark"]):not([data-theme="gradient"]) select optgroup,
+.admin-container:not([data-theme="dark"]):not([data-theme="gradient"]) select option,
+.admin-container:not([data-theme="dark"]):not([data-theme="gradient"]) select optgroup {
+  color-scheme: light !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+body[data-theme="light"]:not(.admin-container) select option:checked,
+body:not([data-theme="dark"]):not([data-theme="gradient"]) select option:checked,
+.admin-container:not([data-theme="dark"]):not([data-theme="gradient"]) select option:checked {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
 }
 
 body[data-theme="light"]:not(.admin-container) input::placeholder,
@@ -415,8 +489,10 @@ body[data-theme="dark"] main .price-track-white {
 .admin-container[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
 .admin-container[data-theme="dark"] select,
 .admin-container[data-theme="dark"] textarea {
+  color-scheme: dark !important;
   background-color: #18181b !important;
   color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
   border: 1px solid #3f3f46 !important;
   border-radius: 0.75rem !important;
 }

@@ -24,13 +24,22 @@ export default function EnviosPage() {
           <p className="mb-4">
             Dependiendo de tu ubicación geográfica, los tiempos estimados de entrega son:
           </p>
-          <ul className="list-disc pl-6 space-y-2 mb-6">
-            <li><strong>CABA y GBA:</strong> Entre 2 y 4 días hábiles una vez despachado el pedido.</li>
-            <li><strong>Resto del país:</strong> Entre 4 y 7 días hábiles una vez despachado.</li>
-            <li><strong>Provincias del Sur (Tierra del Fuego, Santa Cruz, Chubut):</strong> Entre 6 y 10 días hábiles.</li>
+          <ul className="list-disc pl-6 space-y-3 mb-6">
+            <li>
+              <strong>Trelew (Chubut):</strong> 🚀 <strong>Envíos en el día</strong> (entrega local directa).
+            </li>
+            <li>
+              <strong>Zonas aledañas (Rawson, Gaiman, Playa Unión, etc.):</strong> 🚚 <strong>1 día de demora</strong>.
+            </li>
+            <li>
+              <strong>Resto de la provincia de Chubut:</strong> 📦 De <strong>2 a 5 días</strong> hábiles.
+            </li>
+            <li>
+              <strong>Interior del país (Resto de Argentina):</strong> ✈️ De <strong>3 a 7 días</strong> hábiles a través de Correo Argentino.
+            </li>
           </ul>
           <p className="text-sm bg-zinc-50 p-4 border border-zinc-200 rounded-xl">
-            * <em>Nota: Los tiempos de envío corren a partir de que el pedido ha sido procesado, empaquetado y entregado al correo. Los pedidos realizados en días feriados o fines de semana serán procesados el siguiente día hábil.</em>
+            * <em>Nota: Los tiempos de envío corren a partir de que el pedido ha sido procesado y empaquetado. En Trelew las entregas se coordinan de forma inmediata en el día. Para envíos al interior, se realiza el despacho por Correo Argentino.</em>
           </p>
 
           <h2 className="text-2xl font-bold text-zinc-900 mt-8 mb-4">Costos de Envío</h2>

@@ -62,31 +62,114 @@ export async function login(formData: FormData) {
  * @returns {Promise<{error: string} | void>} Un error en caso de fallo, o redirige en éxito.
  */
 export async function register(formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-  const nombre = formData.get('nombre') as string;
-  const apellido = formData.get('apellido') as string;
-  const dni = formData.get('dni') as string;
-  const telefono = formData.get('telefono') as string;
-  const calle = formData.get('calle') as string;
-  const numero = formData.get('numero') as string;
-  const piso = formData.get('piso') as string;
-  const departamento = formData.get('departamento') as string;
-  const localidad = (formData.get('localidad') || formData.get('ciudad')) as string;
-  const provincia = formData.get('provincia') as string;
-  const codigo_postal = formData.get('codigo_postal') as string;
-  const referencias = formData.get('referencias') as string;
+  const email = (formData.get('email') as string || '').trim().toLowerCase();
+  const password = formData.get('password') as string || '';
+  const confirmPassword = formData.get('confirm_password') as string || '';
+  const nombre = (formData.get('nombre') as string || '').trim();
+  const apellido = (formData.get('apellido') as string || '').trim();
+  const dni = (formData.get('dni') as string || '').trim();
+  const telefono = (formData.get('telefono') as string || '').trim();
+  const calle = (formData.get('calle') as string || '').trim();
+  const numero = (formData.get('numero') as string || '').trim();
+  const piso = (formData.get('piso') as string || '').trim();
+  const departamento = (formData.get('departamento') as string || '').trim();
+  const localidad = ((formData.get('localidad') || formData.get('ciudad')) as string || '').trim();
+  const provincia = (formData.get('provincia') as string || '').trim();
+  const codigo_postal = (formData.get('codigo_postal') as string || '').trim();
+  const referencias = (formData.get('referencias') as string || '').trim();
   const shipping_quote_required = formData.get('shipping_quote_required') === 'true';
 
-  if (!email || !password || !nombre || !apellido || !dni || !telefono || !calle || !numero || !localidad || !provincia || !codigo_postal) {
-    return { error: 'Por favor completa todos los campos obligatorios.' };
+  // 1. Validaciones de presencia de campos obligatorios
+  if (!email) return { error: 'El correo electrónico es obligatorio.' };
+  if (!password) return { error: 'La contraseña es obligatoria.' };
+  if (!nombre) return { error: 'El nombre es obligatorio.' };
+  if (!apellido) return { error: 'El apellido es obligatorio.' };
+  if (!dni) return { error: 'El DNI es obligatorio.' };
+  if (!telefono) return { error: 'El teléfono es obligatorio.' };
+  if (!calle) return { error: 'La calle es obligatoria.' };
+  if (!numero) return { error: 'El número de calle es obligatorio.' };
+  if (!provincia) return { error: 'Debes seleccionar una provincia.' };
+  if (!localidad) return { error: 'Debes seleccionar una localidad.' };
+  if (!codigo_postal) return { error: 'El código postal es obligatorio.' };
+
+  // 2. Validación de formato de email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { error: 'Por favor ingresa un correo electrónico válido (ej: usuario@email.com).' };
   }
+
+  // 3. Validación de contraseña
+  if (password.length < 6) {
+    return { error: 'La contraseña debe tener al menos 6 caracteres.' };
+  }
+  if (confirmPassword && password !== confirmPassword) {
+    return { error: 'Las contraseñas no coinciden.' };
+  }
+
+  // 4. Validación de nombre y apellido
+  if (nombre.length < 2) {
+    return { error: 'El nombre debe tener al menos 2 caracteres.' };
+  }
+  if (apellido.length < 2) {
+    return { error: 'El apellido debe tener al menos 2 caracteres.' };
+  }
+
+  // 5. Validación de DNI
+  const dniClean = dni.replace(/\D/g, '');
+  if (dniClean.length < 7 || dniClean.length > 9) {
+    return { error: 'El DNI debe contener entre 7 y 9 dígitos numéricos.' };
+  }
+
+  // 6. Validación de teléfono
+  const phoneClean = telefono.replace(/\D/g, '');
+  if (phoneClean.length < 8 || phoneClean.length > 15) {
+    return { error: 'El número de teléfono debe tener entre 8 y 15 dígitos numéricos.' };
+  }
+
+  // 7. Validación de dirección
+  if (calle.length < 2) {
+    return { error: 'La calle debe tener al menos 2 caracteres.' };
+  }
+  if (codigo_postal.length < 3) {
+    return { error: 'El código postal no es válido.' };
+  }
+
+  const fullAddress = [
+    `${calle} ${numero}`,
+    piso ? `Piso ${piso}` : '',
+    departamento ? `Dpto ${departamento}` : '',
+    provincia ? `Prov ${provincia}` : '',
+    referencias ? `Ref: ${referencias}` : ''
+  ].filter(Boolean).join(', ');
+
+  const fullName = `${nombre} ${apellido}`.trim();
 
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        full_name: fullName,
+        nombre,
+        apellido,
+        dni: dniClean,
+        phone: telefono,
+        calle,
+        numero,
+        piso,
+        departamento,
+        referencias,
+        city: localidad,
+        provincia,
+        localidad,
+        postal_code: codigo_postal,
+        codigo_postal,
+        shipping_quote_required,
+        address: fullAddress,
+      },
+    },
   });
 
   if (error) {
@@ -94,24 +177,15 @@ export async function register(formData: FormData) {
   }
 
   if (data.user) {
-    const fullAddress = [
-      `${calle} ${numero}`,
-      piso ? `Piso ${piso}` : '',
-      departamento ? `Dpto ${departamento}` : '',
-      provincia ? `Prov ${provincia}` : '',
-      referencias ? `Ref: ${referencias}` : ''
-    ].filter(Boolean).join(', ');
-
     const adminSupabase = createAdminClient();
-    await adminSupabase.from('profiles').upsert({
+    const { error: profileError } = await adminSupabase.from('profiles').upsert({
       id: data.user.id,
       email: email,
-      full_name: `${nombre} ${apellido}`.trim(),
+      full_name: fullName,
       nombre: nombre,
       apellido: apellido,
-      dni: dni,
+      dni: dniClean,
       phone: telefono,
-      telefono: telefono,
       address: fullAddress,
       calle: calle,
       numero: numero,
@@ -124,7 +198,12 @@ export async function register(formData: FormData) {
       postal_code: codigo_postal,
       codigo_postal: codigo_postal,
       shipping_quote_required: shipping_quote_required,
+      role: 'user',
     });
+
+    if (profileError) {
+      console.error('Error guardando perfil tras registro:', profileError.message);
+    }
   }
 
   // 6. En caso de éxito, redirigimos al inicio de sesión con un mensaje de éxito
