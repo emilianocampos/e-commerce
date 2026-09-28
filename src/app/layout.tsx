@@ -52,6 +52,16 @@ export const metadata: Metadata = {
     title: "KLONFARK | Tu estilo, tu esencia",
     description: "Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida.",
   },
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.png",
+  },
 };
 
 import Script from 'next/script';
