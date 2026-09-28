@@ -13,7 +13,8 @@ import { getUser, getProfile } from "@/lib/auth";
 import { getStoreSettings } from "@/actions/settings";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { hexToRgb } from "@/lib/utils";
-
+import { Suspense } from "react";
+import { RouteCurtainLoader, CurtainLoaderFallback } from "@/components/RouteCurtainLoader";
 import NextTopLoader from 'nextjs-toploader';
 
 // 1. Configuramos la fuente Inter que Next.js cargará automáticamente optimizada
@@ -142,6 +143,9 @@ export default async function RootLayout({
         } as React.CSSProperties}
         className={`${inter.variable} ${archivoBlack.variable} min-h-screen flex flex-col font-sans antialiased selection:bg-shop-black selection:text-white transition-colors duration-300`}
       >
+        <Suspense fallback={<CurtainLoaderFallback brandName={settings?.store_name || "KLONFARK"} />}>
+          <RouteCurtainLoader brandName={settings?.store_name || "KLONFARK"} />
+        </Suspense>
         <NextTopLoader
           color="#000000"
           initialPosition={0.08}

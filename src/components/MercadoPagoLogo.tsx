@@ -3,13 +3,14 @@ import React from 'react';
 interface MercadoPagoLogoProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
+  height?: number;
 }
 
-export function MercadoPagoLogo({ className = '', size = 'md' }: MercadoPagoLogoProps) {
+export function MercadoPagoLogo({ className = '', size = 'md', height }: MercadoPagoLogoProps) {
   // Proporción exacta del óvalo oficial de Mercado Pago
-  const iconHeight = size === 'sm' ? 15 : size === 'lg' ? 22 : 18;
+  const iconHeight = height ?? (size === 'sm' ? 15 : size === 'lg' ? 22 : 18);
   const iconWidth = Math.round(iconHeight * 1.37);
-  const textSize = size === 'sm' ? 'text-[10px]' : size === 'lg' ? 'text-[13px]' : 'text-[11px]';
+  const textSize = iconHeight <= 16 ? 'text-[10px]' : iconHeight >= 22 ? 'text-[13px]' : 'text-[11px]';
 
   return (
     <span className={`inline-flex items-center gap-1.5 align-middle select-none ${className}`}>
