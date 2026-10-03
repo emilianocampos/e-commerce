@@ -15,6 +15,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { hexToRgb } from "@/lib/utils";
 import { Suspense } from "react";
 import { RouteCurtainLoader, CurtainLoaderFallback } from "@/components/RouteCurtainLoader";
+import { AuthListener } from "@/components/AuthListener";
 import NextTopLoader from 'nextjs-toploader';
 
 // 1. Configuramos la fuente Inter que Next.js cargará automáticamente optimizada
@@ -169,6 +170,7 @@ export default async function RootLayout({
         />
         <WhatsAppButton />
         <CartDrawer />
+        <AuthListener />
         {/* Renderizamos el Navbar pasando los datos del usuario como props para que sepa quién es y qué rol tiene */}
         <NavbarWrapper user={user} role={profile?.role || null} settings={settings} />
         

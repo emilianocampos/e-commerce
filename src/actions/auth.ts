@@ -4,10 +4,130 @@
  * Estas funciones se ejecutan de manera segura en el servidor y mutan el estado
  * de la sesión, sin exponer la lógica al cliente ni requerir APIs intermedias.
  */
-'use server'; // Esta directiva le dice a Next.js que todas las funciones de este archivo deben ejecutarse en el servidor.
+'use server';
 
 import { createClient, createAdminClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+
+/**
+ * Traduce los errores técnicos de Supabase a mensajes claros, amigables y en español.
+ */
+function formatAuthError(message?: string): string {
+  if (!message) return 'Ocurrió un error inesperado. Por favor intenta nuevamente.';
+  
+  const lower = message.toLowerCase();
+  
+  if (lower.includes('invalid login credentials') || lower.includes('invalid credentials')) {
+    return 'El correo electrónico o la contraseña son incorrectos. Por favor verifica tus datos o utiliza "¿Olvidaste tu contraseña?".';
+  }
+  if (lower.includes('email not confirmed')) {
+    return 'Debes confirmar tu correo electrónico antes de ingresar. Por favor revisa tu bandeja de entrada o spam.';
+  }
+  if (lower.includes('user already registered') || lower.includes('already registered')) {
+    return 'Ya existe una cuenta con este correo electrónico. Puedes iniciar sesión directamente.';
+  }
+  if (lower.includes('user not found')) {
+    return 'No encontramos una cuenta registrada con este correo electrónico.';
+  }
+  if (lower.includes('rate limit') || lower.includes('over_email_send_rate_limit')) {
+    return 'Has alcanzado el límite de intentos permitidos. Por favor espera unos minutos antes de volver a intentar.';
+  }
+  if (lower.includes('once every') || lower.includes('security purposes')) {
+    return 'Por motivos de seguridad, debes esperar 60 segundos antes de solicitar otro enlace.';
+  }
+  if (lower.includes('password should be at least')) {
+    return 'La contraseña debe tener al menos 6 caracteres.';
+  }
+  if (lower.includes('token') && (lower.includes('expired') || lower.includes('invalid'))) {
+    return 'El enlace de seguridad ha expirado o ya no es válido. Por favor solicita uno nuevo.';
+  }
+  if (lower.includes('email rate limit exceeded')) {
+    return 'Demasiadas solicitudes enviadas. Espera unos minutos e inténtalo nuevamente.';
+  }
+
+  return 'No pudimos procesar la solicitud con los datos ingresados. Por favor verifica e intenta nuevamente.';
+}
+
+/**
+ * Solicita el restablecimiento de contraseña enviando un correo al usuario con un enlace seguro.
+ * @param {FormData} formData - Contiene el email del usuario.
+ * @returns {Promise<{error?: string, success?: boolean, message?: string}>}
+ */
+export async function requestPasswordReset(formData: FormData) {
+  const email = (formData.get('email') as string || '').trim().toLowerCase();
+
+  if (!email) {
+    return { error: 'Por favor ingresa tu correo electrónico.' };
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { error: 'Por favor ingresa un correo electrónico válido (ej: usuario@email.com).' };
+  }
+
+  try {
+    const headersList = await headers();
+    const host = headersList.get('host');
+    const proto = headersList.get('x-forwarded-proto') || 'http';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (host ? `${proto}://${host}` : 'http://localhost:3000');
+    const redirectTo = `${siteUrl.replace(/\/$/, '')}/auth/callback?next=/actualizar-contrasena`;
+
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+
+    if (error) {
+      console.error('Error in resetPasswordForEmail:', error.message);
+      return { error: formatAuthError(error.message) };
+    }
+
+    return { 
+      success: true, 
+      message: 'Te hemos enviado un correo con las instrucciones para restablecer tu contraseña. Revisa tu bandeja de entrada y spam.' 
+    };
+  } catch (err: any) {
+    console.error('Error solicitando recuperación de contraseña:', err);
+    return { error: 'Ocurrió un error al procesar tu solicitud. Intenta nuevamente.' };
+  }
+}
+
+/**
+ * Actualiza la contraseña del usuario actualmente autenticado (por ejemplo tras hacer clic en el enlace de recuperación).
+ * @param {FormData} formData - Contiene la nueva contraseña y su confirmación.
+ * @returns {Promise<{error?: string} | void>}
+ */
+export async function updatePassword(formData: FormData) {
+  const password = formData.get('password') as string || '';
+  const confirmPassword = formData.get('confirm_password') as string || '';
+
+  if (!password) {
+    return { error: 'La nueva contraseña es obligatoria.' };
+  }
+
+  if (password.length < 6) {
+    return { error: 'La contraseña debe tener al menos 6 caracteres.' };
+  }
+
+  if (password !== confirmPassword) {
+    return { error: 'Las contraseñas no coinciden.' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({
+    password: password,
+  });
+
+  if (error) {
+    console.error('Error actualizando contraseña:', error.message);
+    return { error: formatAuthError(error.message) };
+  }
+
+  // Cerramos la sesión actual para que inicie sesión limpiamente con su nueva credencial
+  await supabase.auth.signOut();
+  redirect('/login?message=Tu contraseña ha sido actualizada con éxito. Inicia sesión con tu nueva contraseña.');
+}
 
 /**
  * Procesa el formulario de inicio de sesión, conectando con Supabase Auth.
@@ -16,12 +136,12 @@ import { redirect } from 'next/navigation';
  */
 export async function login(formData: FormData) {
   // 1. Extraemos el email y contraseña enviados por el usuario desde el formulario
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+  const email = (formData.get('email') as string || '').trim().toLowerCase();
+  const password = formData.get('password') as string || '';
 
   // 2. Validación básica para asegurarnos de que se enviaron ambos datos
   if (!email || !password) {
-    return { error: 'Email y contraseña requeridos' };
+    return { error: 'Por favor ingresa tu email y contraseña.' };
   }
 
   // 3. Inicializamos nuestro cliente de Supabase (específico para el servidor)
@@ -33,9 +153,9 @@ export async function login(formData: FormData) {
     password,
   });
 
-  // 5. Si las credenciales son incorrectas o hay algún error, devolvemos un mensaje de error
+  // 5. Si las credenciales son incorrectas o hay algún error, devolvemos un mensaje amigable
   if (error) {
-    return { error: error.message };
+    return { error: formatAuthError(error.message) };
   }
 
   // 6. Verificamos el rol del usuario para redirigirlo a la sección correspondiente
@@ -173,7 +293,7 @@ export async function register(formData: FormData) {
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: formatAuthError(error.message) };
   }
 
   if (data.user) {

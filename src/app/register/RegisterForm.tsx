@@ -89,6 +89,11 @@ export function RegisterForm() {
       return;
     }
 
+    if (name === 'confirm_password' || name === 'confirmPassword') {
+      setFormData(prev => ({ ...prev, confirmPassword: value }));
+      return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 

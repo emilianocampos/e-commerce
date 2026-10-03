@@ -5,18 +5,18 @@ export const metadata = {
   description: 'Inicia sesión en tu cuenta para continuar.',
 };
 
-export default async function LoginPage(props: { searchParams: Promise<{ message?: string }> }) {
+export default async function LoginPage(props: { searchParams: Promise<{ message?: string; error?: string }> }) {
   const searchParams = await props.searchParams;
   
   return (
     <div className="flex min-h-[calc(100vh-140px)] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm rounded-3xl border border-zinc-200 p-6 sm:p-8 shadow-xl corner-glow-card relative overflow-hidden bg-white">
+      <div className="w-full max-w-sm rounded-3xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 shadow-xl corner-glow-card relative overflow-hidden bg-white dark:bg-zinc-900">
         <div className="mb-6 text-center relative z-10">
-          <h1 className="text-2xl font-extrabold tracking-tight">Bienvenido de nuevo</h1>
-          <p className="text-xs text-zinc-500 mt-1">Ingresa tus credenciales para acceder a tu cuenta</p>
+          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white">Bienvenido de nuevo</h1>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Ingresa tus credenciales para acceder a tu cuenta</p>
         </div>
         <div className="relative z-10">
-          <LoginForm message={searchParams.message} />
+          <LoginForm message={searchParams.message} error={searchParams.error} />
         </div>
       </div>
     </div>

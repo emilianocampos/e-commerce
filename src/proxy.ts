@@ -61,7 +61,7 @@ export default async function proxy(request: NextRequest) {
   // Definimos qué rutas requieren qué nivel de permisos
   const isProtectedAdminRoute = pathname.startsWith('/admin'); // Solo admins
   const isProtectedUserRoute = pathname.startsWith('/perfil') || pathname.startsWith('/checkout'); // Usuarios registrados
-  const isAuthRoute = pathname === '/login' || pathname === '/register'; // Solo usuarios NO registrados
+  const isAuthRoute = pathname === '/login' || pathname === '/register' || pathname === '/recuperar-contrasena'; // Solo usuarios NO registrados
 
   // 6. Si no hay usuario y trata de acceder a cualquier ruta protegida
   if (!user && (isProtectedAdminRoute || isProtectedUserRoute)) {
