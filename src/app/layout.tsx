@@ -78,8 +78,18 @@ export default async function RootLayout({
   const profile = await getProfile();
   const settings = await getStoreSettings();
 
-  const googleTagId = settings?.google_tag_id || process.env.NEXT_PUBLIC_GOOGLE_TAG_ID;
-  const googleSiteVerification = settings?.google_site_verification || process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+  const rawGoogleVerification = settings?.google_site_verification || process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+  const googleSiteVerification = (() => {
+    if (!rawGoogleVerification) return null;
+    let val = String(rawGoogleVerification).trim();
+    const metaMatch = val.match(/content=["']([^"']+)["']/i);
+    if (metaMatch && metaMatch[1]) val = metaMatch[1].trim();
+    if (val.toLowerCase().startsWith('google-site-verification=')) {
+      val = val.substring('google-site-verification='.length).trim();
+    }
+    val = val.replace(/^["']|["']$/g, '').trim();
+    return val || null;
+  })();
   const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://klonfark.com';
   const baseUrl = rawSiteUrl.endsWith('/') ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
 

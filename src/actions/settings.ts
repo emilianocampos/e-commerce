@@ -64,7 +64,18 @@ export async function updateStoreSettings(prevState: any, formData: FormData) {
     gradient_text_secondary: formData.get('gradient_text_secondary') || '#d4d4d8',
     card_glow_color: formData.get('card_glow_color') || '#10b981',
     google_tag_id: formData.get('google_tag_id') ? String(formData.get('google_tag_id')).trim() : null,
-    google_site_verification: formData.get('google_site_verification') ? String(formData.get('google_site_verification')).trim() : null,
+    google_site_verification: (() => {
+      const raw = formData.get('google_site_verification');
+      if (!raw) return null;
+      let val = String(raw).trim();
+      const metaMatch = val.match(/content=["']([^"']+)["']/i);
+      if (metaMatch && metaMatch[1]) val = metaMatch[1].trim();
+      if (val.toLowerCase().startsWith('google-site-verification=')) {
+        val = val.substring('google-site-verification='.length).trim();
+      }
+      val = val.replace(/^["']|["']$/g, '').trim();
+      return val || null;
+    })(),
     updated_at: new Date().toISOString(),
   };
 
