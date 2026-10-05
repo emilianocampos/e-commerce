@@ -90,6 +90,10 @@ export default async function RootLayout({
     val = val.replace(/^["']|["']$/g, '').trim();
     return val || null;
   })();
+
+  const rawGoogleTagId = settings?.google_tag_id || process.env.NEXT_PUBLIC_GOOGLE_TAG_ID;
+  const googleTagId = rawGoogleTagId ? String(rawGoogleTagId).trim() : null;
+
   const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://klonfark.com';
   const baseUrl = rawSiteUrl.endsWith('/') ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
 
