@@ -242,15 +242,6 @@ body[data-theme="light"]:not(.admin-container) input:-webkit-autofill:active {
   caret-color: #09090b !important;
 }
 
-/* ========================================================= */
-/* BARRA DEL FILTRO DE PRECIO (FONDO BLANCO)                 */
-/* ========================================================= */
-.price-track-white,
-body[data-theme="dark"] .price-track-white,
-body[data-theme="dark"] main .price-track-white {
-  background-color: #ffffff !important;
-  border-color: #ffffff !important;
-}
 
 /* ========================================================= */
 /* PANEL DE ADMINISTRACIÓN (.admin-container)                */

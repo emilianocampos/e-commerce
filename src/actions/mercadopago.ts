@@ -20,11 +20,13 @@ export async function createCheckoutPreference(
     vipCardCode?: string;
     isTransferPromo?: boolean;
     promoCode?: string;
+    phone?: string;
   }
 ) {
   try {
     // supabase: Instancia del cliente de base de datos para ejecutar queries con nuestros permisos.
     const supabase = await createClient();
+    const adminClient = createAdminClient();
 
     // Verificar que el usuario haya iniciado sesión antes de permitir la compra.
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -33,19 +35,52 @@ export async function createCheckoutPreference(
       return { requireLogin: true };
     }
 
-    // Verificar que el cliente tenga número de teléfono registrado antes de comprar
-    const { data: userProfile } = await supabase
+    // 1. Si el usuario proporcionó el teléfono en este intento, guardarlo inmediatamente en DB
+    if (options?.phone && options.phone.trim()) {
+      const cleanInput = options.phone.trim();
+      if (cleanInput.replace(/\D/g, '').length >= 6) {
+        const { data: existingProfile } = await adminClient
+          .from('profiles')
+          .select('id, full_name, email, role')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        await adminClient.from('profiles').upsert({
+          id: user.id,
+          email: user.email || '',
+          full_name: existingProfile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
+          phone: cleanInput,
+          role: existingProfile?.role || 'user',
+        }, { onConflict: 'id' });
+      }
+    }
+
+    // 2. Verificar que el cliente tenga número de teléfono registrado antes de comprar
+    const { data: userProfile } = await adminClient
       .from('profiles')
-      .select('id, phone')
+      .select('id, phone, full_name, email, role')
       .eq('id', user.id)
       .maybeSingle();
 
-    const cleanPhoneDigits = (userProfile?.phone || '').replace(/\D/g, '');
+    const resolvedPhone = userProfile?.phone || options?.phone || (user.user_metadata?.phone as string | undefined) || user.phone || '';
+    const cleanPhoneDigits = resolvedPhone.replace(/\D/g, '');
+
     if (!cleanPhoneDigits || cleanPhoneDigits.length < 6) {
       return {
         requirePhone: true,
         message: 'Para coordinar la entrega y el despacho, necesitamos tu número de teléfono o WhatsApp antes de pagar.'
       };
+    }
+
+    // Si el teléfono estaba en metadata pero no en la tabla profiles, persistirlo ahora
+    if (!userProfile || !userProfile.phone) {
+      await adminClient.from('profiles').upsert({
+        id: user.id,
+        email: user.email || '',
+        full_name: userProfile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
+        phone: resolvedPhone,
+        role: userProfile?.role || 'user',
+      }, { onConflict: 'id' });
     }
 
     const productIds = cartItems.map(item => item.productId);
@@ -237,7 +272,7 @@ export async function createCheckoutPreference(
           order_id: order.id.toString(),
         },
         back_urls: {
-          success: `${siteUrl}/pago/exito`,
+          success: `${siteUrl}/pagos/exito`,
           failure: `${siteUrl}/pago/fallo`,
           pending: `${siteUrl}/pago/pendiente`,
         },

@@ -292,19 +292,23 @@ export function Cart() {
           <h2 className={styles.summaryTitle}>Resumen de la compra</h2>
 
           {/* TRANSFER PROMO TOGGLE */}
-          <div className="mb-5 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200">
-            <label className="flex items-start gap-3 cursor-pointer">
+          <div className={`mb-5 p-4 rounded-2xl transition-all border ${
+            isTransferPromo 
+              ? 'bg-emerald-500/10 border-emerald-500/40 shadow-sm shadow-emerald-500/10' 
+              : 'bg-white/5 border-white/10 hover:border-white/20'
+          }`}>
+            <label className="flex items-start gap-3 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={isTransferPromo}
                 onChange={(e) => setIsTransferPromo(e.target.checked)}
-                className="mt-1 w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                className="mt-0.5 w-4 h-4 text-emerald-500 rounded border-zinc-600 bg-zinc-900/80 focus:ring-emerald-500/50 cursor-pointer accent-emerald-500 shrink-0"
               />
               <div className="text-xs">
-                <span className="font-extrabold text-emerald-950 block">
+                <span className="font-extrabold text-white block tracking-wide">
                   💸 Promo Transferencia / Efectivo (-10% OFF)
                 </span>
-                <span className="text-emerald-700 block mt-0.5">
+                <span className="text-zinc-300 block mt-1 leading-relaxed">
                   Aplica automáticamente un 10% de descuento directo sobre tus productos.
                 </span>
               </div>
@@ -315,8 +319,8 @@ export function Cart() {
           <div className="mb-5">
             {!appliedVipCard ? (
               <form onSubmit={handleApplyVip} className="space-y-2">
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <Crown className="w-3.5 h-3.5 text-amber-500" />
+                <label className="block text-xs font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
+                  <Crown className="w-3.5 h-3.5 text-amber-400" />
                   ¿Tenés Tarjeta VIP Klonfark?
                 </label>
                 <div className="flex gap-2">
@@ -332,30 +336,30 @@ export function Cart() {
                   <button
                     type="submit"
                     disabled={isValidatingVip || !vipInput.trim()}
-                    className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm disabled:opacity-50 transition-colors whitespace-nowrap"
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs shadow-sm shadow-orange-500/20 disabled:opacity-50 transition-all whitespace-nowrap cursor-pointer"
                   >
                     {isValidatingVip ? 'Validando...' : 'Aplicar'}
                   </button>
                 </div>
               </form>
             ) : (
-              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-300 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/40 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white flex items-center justify-center shrink-0">
                     <Crown className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-amber-950 block">
+                    <span className="text-xs font-bold text-white block">
                       Tarjeta VIP #{appliedVipCard.cardNumber}
                     </span>
-                    <span className="text-[11px] text-amber-700 block">
+                    <span className="text-[11px] text-amber-300 block">
                       Beneficio activo para {appliedVipCard.clientName}
                     </span>
                   </div>
                 </div>
                 <button
                   onClick={handleRemoveVip}
-                  className="p-1.5 rounded-lg text-amber-800 hover:bg-amber-100 hover:text-amber-950 transition-colors"
+                  className="p-1.5 rounded-lg text-amber-300 hover:bg-amber-500/20 hover:text-white transition-colors"
                   title="Quitar tarjeta VIP"
                 >
                   <X className="w-4 h-4" />
@@ -368,8 +372,8 @@ export function Cart() {
           <div className="mb-5">
             {!appliedCoupon ? (
               <form onSubmit={handleApplyCoupon} className="space-y-2">
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5 text-zinc-600" />
+                <label className="block text-xs font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-orange-500" />
                   ¿Tenés un cupón de descuento?
                 </label>
                 <div className="flex gap-2">
@@ -379,36 +383,36 @@ export function Cart() {
                       placeholder="Ej: POWERFEMME"
                       value={couponInput}
                       onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-xs font-mono font-bold text-zinc-900 placeholder:font-sans placeholder:font-normal placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900"
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-xs font-mono font-bold text-zinc-900 placeholder:font-sans placeholder:font-normal placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={isValidatingCoupon || !couponInput.trim()}
-                    className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs shadow-sm disabled:opacity-50 transition-colors whitespace-nowrap"
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs shadow-sm shadow-orange-500/20 disabled:opacity-50 transition-all whitespace-nowrap cursor-pointer"
                   >
                     {isValidatingCoupon ? 'Validando...' : 'Aplicar'}
                   </button>
                 </div>
               </form>
             ) : (
-              <div className="p-3.5 rounded-2xl bg-zinc-100 border border-zinc-300 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-orange-500/10 border border-orange-500/40 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-zinc-900 text-white flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white flex items-center justify-center shrink-0">
                     <Tag className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-zinc-950 block">
+                    <span className="text-xs font-bold text-white block">
                       Cupón {appliedCoupon.code} (-{appliedCoupon.percentage}%)
                     </span>
-                    <span className="text-[11px] text-zinc-600 block">
+                    <span className="text-[11px] text-zinc-300 block">
                       Descuento aplicado en el resumen
                     </span>
                   </div>
                 </div>
                 <button
                   onClick={handleRemoveCoupon}
-                  className="p-1.5 rounded-lg text-zinc-600 hover:bg-zinc-200 hover:text-zinc-950 transition-colors"
+                  className="p-1.5 rounded-lg text-zinc-400 hover:bg-white/10 hover:text-white transition-colors"
                   title="Quitar cupón"
                 >
                   <X className="w-4 h-4" />

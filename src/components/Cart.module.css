@@ -222,18 +222,20 @@
   font-size: 16px;
 }
 .promoBtn {
-  background-color: var(--shop-black);
-  color: var(--shop-white);
+  background: linear-gradient(to right, #f97316, #f59e0b);
+  color: #ffffff;
   border: none;
   border-radius: 62px;
   padding: 12px 24px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s, transform 0.1s;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
 }
 .promoBtn:hover {
-  opacity: 0.8;
+  opacity: 0.9;
+  transform: scale(1.02);
 }
 .checkoutBtn {
   width: 100%;

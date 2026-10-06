@@ -107,11 +107,10 @@ export function ShopFilters() {
           <div className="px-1">
             {/* BARRA DEL FILTRO DE PRECIO: FONDO BLANCO PURO */}
             <div 
-              className="price-track-white relative h-2 w-full rounded-full mb-6 mt-4 shadow-sm"
-              style={{ backgroundColor: '#ffffff', border: '1px solid #ffffff' }}
+              className="relative h-2 w-full rounded-full mb-6 mt-4 bg-zinc-800 border border-zinc-700/60 shadow-inner"
             >
               <div 
-                className="absolute h-full bg-zinc-900 rounded-full" 
+                className="absolute h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full" 
                 style={{ 
                   left: `${(Number(minPrice) / 100000) * 100}%`, 
                   right: `${100 - (Number(maxPrice) / 100000) * 100}%` 
@@ -127,7 +126,7 @@ export function ShopFilters() {
                   const val = Math.min(Number(e.target.value), Number(maxPrice));
                   setMinPrice(val.toString());
                 }}
-                className="absolute w-full -top-[5px] appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-zinc-900 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-zinc-900 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer"
+                className={`absolute w-full -top-[6px] appearance-none bg-transparent pointer-events-none ${Number(minPrice) > 85000 ? 'z-30' : 'z-20'} [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-zinc-950 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer hover:[&::-webkit-slider-thumb]:scale-110 active:[&::-webkit-slider-thumb]:scale-110 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:bg-zinc-950 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer`}
               />
               <input
                 type="range"
@@ -139,7 +138,7 @@ export function ShopFilters() {
                   const val = Math.max(Number(e.target.value), Number(minPrice));
                   setMaxPrice(val.toString());
                 }}
-                className="absolute w-full -top-[5px] appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-zinc-900 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-zinc-900 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer"
+                className="absolute w-full -top-[6px] appearance-none bg-transparent pointer-events-none z-20 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-zinc-950 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer hover:[&::-webkit-slider-thumb]:scale-110 active:[&::-webkit-slider-thumb]:scale-110 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:bg-zinc-950 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer"
               />
             </div>
             <div className="flex justify-between items-center text-sm font-medium">
@@ -257,7 +256,7 @@ export function ShopFilters() {
 
         <button 
           onClick={applyFilters}
-          className="mt-2 w-full bg-white hover:bg-zinc-200 text-zinc-950 py-3.5 rounded-full font-black text-sm tracking-wide transition-all shadow-lg active:scale-98 cursor-pointer"
+          className="mt-2 w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white py-3.5 rounded-full font-black text-sm tracking-wide transition-all shadow-lg shadow-orange-500/25 active:scale-98 cursor-pointer"
         >
           Aplicar Filtros
         </button>

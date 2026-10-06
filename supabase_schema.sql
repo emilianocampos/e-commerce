@@ -123,8 +123,26 @@ CREATE POLICY "Users can update own notifications"
 ON public.notifications FOR UPDATE 
 USING (auth.uid() = profile_id);
 
-DROP POLICY IF EXISTS "Service role can insert notifications" ON public.notifications;
-CREATE POLICY "Service role can insert notifications" 
-ON public.notifications FOR INSERT 
-WITH CHECK (true);
+-- 9. Políticas para profiles
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
+CREATE POLICY "Public profiles are viewable by everyone" 
+ON public.profiles FOR SELECT 
+USING (true);
+
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
+CREATE POLICY "Users can insert own profile" 
+ON public.profiles FOR INSERT 
+WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+CREATE POLICY "Users can update own profile" 
+ON public.profiles FOR UPDATE 
+USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Admins can manage all profiles" ON public.profiles;
+CREATE POLICY "Admins can manage all profiles" 
+ON public.profiles FOR ALL 
+USING ( (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin' );
 

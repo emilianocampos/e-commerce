@@ -12,10 +12,12 @@ interface BuyNowButtonProps {
 export function BuyNowButton({ productId }: BuyNowButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleBuy = async () => {
+  const handleBuy = async (overridePhone?: string) => {
     setIsLoading(true);
     try {
-      const response = await createCheckoutPreference([{ productId, quantity: 1 }]);
+      const response = await createCheckoutPreference([{ productId, quantity: 1 }], {
+        phone: overridePhone,
+      });
 
       if (response.requireLogin) {
         showToast.warning('Debes iniciar sesión para comprar este producto.', { position: 'top-center' });
@@ -54,7 +56,7 @@ export function BuyNowButton({ productId }: BuyNowButtonProps) {
             return;
           }
           showToast.success('¡Teléfono guardado! Conectando...', { position: 'top-center' });
-          return handleBuy();
+          return handleBuy(phone);
         }
         return;
       }
@@ -79,7 +81,7 @@ export function BuyNowButton({ productId }: BuyNowButtonProps) {
   return (
     <Button
       size="lg"
-      onClick={handleBuy}
+      onClick={() => handleBuy()}
       disabled={isLoading}
       // Se utiliza un color similar al branding de Mercado Pago para mayor confianza
       className="w-full bg-[#009ee3] hover:bg-[#0086c9] text-white transition-colors"

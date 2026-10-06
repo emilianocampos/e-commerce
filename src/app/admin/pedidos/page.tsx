@@ -1,5 +1,4 @@
-import { createClient } from '@/lib/supabase-server';
-import { redirect } from 'next/navigation';
+import { createAdminClient } from '@/lib/supabase-server';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -8,28 +7,28 @@ export const metadata = {
 };
 
 export default async function AdminPedidosPage() {
-  const supabase = await createClient();
+  const adminClient = createAdminClient();
 
-  // La verificación de admin ahora se hace de forma global en src/app/admin/layout.tsx
-
-  // Obtener todas las órdenes junto con el perfil del comprador
-  const { data: orders, error } = await supabase
+  // Obtener todas las órdenes junto con el perfil del comprador de forma segura con adminClient
+  const { data: orders, error } = await adminClient
     .from('orders')
     .select(`
       id,
-      total,
+      total_amount,
       status,
+      shipping_status,
       created_at,
       profiles (
         nombre,
         apellido,
+        full_name,
         email
       )
     `)
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching orders:', error);
+    console.error('Error fetching orders:', error.message);
   }
 
   return (
@@ -54,14 +53,16 @@ export default async function AdminPedidosPage() {
                 <tr key={order.id} className="hover:bg-zinc-50">
                   <td className="px-6 py-4 font-mono text-xs">{order.id.split('-')[0]}...</td>
                   <td className="px-6 py-4">
-                    <p className="font-medium text-zinc-900">{order.profiles?.nombre} {order.profiles?.apellido}</p>
+                    <p className="font-medium text-zinc-900">
+                      {order.profiles?.full_name || `${order.profiles?.nombre || ''} ${order.profiles?.apellido || ''}`.trim() || 'Cliente'}
+                    </p>
                     <p className="text-xs text-zinc-500">{order.profiles?.email}</p>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {new Date(order.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-right font-medium text-zinc-900">
-                    {formatCurrency(order.total)}
+                    {formatCurrency(order.total_amount || 0)}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold uppercase tracking-wider

@@ -20,7 +20,7 @@ export function CheckoutButton({ vipCardCode, isTransferPromo, promoCode }: Chec
   const { items } = useCartStore();
   const router = useRouter();
 
-  const handleBuy = async () => {
+  const handleBuy = async (overridePhone?: string) => {
     if (items.length === 0) return;
     
     setIsLoading(true);
@@ -36,6 +36,7 @@ export function CheckoutButton({ vipCardCode, isTransferPromo, promoCode }: Chec
         vipCardCode,
         isTransferPromo,
         promoCode,
+        phone: overridePhone,
       });
 
       if (response.requireLogin) {
@@ -75,7 +76,7 @@ export function CheckoutButton({ vipCardCode, isTransferPromo, promoCode }: Chec
             return;
           }
           showToast.success('¡Teléfono guardado! Conectando...', { position: 'top-center' });
-          return handleBuy();
+          return handleBuy(phone);
         }
         return;
       }
@@ -99,7 +100,7 @@ export function CheckoutButton({ vipCardCode, isTransferPromo, promoCode }: Chec
 
   return (
     <button
-      onClick={handleBuy}
+      onClick={() => handleBuy()}
       disabled={isLoading || items.length === 0}
       className={styles.checkoutBtn}
     >
