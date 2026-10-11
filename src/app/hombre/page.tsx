@@ -1,5 +1,19 @@
+import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase-server';
 import { ProductCard } from '@/components/ProductCard';
+
+export const metadata: Metadata = {
+  title: 'Hombre',
+  description: 'Descubre nuestra selección exclusiva para hombre en KLONFARK. Ropa urbana, indumentaria deportiva y estilo de vanguardia.',
+  alternates: {
+    canonical: '/hombre',
+  },
+  openGraph: {
+    title: 'Colección Hombre | KLONFARK',
+    description: 'Descubre nuestra selección exclusiva para hombre en KLONFARK. Ropa urbana, indumentaria deportiva y estilo de vanguardia.',
+    url: 'https://klonfark.com/hombre',
+  },
+};
 
 export const revalidate = 0;
 
@@ -9,7 +23,7 @@ export default async function HombrePage() {
   const { data: products, error } = await supabase
     .from('products')
     .select('*')
-    .eq('category', 'hombre')
+    .or('category.eq.hombre,gender.eq.MEN')
     .order('created_at', { ascending: false });
 
   if (error) {

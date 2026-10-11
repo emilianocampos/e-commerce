@@ -9,6 +9,7 @@ import { getUser } from '@/lib/auth';
 import { ProductReviews } from '@/components/ProductReviews';
 import { ProductGallery } from './ProductGallery';
 import { ProductPurchaseSection } from './ProductPurchaseSection';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -21,13 +22,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const title = product ? product.title : 'Producto no encontrado';
   const description = product?.description || 'Detalles del producto en KLONFARK';
   const image = product?.image || '';
+  const baseUrl = getSiteUrl();
+  const canonicalUrl = `${baseUrl}/producto/${resolvedParams.id}`;
 
   return {
     title,
     description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: `${title} | KLONFARK`,
       description,
+      url: canonicalUrl,
       images: image ? [{ url: image }] : [],
     },
     twitter: {
@@ -116,8 +123,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const currentPrice = hasDiscount && product.sale_price ? product.sale_price : product.price;
   const originalPrice = hasDiscount ? product.price : null;
 
-  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://klonfark.com';
-  const baseUrl = rawSiteUrl.endsWith('/') ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
+  const baseUrl = getSiteUrl();
   const productUrl = `${baseUrl}/producto/${product.id}`;
 
   const jsonLd = {

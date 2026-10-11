@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
+import { getSiteUrl } from '@/lib/site-url';
 
 export default function robots(): MetadataRoute.Robots {
-  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://klonfark.com';
-  const baseUrl = rawSiteUrl.endsWith('/') ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
+  const baseUrl = getSiteUrl();
 
   return {
     rules: [
@@ -17,6 +17,9 @@ export default function robots(): MetadataRoute.Robots {
           '/mis-pedidos',
           '/pago/*',
           '/pagos/*',
+          '/carrito',
+          '/actualizar-contrasena',
+          '/recuperar-contrasena',
         ],
       },
       {

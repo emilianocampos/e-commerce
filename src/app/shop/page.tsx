@@ -9,9 +9,13 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Tienda',
   description: 'Explora nuestra colección completa de ropa y accesorios. Encuentra lo que combina con tu estilo en KLONFARK.',
+  alternates: {
+    canonical: '/shop',
+  },
   openGraph: {
     title: 'Tienda | KLONFARK',
     description: 'Explora nuestra colección completa de ropa y accesorios. Encuentra lo que combina con tu estilo en KLONFARK.',
+    url: 'https://klonfark.com/shop',
   }
 };
 

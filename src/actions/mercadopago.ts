@@ -3,6 +3,7 @@
 import { Preference } from 'mercadopago';
 import { mpClient } from '@/lib/mercadopago';
 import { createClient, createAdminClient } from '@/lib/supabase-server';
+import { getSiteUrl } from '@/lib/site-url';
 
 /**
  * Función: createCheckoutPreference
@@ -146,9 +147,7 @@ export async function createCheckoutPreference(
     }
 
     const preference = new Preference(mpClient);
-
-    const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-    const siteUrl = rawSiteUrl.endsWith('/') ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
+    const siteUrl = getSiteUrl();
 
     let orderSubtotal = 0;
     let orderPromoDiscount = 0;

@@ -10,12 +10,13 @@ function escapeXml(unsafe: string): string {
     .replace(/'/g, '&apos;');
 }
 
+import { getSiteUrl } from '@/lib/site-url';
+
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // revalidate every hour
 
 export async function GET() {
-  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://klonfark.com';
-  const baseUrl = rawSiteUrl.endsWith('/') ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
+  const baseUrl = getSiteUrl();
 
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';

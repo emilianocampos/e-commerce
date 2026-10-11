@@ -30,8 +30,14 @@ const archivoBlack = Archivo_Black({
   subsets: ["latin"],
 });
 
+import { getSiteUrl, OFFICIAL_SITE_URL } from "@/lib/site-url";
+
 // 2. Metadatos globales (título y descripción por defecto para SEO)
 export const metadata: Metadata = {
+  metadataBase: new URL(OFFICIAL_SITE_URL),
+  alternates: {
+    canonical: './',
+  },
   title: {
     template: "%s | KLONFARK",
     default: "KLONFARK | Tu estilo, tu esencia",
@@ -43,7 +49,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "KLONFARK | Tu estilo, tu esencia",
     description: "Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida.",
-    url: "https://klonfark.com",
+    url: OFFICIAL_SITE_URL,
     siteName: "KLONFARK",
     locale: "es_AR",
     type: "website",
@@ -94,8 +100,7 @@ export default async function RootLayout({
   const rawGoogleTagId = settings?.google_tag_id || process.env.NEXT_PUBLIC_GOOGLE_TAG_ID;
   const googleTagId = rawGoogleTagId ? String(rawGoogleTagId).trim() : null;
 
-  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://klonfark.com';
-  const baseUrl = rawSiteUrl.endsWith('/') ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
+  const baseUrl = getSiteUrl();
 
   const orgJsonLd = {
     '@context': 'https://schema.org',

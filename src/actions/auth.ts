@@ -9,6 +9,7 @@
 import { createClient, createAdminClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
+import { getSiteUrl } from '@/lib/site-url';
 
 /**
  * Traduce los errores técnicos de Supabase a mensajes claros, amigables y en español.
@@ -68,10 +69,8 @@ export async function requestPasswordReset(formData: FormData) {
 
   try {
     const headersList = await headers();
-    const host = headersList.get('host');
-    const proto = headersList.get('x-forwarded-proto') || 'http';
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (host ? `${proto}://${host}` : 'http://localhost:3000');
-    const redirectTo = `${siteUrl.replace(/\/$/, '')}/auth/callback?next=/actualizar-contrasena`;
+    const siteUrl = getSiteUrl();
+    const redirectTo = `${siteUrl}/auth/callback?next=/actualizar-contrasena`;
 
     const supabase = await createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {

@@ -1,5 +1,19 @@
+import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase-server';
 import { ProductCard } from '@/components/ProductCard';
+
+export const metadata: Metadata = {
+  title: 'Mujer',
+  description: 'Descubre nuestra selección exclusiva para mujer en KLONFARK. Tendencia, estilo urbano y prendas de alta calidad.',
+  alternates: {
+    canonical: '/mujer',
+  },
+  openGraph: {
+    title: 'Colección Mujer | KLONFARK',
+    description: 'Descubre nuestra selección exclusiva para mujer en KLONFARK. Tendencia, estilo urbano y prendas de alta calidad.',
+    url: 'https://klonfark.com/mujer',
+  },
+};
 
 export const revalidate = 0;
 
@@ -9,7 +23,7 @@ export default async function MujerPage() {
   const { data: products, error } = await supabase
     .from('products')
     .select('*')
-    .eq('category', 'mujer')
+    .or('category.eq.mujer,gender.eq.WOMEN')
     .order('created_at', { ascending: false });
 
   if (error) {
