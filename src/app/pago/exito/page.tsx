@@ -29,6 +29,14 @@ export default async function PagoExitoPage({ searchParams }: SuccessPageProps) 
 
   let order = null;
   if (orderId) {
+    if (params.collection_status === 'approved' || params.status === 'approved' || !params.status) {
+      try {
+        const { markOrderAsPaid } = await import('@/actions/orders');
+        await markOrderAsPaid(orderId, mpPaymentId);
+      } catch (e) {
+        console.error('Error aprobando orden en pago/exito:', e);
+      }
+    }
     order = await getOrderById(orderId);
   }
 

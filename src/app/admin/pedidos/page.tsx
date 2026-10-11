@@ -65,12 +65,15 @@ export default async function AdminPedidosPage() {
                     {formatCurrency(order.total_amount || 0)}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold uppercase tracking-wider
-                      ${order.status === 'approved' ? 'bg-green-100 text-green-700' :
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wider
+                      ${order.status === 'approved' || order.status === 'paid' ? 'bg-green-100 text-green-700' :
                         order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                           order.status === 'rejected' || order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
                             'bg-zinc-100 text-zinc-700'}`}>
-                      {order.status}
+                      {order.status === 'approved' || order.status === 'paid' ? '✓ Aprobado' :
+                       order.status === 'cancelled' ? '✕ Cancelado' :
+                       order.status === 'rejected' ? '✕ Rechazado' :
+                       order.status === 'pending' ? '⏳ Pendiente' : order.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">

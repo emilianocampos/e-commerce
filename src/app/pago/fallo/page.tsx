@@ -6,7 +6,23 @@ export const metadata = {
   description: 'Hubo un inconveniente al procesar tu pago.',
 };
 
-export default function PagoFalloPage() {
+interface PagoFalloProps {
+  searchParams: Promise<{
+    external_reference?: string;
+    payment_id?: string;
+  }>;
+}
+
+export default async function PagoFalloPage({ searchParams }: PagoFalloProps) {
+  const params = await searchParams;
+  if (params?.external_reference) {
+    try {
+      const { markOrderAsCancelled } = await import('@/actions/orders');
+      await markOrderAsCancelled(params.external_reference, 'El pago fue cancelado o rechazado.');
+    } catch (e) {
+      console.error('Error cancelando orden en pago/fallo:', e);
+    }
+  }
   return (
     <div className="min-h-[80vh] bg-zinc-950 text-white flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-xl bg-zinc-900/80 border border-zinc-800 backdrop-blur-xl rounded-3xl p-6 sm:p-10 shadow-2xl shadow-rose-950/20 relative overflow-hidden text-center">

@@ -29,6 +29,15 @@ export default async function PagosExitoPage({ searchParams }: SuccessPageProps)
 
   let order = null;
   if (orderId) {
+    // Si viene de una transacción aprobada de Mercado Pago, registrar de inmediato como pagada/aprobada
+    if (params.collection_status === 'approved' || params.status === 'approved' || !params.status) {
+      try {
+        const { markOrderAsPaid } = await import('@/actions/orders');
+        await markOrderAsPaid(orderId, mpPaymentId);
+      } catch (e) {
+        console.error('Error aprobando orden en pagos/exito:', e);
+      }
+    }
     order = await getOrderById(orderId);
   }
 
