@@ -291,10 +291,11 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
             </div>
           </div>
 
-          <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl mt-4">
-            <p className="text-xs text-blue-700 leading-relaxed">
-              🔔 Al modificar este estado, el cliente recibirá automáticamente una notificación en su panel de pedidos.
-            </p>
+          <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl mt-4 admin-info-box flex items-start gap-2.5 shadow-xs">
+            <span className="text-base shrink-0 leading-none select-none">🔔</span>
+            <span className="text-xs text-blue-800 font-medium leading-relaxed keep-text-color">
+              Al modificar este estado, el cliente recibirá automáticamente una notificación en su panel de pedidos.
+            </span>
           </div>
         </div>
 
@@ -387,19 +388,31 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
                 )}
                 {order.promo_discount_amount && Number(order.promo_discount_amount) > 0 && (
                   <tr>
-                    <td colSpan={3} className="pt-2 text-right text-emerald-600 font-normal">Descuento Transferencia:</td>
-                    <td className="pt-2 text-right text-emerald-600">-{formatCurrency(order.promo_discount_amount)}</td>
+                    <td colSpan={3} className="pt-2 text-right font-normal">
+                      <span className="text-emerald-500 font-medium">Descuento Transferencia:</span>
+                    </td>
+                    <td className="pt-2 text-right">
+                      <span className="text-emerald-500 font-bold">-{formatCurrency(order.promo_discount_amount)}</span>
+                    </td>
                   </tr>
                 )}
                 {order.vip_discount_amount && Number(order.vip_discount_amount) > 0 && (
                   <tr>
-                    <td colSpan={3} className="pt-2 text-right text-amber-700 font-normal">Beneficio VIP ({order.vip_card_code || 'VIP'}):</td>
-                    <td className="pt-2 text-right text-amber-700">-{formatCurrency(order.vip_discount_amount)}</td>
+                    <td colSpan={3} className="pt-2 text-right font-normal">
+                      <span className="text-amber-500 font-medium">Beneficio VIP ({order.vip_card_code || 'VIP'}):</span>
+                    </td>
+                    <td className="pt-2 text-right">
+                      <span className="text-amber-500 font-bold">-{formatCurrency(order.vip_discount_amount)}</span>
+                    </td>
                   </tr>
                 )}
                 <tr>
-                  <td colSpan={3} className="pt-4 text-right text-base font-bold">Total Pagado:</td>
-                  <td className="pt-4 text-right text-xl font-extrabold text-emerald-600">{formatCurrency(order.total_amount || order.total || 0)}</td>
+                  <td colSpan={3} className="pt-4 text-right text-base font-bold">
+                    <span>Total Pagado:</span>
+                  </td>
+                  <td className="pt-4 text-right">
+                    <span className="text-xl font-extrabold text-emerald-500">{formatCurrency(order.total_amount || order.total || 0)}</span>
+                  </td>
                 </tr>
               </tfoot>
             </table>

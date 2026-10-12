@@ -410,7 +410,7 @@ body[data-theme="light"]:not(.admin-container) input:-webkit-autofill:active {
 .admin-container[data-theme="dark"] h5,
 .admin-container[data-theme="dark"] h6,
 .admin-container[data-theme="dark"] label,
-.admin-container[data-theme="dark"] p,
+.admin-container[data-theme="dark"] p:not(.keep-text-color),
 .admin-container[data-theme="dark"] dt,
 .admin-container[data-theme="dark"] dd,
 .admin-container[data-theme="dark"] th,
@@ -422,7 +422,10 @@ body[data-theme="light"]:not(.admin-container) input:-webkit-autofill:active {
   color: #ffffff !important;
 }
 
-/* Mantener colores de acento/estado */
+/* Mantener colores de acento/estado y texto explícito */
+.admin-container .keep-text-color {
+  color: inherit !important;
+}
 .admin-container .text-emerald-400 {
   color: #34d399 !important;
 }
@@ -432,15 +435,78 @@ body[data-theme="light"]:not(.admin-container) input:-webkit-autofill:active {
 .admin-container .text-emerald-600 {
   color: #059669 !important;
 }
+.admin-container .text-emerald-700 {
+  color: #047857 !important;
+}
+.admin-container .text-emerald-800 {
+  color: #065f46 !important;
+}
 .admin-container .text-amber-400,
 .admin-container .text-amber-500 {
   color: #f59e0b !important;
+}
+.admin-container .text-amber-600 {
+  color: #d97706 !important;
+}
+.admin-container .text-amber-700 {
+  color: #b45309 !important;
+}
+.admin-container .text-amber-800,
+.admin-container .text-amber-900 {
+  color: #78350f !important;
 }
 .admin-container .text-rose-400,
 .admin-container .text-rose-500,
 .admin-container .text-rose-600,
 .admin-container .text-red-500 {
   color: #f43f5e !important;
+}
+.admin-container .text-blue-400 {
+  color: #60a5fa !important;
+}
+.admin-container .text-blue-500 {
+  color: #3b82f6 !important;
+}
+.admin-container .text-blue-600 {
+  color: #2563eb !important;
+}
+.admin-container .text-blue-700 {
+  color: #1d4ed8 !important;
+}
+.admin-container .text-blue-800 {
+  color: #1e40af !important;
+}
+.admin-container .text-blue-900 {
+  color: #1e3a8a !important;
+}
+
+/* Cuadros informativos / notificaciones en Admin */
+.admin-container:not([data-theme="dark"]) .admin-info-box,
+.admin-container:not([data-theme="dark"]) .bg-blue-50:not(select) {
+  background-color: #eff6ff !important;
+  border-color: #bfdbfe !important;
+}
+.admin-container:not([data-theme="dark"]) .admin-info-box *,
+.admin-container:not([data-theme="dark"]) .bg-blue-50:not(select) * {
+  color: #1e40af !important;
+}
+
+.admin-container[data-theme="dark"] .admin-info-box,
+.admin-container[data-theme="dark"] .bg-blue-50:not(select) {
+  background-color: rgba(30, 58, 138, 0.25) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+}
+.admin-container[data-theme="dark"] .admin-info-box *,
+.admin-container[data-theme="dark"] .bg-blue-50:not(select) * {
+  color: #93c5fd !important;
+}
+
+.admin-container[data-theme="dark"] .bg-amber-50:not(select) {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+.admin-container[data-theme="dark"] .bg-amber-50:not(select) * {
+  color: #fde047 !important;
 }
 
 /* Tarjetas y Secciones con degradé de esquina */
