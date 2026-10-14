@@ -126,7 +126,7 @@ export function ShopFilters() {
                   const val = Math.min(Number(e.target.value), Number(maxPrice));
                   setMinPrice(val.toString());
                 }}
-                className={`absolute w-full -top-[6px] appearance-none bg-transparent pointer-events-none ${Number(minPrice) > 85000 ? 'z-30' : 'z-20'} [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-zinc-950 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer hover:[&::-webkit-slider-thumb]:scale-110 active:[&::-webkit-slider-thumb]:scale-110 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:bg-zinc-950 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer`}
+                className={`price-range-slider absolute w-full -top-[6px] h-5 ${Number(minPrice) > 85000 ? 'z-30' : 'z-20'}`}
               />
               <input
                 type="range"
@@ -138,7 +138,7 @@ export function ShopFilters() {
                   const val = Math.max(Number(e.target.value), Number(minPrice));
                   setMaxPrice(val.toString());
                 }}
-                className="absolute w-full -top-[6px] appearance-none bg-transparent pointer-events-none z-20 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-zinc-950 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer hover:[&::-webkit-slider-thumb]:scale-110 active:[&::-webkit-slider-thumb]:scale-110 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:bg-zinc-950 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer"
+                className="price-range-slider absolute w-full -top-[6px] h-5 z-20"
               />
             </div>
             <div className="flex justify-between items-center text-sm font-medium">

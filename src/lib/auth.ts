@@ -4,14 +4,14 @@
  * interactuar con la sesión actual y extraer información útil como el perfil o el rol
  * del usuario para comprobaciones de seguridad.
  */
-// Importamos la función para crear el cliente de Supabase optimizado para el servidor
+import { cache } from 'react';
 import { createClient } from './supabase-server';
 
 /**
  * Obtiene el usuario autenticado actualmente verificando su sesión.
  * @returns {Promise<User | null>} Objeto User de Supabase o null si no está logueado.
  */
-export async function getUser() {
+export const getUser = cache(async () => {
   // 1. Inicializamos el cliente de Supabase (lee las cookies de Next.js automáticamente)
   const supabase = await createClient();
   
@@ -28,14 +28,14 @@ export async function getUser() {
 
   // 4. Si todo salió bien, devolvemos los datos básicos del usuario (email, id, etc.)
   return user;
-}
+});
 
 /**
  * Obtiene el registro completo de la tabla `profiles` correspondiente al usuario actual.
  * Ideal para consultar el rol ('admin' o 'user') del usuario autenticado.
  * @returns {Promise<Profile | null>} Datos del perfil del usuario o null.
  */
-export async function getProfile() {
+export const getProfile = cache(async () => {
   // 1. Primero llamamos a nuestra función getUser() para saber quién es el usuario
   const user = await getUser();
   
@@ -60,7 +60,7 @@ export async function getProfile() {
 
   // 6. Devolvemos el perfil encontrado (que contiene el 'role', 'email', etc.)
   return profile;
-}
+});
 
 /**
  * Verifica si el usuario actual es un administrador.

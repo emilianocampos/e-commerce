@@ -46,25 +46,25 @@ export function RouteCurtainLoader({ brandName = "KLONFARK" }: RouteCurtainLoade
   const isFirstRender = useRef(true);
   const prevPathRef = useRef(`${pathname}?${searchParams.toString()}`);
 
-  // Animación de apertura: espera a que cargue y luego abre las solapas hacia los lados
-  const openCurtain = (delay = 500) => {
+  // Animación de apertura: rápida y fluida para no retrasar la experiencia del usuario
+  const openCurtain = (delay = 80) => {
     const timer = setTimeout(() => {
       setIsOpen(true);
-      // Ocultar totalmente del DOM tras completar el desplazamiento lateral de 900ms
+      // Ocultar totalmente del DOM tras completar el desplazamiento lateral suave de 500ms
       const hideTimer = setTimeout(() => {
         setIsVisible(false);
-      }, 950);
+      }, 550);
       return () => clearTimeout(hideTimer);
     }, delay);
 
     return () => clearTimeout(timer);
   };
 
-  // 1. Efecto en la primera carga (Initial Load): se muestra cerrado y luego se abre
+  // 1. Efecto en la primera carga (Initial Load): se abre de inmediato y con fluidez
   useEffect(() => {
     setIsVisible(true);
     setIsOpen(false);
-    const cleanup = openCurtain(500);
+    const cleanup = openCurtain(80);
     return cleanup;
   }, []);
 
@@ -80,7 +80,7 @@ export function RouteCurtainLoader({ brandName = "KLONFARK" }: RouteCurtainLoade
       prevPathRef.current = currentFullUrl;
       setIsVisible(true);
       setIsOpen(false);
-      const cleanup = openCurtain(350);
+      const cleanup = openCurtain(80);
       return cleanup;
     }
   }, [pathname, searchParams]);
@@ -141,7 +141,7 @@ export function RouteCurtainLoader({ brandName = "KLONFARK" }: RouteCurtainLoade
     >
       {/* Solapa Izquierda (se desliza hacia la izquierda sin bordes en el medio) */}
       <div
-        className={`fixed top-0 left-0 bottom-0 w-[calc(50%+1px)] bg-[#09090b] shadow-[10px_0_40px_rgba(0,0,0,0.9)] transition-transform duration-900 ease-[cubic-bezier(0.77,0,0.175,1)] will-change-transform ${
+        className={`fixed top-0 left-0 bottom-0 w-[calc(50%+1px)] bg-[#09090b] shadow-[10px_0_40px_rgba(0,0,0,0.9)] transition-transform duration-500 ease-[cubic-bezier(0.77,0,0.175,1)] will-change-transform ${
           isOpen ? "-translate-x-full pointer-events-none" : "translate-x-0 pointer-events-auto"
         }`}
       >
@@ -150,7 +150,7 @@ export function RouteCurtainLoader({ brandName = "KLONFARK" }: RouteCurtainLoade
 
       {/* Solapa Derecha (se desliza hacia la derecha sin bordes en el medio) */}
       <div
-        className={`fixed top-0 right-0 bottom-0 w-[calc(50%+1px)] bg-[#09090b] shadow-[-10px_0_40px_rgba(0,0,0,0.9)] transition-transform duration-900 ease-[cubic-bezier(0.77,0,0.175,1)] will-change-transform ${
+        className={`fixed top-0 right-0 bottom-0 w-[calc(50%+1px)] bg-[#09090b] shadow-[-10px_0_40px_rgba(0,0,0,0.9)] transition-transform duration-500 ease-[cubic-bezier(0.77,0,0.175,1)] will-change-transform ${
           isOpen ? "translate-x-full pointer-events-none" : "translate-x-0 pointer-events-auto"
         }`}
       >

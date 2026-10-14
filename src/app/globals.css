@@ -107,10 +107,10 @@ select optgroup {
 }
 
 /* MODO OSCURO: Fondo oscuro y letras SIEMPRE BLANCAS NÍTIDAS */
-body[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+body[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),
 body[data-theme="dark"] select,
 body[data-theme="dark"] textarea,
-body[data-theme="gradient"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+body[data-theme="gradient"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),
 body[data-theme="gradient"] select,
 body[data-theme="gradient"] textarea {
   color-scheme: dark !important;
@@ -152,10 +152,10 @@ body[data-theme="gradient"] textarea::placeholder {
   -webkit-text-fill-color: #a1a1aa !important;
 }
 
-body[data-theme="dark"] input:focus,
+body[data-theme="dark"] input:not([type="range"]):focus,
 body[data-theme="dark"] select:focus,
 body[data-theme="dark"] textarea:focus,
-body[data-theme="gradient"] input:focus,
+body[data-theme="gradient"] input:not([type="range"]):focus,
 body[data-theme="gradient"] select:focus,
 body[data-theme="gradient"] textarea:focus {
   border-color: var(--card-glow-color, #10b981) !important;
@@ -185,10 +185,10 @@ body[data-theme="gradient"] input:-webkit-autofill:active {
 }
 
 /* MODO CLARO: Fondo blanco y letras SIEMPRE NEGRAS NÍTIDAS */
-body[data-theme="light"]:not(.admin-container) input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+body[data-theme="light"]:not(.admin-container) input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),
 body[data-theme="light"]:not(.admin-container) select,
 body[data-theme="light"]:not(.admin-container) textarea,
-body:not([data-theme="dark"]):not([data-theme="gradient"]) main:not(.admin-container *) input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+body:not([data-theme="dark"]):not([data-theme="gradient"]) main:not(.admin-container *) input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),
 body:not([data-theme="dark"]):not([data-theme="gradient"]) main:not(.admin-container *) select,
 body:not([data-theme="dark"]):not([data-theme="gradient"]) main:not(.admin-container *) textarea {
   color-scheme: light !important;
@@ -196,6 +196,85 @@ body:not([data-theme="dark"]):not([data-theme="gradient"]) main:not(.admin-conta
   color: #09090b !important;
   -webkit-text-fill-color: #09090b !important;
   border-color: #e4e4e7 !important;
+}
+
+/* ========================================================= */
+/* DUAL RANGE SLIDER: BORDES BLANCOS COMPLETOS Y VISIBLES    */
+/* ========================================================= */
+.price-range-slider {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.price-range-slider:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.price-range-slider::-webkit-slider-runnable-track {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  height: 100% !important;
+}
+
+.price-range-slider::-moz-range-track {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  height: 100% !important;
+}
+
+.price-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  pointer-events: auto !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  background: #09090b !important;
+  background-color: #09090b !important;
+  border: 2.5px solid #ffffff !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.6) !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.price-range-slider::-moz-range-thumb {
+  pointer-events: auto !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  background: #09090b !important;
+  background-color: #09090b !important;
+  border: 2.5px solid #ffffff !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.6) !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.price-range-slider::-webkit-slider-thumb:hover,
+.price-range-slider::-webkit-slider-thumb:active {
+  transform: scale(1.15) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 4px 12px rgba(0, 0, 0, 0.7) !important;
+}
+
+.price-range-slider::-moz-range-thumb:hover,
+.price-range-slider::-moz-range-thumb:active {
+  transform: scale(1.15) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 4px 12px rgba(0, 0, 0, 0.7) !important;
 }
 
 /* Opciones de los SELECT en MODO CLARO (Tienda y Admin) */

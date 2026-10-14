@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase-server';
-import { ProductCard } from '@/components/ProductCard';
+import { ProductGridWithLoadMore } from '@/components/ProductGridWithLoadMore';
 
 export const metadata: Metadata = {
   title: 'Mujer',
@@ -46,17 +46,14 @@ export default async function MujerPage() {
           </p>
         </div>
 
-        {(!products || products.length === 0) ? (
-          <div className="flex flex-col items-center justify-center rounded-xl bg-white border border-zinc-200 py-32 text-zinc-500">
-            <p>No hay productos disponibles por ahora en esta categoría.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
+        <ProductGridWithLoadMore
+          products={(products || []) as any}
+          chunkSize={6}
+          initialCount={6}
+          gridClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12"
+          emptyTitle="No hay productos disponibles por ahora en esta categoría."
+          emptySubtitle="Vuelve a consultar pronto o explora otras secciones de nuestra tienda."
+        />
       </div>
     </div>
   );

@@ -1,0 +1,148 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  min-width: 0;
+  width: 100%;
+}
+
+.shimmerBase {
+  position: relative;
+  overflow: hidden;
+  background-color: #f0f0f2;
+}
+
+:global(body[data-theme="dark"]) .shimmerBase {
+  background-color: #1a1a20;
+}
+
+.shimmerBase::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s infinite ease-in-out;
+}
+
+:global(body[data-theme="dark"]) .shimmerBase::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.imageWrapper {
+  border-radius: 20px;
+  aspect-ratio: 1;
+  width: 100%;
+  margin-bottom: 16px;
+  border: 1px solid rgba(var(--card-glow-rgb, 16, 185, 129), 0.20);
+  background-image: radial-gradient(circle at 100% 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.15) 0%, transparent 60%);
+}
+
+:global(body[data-theme="dark"]) .imageWrapper {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-image: radial-gradient(circle at 100% 0%, rgba(var(--card-glow-rgb, 16, 185, 129), 0.18) 0%, transparent 60%);
+}
+
+.title {
+  height: 20px;
+  width: 82%;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.starsGroup {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.star {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.ratingText {
+  width: 32px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.priceContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.price {
+  width: 110px;
+  height: 26px;
+  border-radius: 6px;
+}
+
+.discount {
+  width: 48px;
+  height: 22px;
+  border-radius: 9999px;
+}
+
+.transferBadge {
+  width: 165px;
+  height: 26px;
+  border-radius: 8px;
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.installmentsRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.installmentLine1 {
+  width: 175px;
+  height: 13px;
+  border-radius: 4px;
+}
+
+.installmentLine2 {
+  width: 95px;
+  height: 13px;
+  border-radius: 4px;
+}

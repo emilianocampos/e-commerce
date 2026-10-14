@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase-server';
-import { ProductCard } from '@/components/ProductCard';
+import { ProductGridWithLoadMore } from '@/components/ProductGridWithLoadMore';
 import { ShopFilters } from '@/components/ShopFilters';
 import { ShopSearchBar } from '@/components/ShopSearchBar';
 import Link from 'next/link';
@@ -180,18 +180,12 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             </div>
           )}
 
-          {filteredProducts && filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-8">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product as any} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-24 bg-zinc-50 rounded-[20px] border border-zinc-200">
-              <h3 className="text-xl font-bold text-zinc-400 mb-2">No se encontraron productos</h3>
-              <p className="text-zinc-500">Intenta cambiar los filtros para ver más resultados.</p>
-            </div>
-          )}
+          <ProductGridWithLoadMore 
+            products={(filteredProducts || []) as any} 
+            chunkSize={6}
+            initialCount={6}
+            gridClassName="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-8" 
+          />
         </div>
       </div>
     </div>
