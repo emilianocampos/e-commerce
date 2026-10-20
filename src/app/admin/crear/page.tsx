@@ -1,9 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { ProductForm } from '@/components/ProductForm';
-import { ImportExcel } from '@/components/ImportExcel';
-import { createProduct } from '@/actions/products';
+
+const ImportExcel = dynamic(() => import('@/components/ImportExcel').then(m => m.ImportExcel), {
+  ssr: false,
+  loading: () => <p className="text-sm text-zinc-500 py-4">Cargando importador...</p>,
+});
+import { createProduct, getProductsForComboSelection } from '@/actions/products';
 import { getBrands } from '@/actions/brands';
 import { getCategories, getSubcategories } from '@/actions/categories';
 
@@ -14,15 +19,20 @@ export default function CreateProductPage() {
   const [brands, setBrands] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
+  const [availableProducts, setAvailableProducts] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadData() {
-      const b = await getBrands();
-      const c = await getCategories();
-      const s = await getSubcategories();
+      const [b, c, s, p] = await Promise.all([
+        getBrands(),
+        getCategories(),
+        getSubcategories(),
+        getProductsForComboSelection(),
+      ]);
       setBrands(b);
       setCategories(c);
       setSubcategories(s);
+      setAvailableProducts(p);
     }
     loadData();
   }, []);
@@ -53,6 +63,7 @@ export default function CreateProductPage() {
             brands={brands}
             categories={categories}
             subcategories={subcategories}
+            availableProducts={availableProducts}
           />
         ) : (
           <ImportExcel />

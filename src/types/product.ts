@@ -1,4 +1,4 @@
-export type ProductType = 'SUPPLEMENT' | 'CLOTHES' | 'ACCESSORY';
+export type ProductType = 'SUPPLEMENT' | 'CLOTHES' | 'ACCESSORY' | 'COMBO';
 export type GenderType = 'MEN' | 'WOMEN' | 'UNISEX';
 
 export interface Brand {
@@ -89,6 +89,7 @@ export interface Product {
   updated_at?: string | null;
   vip_discount_percentage?: number | null;
   vip_stackable?: boolean;
+  combo_items?: ComboItem[] | null;
 
   // Relaciones (opcionales para no romper queries actuales)
   brands?: Brand | null;
@@ -97,6 +98,15 @@ export interface Product {
   product_images?: ProductImage[];
   product_variants?: ProductVariant[];
   supplement_information?: SupplementInfo | null;
+}
+
+export interface ComboItem {
+  id?: string | null;
+  title: string;
+  quantity: number;
+  image?: string | null;
+  price?: number | null;
+  custom?: boolean;
 }
 
 export interface CartItem {

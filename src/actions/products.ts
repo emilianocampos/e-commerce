@@ -13,9 +13,21 @@ function generateSKU(type: string, gender: string | null): string {
     else prefix = 'URBA';
   } else if (type === 'SUPPLEMENT') {
     prefix = 'SUPP';
+  } else if (type === 'COMBO') {
+    prefix = 'COMB';
   }
   const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
   return `${prefix}-${randomPart}`;
+}
+
+export async function getProductsForComboSelection() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('products')
+    .select('id, title, price, image, type')
+    .neq('type', 'COMBO')
+    .order('title', { ascending: true });
+  return data || [];
 }
 
 export async function createProduct(_prevState: any, formData: FormData) {
@@ -87,7 +99,17 @@ export async function createProduct(_prevState: any, formData: FormData) {
     formData.get('image_opt_3') as File | null
   ];
 
-  const { data: newProduct, error } = await supabase.from('products').insert({
+  const combo_items_raw = formData.get('combo_items') as string;
+  let combo_items = null;
+  if (type === 'COMBO' && combo_items_raw) {
+    try {
+      combo_items = JSON.parse(combo_items_raw);
+    } catch {
+      combo_items = null;
+    }
+  }
+
+  const insertPayload: Record<string, any> = {
     title,
     description,
     price,
@@ -102,11 +124,24 @@ export async function createProduct(_prevState: any, formData: FormData) {
     brand_id,
     vip_discount_percentage,
     vip_stackable,
+    combo_items,
     active: true,
-  }).select('id').single();
+  };
+
+  let newProduct: any = null;
+  const { data: createdProd, error } = await supabase.from('products').insert(insertPayload).select('id').single();
 
   if (error) {
-    return { error: error.message };
+    if (error.message?.includes('combo_items')) {
+      delete insertPayload.combo_items;
+      const retry = await supabase.from('products').insert(insertPayload).select('id').single();
+      if (retry.error) return { error: retry.error.message };
+      newProduct = retry.data;
+    } else {
+      return { error: error.message };
+    }
+  } else {
+    newProduct = createdProd;
   }
 
   // Upload and insert optional images
@@ -163,19 +198,28 @@ export async function createProduct(_prevState: any, formData: FormData) {
     const gramsStr = formData.get('supp_grams') as string;
     const entradaStr = formData.get('supp_entrada') as string;
     const salidaStr = formData.get('supp_salida') as string;
+    const rawFlavor = (formData.get('supp_flavor') as string)?.trim() || null;
 
-    const suppData = {
+    const baseSuppData: Record<string, any> = {
       product_id: newProduct.id,
       servings: servingsStr ? parseInt(servingsStr, 10) : null,
-      flavor: formData.get('supp_flavor') as string || null,
+      flavor: rawFlavor,
       net_weight: netWeightStr ? parseFloat(netWeightStr) : null,
       grams: gramsStr ? parseFloat(gramsStr) : null,
-      ingredients: formData.get('supp_ingredients') as string || null,
+      ingredients: (formData.get('supp_ingredients') as string) || null,
+    };
+
+    const fullSuppData = {
+      ...baseSuppData,
       entrada: entradaStr ? parseInt(entradaStr, 10) : null,
       salida: salidaStr ? parseInt(salidaStr, 10) : null,
     };
     
-    await supabase.from('supplement_information').insert(suppData);
+    const { error: insertError } = await supabase.from('supplement_information').insert(fullSuppData);
+    if (insertError) {
+      console.warn("Reintentando insert de supplement_information sin entrada/salida:", insertError.message);
+      await supabase.from('supplement_information').insert(baseSuppData);
+    }
   }
 
   revalidatePath('/', 'layout');
@@ -302,6 +346,16 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     }
   }
 
+  const combo_items_raw = formData.get('combo_items') as string;
+  let combo_items = null;
+  if (type === 'COMBO' && combo_items_raw) {
+    try {
+      combo_items = JSON.parse(combo_items_raw);
+    } catch {
+      combo_items = null;
+    }
+  }
+
   const updateData: any = {
     title,
     description,
@@ -315,6 +369,7 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     brand_id,
     vip_discount_percentage,
     vip_stackable,
+    combo_items: type === 'COMBO' ? combo_items : null,
     updated_at: new Date().toISOString(),
   };
 
@@ -322,7 +377,12 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     updateData.image = imageUrl;
   }
 
-  const { error } = await supabase.from('products').update(updateData).eq('id', id);
+  let { error } = await supabase.from('products').update(updateData).eq('id', id);
+  if (error && error.message?.includes('combo_items')) {
+    delete updateData.combo_items;
+    const retry = await supabase.from('products').update(updateData).eq('id', id);
+    error = retry.error;
+  }
 
   if (error) {
     return { error: error.message };
@@ -366,19 +426,28 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     const gramsStr = formData.get('supp_grams') as string;
     const entradaStr = formData.get('supp_entrada') as string;
     const salidaStr = formData.get('supp_salida') as string;
+    const rawFlavor = (formData.get('supp_flavor') as string)?.trim() || null;
 
-    const suppData = {
+    const baseSuppData: Record<string, any> = {
       product_id: id,
       servings: servingsStr ? parseInt(servingsStr, 10) : null,
-      flavor: formData.get('supp_flavor') as string || null,
+      flavor: rawFlavor,
       net_weight: netWeightStr ? parseFloat(netWeightStr) : null,
       grams: gramsStr ? parseFloat(gramsStr) : null,
-      ingredients: formData.get('supp_ingredients') as string || null,
+      ingredients: (formData.get('supp_ingredients') as string) || null,
+    };
+
+    const fullSuppData = {
+      ...baseSuppData,
       entrada: entradaStr ? parseInt(entradaStr, 10) : null,
       salida: salidaStr ? parseInt(salidaStr, 10) : null,
     };
     
-    await supabase.from('supplement_information').upsert(suppData);
+    const { error: upsertError } = await supabase.from('supplement_information').upsert(fullSuppData);
+    if (upsertError) {
+      console.warn("Reintentando upsert de supplement_information sin entrada/salida:", upsertError.message);
+      await supabase.from('supplement_information').upsert(baseSuppData);
+    }
   }
 
   revalidatePath('/', 'layout');
@@ -407,6 +476,7 @@ export async function deleteProduct(id: string) {
   revalidatePath('/hombre');
   revalidatePath('/mujer');
   revalidatePath('/suplementos');
+  revalidatePath('/combos');
   revalidatePath('/ofertas');
   revalidatePath('/admin/productos');
   return { success: true };

@@ -45,6 +45,11 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/producto/${product.id}`} className={styles.card}>
       <div className={styles.imageWrapper}>
+        {product.type === 'COMBO' && (
+          <span className="absolute top-2.5 left-2.5 z-10 bg-amber-500 text-black font-black text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-md shadow-md flex items-center gap-1">
+            <span>🔥</span> COMBO
+          </span>
+        )}
         {product.image ? (
           <Image
             src={product.image}

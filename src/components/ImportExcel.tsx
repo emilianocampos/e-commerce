@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import * as XLSX from 'xlsx';
 import { ImportRow, processExcelImport } from '@/actions/import';
 
 export function ImportExcel() {
@@ -13,17 +12,20 @@ export function ImportExcel() {
   const [productType, setProductType] = useState<string>('CLOTHES');
   const [gender, setGender] = useState<string>('MEN');
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      const bstr = evt.target?.result;
-      const wb = XLSX.read(bstr, { type: 'binary' });
-      const wsname = wb.SheetNames[0];
-      const ws = wb.Sheets[wsname];
-      const data = XLSX.utils.sheet_to_json(ws) as any[];
+    setIsLoading(true);
+    try {
+      const XLSX = await import('xlsx');
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const bstr = evt.target?.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws) as any[];
 
       const transformedData: ImportRow[] = data.map((row) => {
         const getVal = (keyStr: string) => {
@@ -62,8 +64,16 @@ export function ImportExcel() {
 
       setDataPreview(transformedData);
       setResult(null);
+      setIsLoading(false);
+    };
+    reader.onerror = () => {
+      setIsLoading(false);
     };
     reader.readAsBinaryString(file);
+    } catch (err: any) {
+      setResult({ errors: [err.message || 'Error al procesar el archivo'], created: 0, updated: 0 });
+      setIsLoading(false);
+    }
   };
 
   const handleImport = async () => {
@@ -99,6 +109,7 @@ export function ImportExcel() {
             >
               <option value="CLOTHES">Ropa</option>
               <option value="SUPPLEMENT">Suplementos</option>
+              <option value="COMBO">Combos</option>
             </select>
           </div>
           

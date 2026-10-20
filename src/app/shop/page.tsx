@@ -27,6 +27,9 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
   // URL Params mappings for Type and Gender
   if (params.type) query = query.eq('type', params.type);
+  if (params.category_name === 'combos' || params.category === 'combos') {
+    query = query.eq('type', 'COMBO');
+  }
   if (params.gender) query = query.eq('gender', params.gender);
   if (params.category_name === 'urbano') {
     query = query.eq('type', 'CLOTHES').eq('gender', 'UNISEX');
@@ -95,6 +98,9 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       const brand = await supabase.from('brands').select('name').eq('id', params.brand_id).single();
       if (brand.data) pageTitle = `Suplementos ${brand.data.name}`;
     }
+  }
+  if (params.type === 'COMBO' || params.category_name === 'combos' || params.category === 'combos') {
+    pageTitle = 'Combos';
   }
   if (params.gender === 'MEN') pageTitle = 'Hombre';
   if (params.gender === 'WOMEN') pageTitle = 'Mujer';

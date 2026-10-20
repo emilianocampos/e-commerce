@@ -3,16 +3,16 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { formatCurrency } from '@/lib/utils';
 import { Metadata } from 'next';
-import { Star, Tag } from 'lucide-react';
+import { Star, Tag, Package } from 'lucide-react';
 import Link from 'next/link';
+
 import { getUser } from '@/lib/auth';
 import { ProductReviews } from '@/components/ProductReviews';
 import { ProductGallery } from './ProductGallery';
 import { ProductPurchaseSection } from './ProductPurchaseSection';
 import { getSiteUrl } from '@/lib/site-url';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
@@ -231,6 +231,67 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <p className="text-zinc-300 mb-6 leading-relaxed pb-6 border-b border-zinc-200/20">
               {product.description || 'Producto de alta calidad seleccionado especialmente para acompañar tu rendimiento y estilo.'}
             </p>
+
+            {/* SECCIÓN DETALLE DE COMBO */}
+            {product.type === 'COMBO' && Array.isArray(product.combo_items) && product.combo_items.length > 0 && (
+              <div className="mb-6 bg-gradient-to-br from-amber-500/10 via-zinc-900/80 to-zinc-900/90 border border-amber-500/30 rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-zinc-800">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-amber-400 flex items-center gap-2">
+                    <Package className="w-4 h-4 text-amber-400" />
+                    Este Combo Incluye ({product.combo_items.length} productos)
+                  </h3>
+                  <span className="text-xs bg-amber-500/20 text-amber-300 font-bold px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                    Pack Especial
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {product.combo_items.map((item: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between gap-3 p-3 bg-zinc-950/70 border border-zinc-800/80 rounded-xl"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-12 h-12 rounded-lg bg-zinc-900 overflow-hidden shrink-0 border border-zinc-800 flex items-center justify-center">
+                          {item.image ? (
+                            <Image src={item.image} alt={item.title} fill unoptimized className="object-cover" />
+                          ) : (
+                            <Package className="w-5 h-5 text-zinc-500" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-zinc-100 flex items-center gap-2">
+                            {item.title}
+                          </div>
+                          <div className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2">
+                            <span className="text-amber-400 font-semibold">Cantidad: {item.quantity}</span>
+                            {item.price && (
+                              <>
+                                <span>•</span>
+                                <span>Valor indiv.: {formatCurrency(item.price)}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {item.id ? (
+                        <Link
+                          href={`/producto/${item.id}`}
+                          className="text-xs text-zinc-400 hover:text-white font-medium underline shrink-0 transition-colors"
+                        >
+                          Ver producto &rarr;
+                        </Link>
+                      ) : (
+                        <span className="text-[10px] text-amber-400/80 bg-amber-500/10 px-2 py-0.5 rounded font-medium border border-amber-500/20 shrink-0">
+                          Accesorio / Extra
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* TABLA NUTRICIONAL PARA SUPLEMENTOS */}
             {product.type === 'SUPPLEMENT' && suppInfo && (

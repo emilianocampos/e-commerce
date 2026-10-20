@@ -18,6 +18,7 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
 
   const getCategoryLabel = (product: any) => {
     if (product.type === 'SUPPLEMENT') return 'Suplemento';
+    if (product.type === 'COMBO') return 'Combo';
     if (product.type === 'CLOTHES') {
       if (product.gender === 'MEN') return 'Ropa - Hombre';
       if (product.gender === 'WOMEN') return 'Ropa - Mujer';
@@ -44,6 +45,8 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
     if (selectedType !== 'ALL') {
       if (selectedType === 'SUPPLEMENT') {
         list = list.filter((p) => p.type === 'SUPPLEMENT');
+      } else if (selectedType === 'COMBO') {
+        list = list.filter((p) => p.type === 'COMBO');
       } else if (selectedType === 'MEN') {
         list = list.filter((p) => p.type === 'CLOTHES' && p.gender === 'MEN');
       } else if (selectedType === 'WOMEN') {
@@ -99,6 +102,7 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
           >
             <option value="ALL">Todas las Categorías</option>
             <option value="SUPPLEMENT">Suplementos</option>
+            <option value="COMBO">Combos</option>
             <option value="MEN">Hombre</option>
             <option value="WOMEN">Mujer</option>
             <option value="URBANO">Urbano</option>

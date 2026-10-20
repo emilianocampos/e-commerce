@@ -7,7 +7,7 @@ import { SiteReviewsSection } from '@/components/SiteReviewsSection';
 
 import { getStoreSettings } from '@/actions/settings';
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 export default async function Home() {
   const supabase = await createClient();

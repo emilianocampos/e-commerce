@@ -165,7 +165,7 @@ export function ShopFilters() {
         </div>
 
         {/* SIZE FILTER */}
-        {searchParams.get('type') !== 'SUPPLEMENT' && (
+        {!['SUPPLEMENT', 'COMBO'].includes(searchParams.get('type') || '') && (
           <div className="pb-5 border-b border-zinc-100">
             <div className="flex justify-between items-center mb-4 cursor-pointer">
               <h3 className="font-bold text-lg text-zinc-900">Talles</h3>
@@ -195,7 +195,7 @@ export function ShopFilters() {
         )}
 
         {/* COLOR FILTER */}
-        {searchParams.get('type') !== 'SUPPLEMENT' && (
+        {!['SUPPLEMENT', 'COMBO'].includes(searchParams.get('type') || '') && (
           <div>
             <div className="flex justify-between items-center mb-4 cursor-pointer">
               <h3 className="font-bold text-lg text-zinc-900">Colores</h3>

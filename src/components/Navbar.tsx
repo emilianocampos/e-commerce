@@ -113,6 +113,8 @@ export function Navbar({ user, role, settings }: NavbarProps) {
               </div>
             </div>
             
+            <Link href="/shop?type=COMBO" className={styles.navLink}>Combos</Link>
+            
             <Link href="/shop?on_sale=true" className={styles.navLink} style={{ color: 'var(--shop-red, #ef4444)', fontWeight: 'bold' }}>Ofertas</Link>
           </nav>
 
@@ -321,6 +323,8 @@ export function Navbar({ user, role, settings }: NavbarProps) {
                     </div>
                   )}
                 </div>
+
+                <Link href="/shop?type=COMBO" onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonHeader} style={{ paddingLeft: '0' }}>Combos</Link>
 
                 <Link href="/shop?on_sale=true" onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileAccordeonHeader} style={{ paddingLeft: '0', color: '#ef4444', fontWeight: 'bold' }}>Ofertas</Link>
               </nav>

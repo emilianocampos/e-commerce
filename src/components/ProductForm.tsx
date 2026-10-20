@@ -3,12 +3,13 @@
 import { useActionState, useState, useEffect, startTransition } from 'react';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
-import { Product, Brand, Category, Subcategory } from '@/types/product';
+import { Product, Brand, Category, Subcategory, ComboItem } from '@/types/product';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { showToast } from 'nextjs-toast-notify';
 import { compressImage } from '@/lib/imageCompression';
-import { Crown, Trash2, X } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
+import { Crown, Trash2, X, Plus, Package, Layers, Sparkles, AlertCircle, CheckCircle2, Search, Minus } from 'lucide-react';
 
 interface ProductFormProps {
   action: (state: any, formData: FormData) => Promise<any>;
@@ -16,9 +17,10 @@ interface ProductFormProps {
   brands: Brand[];
   categories: Category[];
   subcategories: Subcategory[];
+  availableProducts?: { id: string; title: string; price: number; image?: string; type: string }[];
 }
 
-export function ProductForm({ action, initialData, brands, categories, subcategories }: ProductFormProps) {
+export function ProductForm({ action, initialData, brands, categories, subcategories, availableProducts = [] }: ProductFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
   const router = useRouter();
 
@@ -63,9 +65,141 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
   const [sizeColors, setSizeColors] = useState<Record<string, string[]>>(initialSizeColors);
   const [customColorInput, setCustomColorInput] = useState<Record<string, string>>({});
   
-  // Category logic (Ropa vs Suplementos)
+  // Category logic (Ropa vs Suplementos vs Combos)
   const [productType, setProductType] = useState<string>(initialData?.type || 'CLOTHES');
   const [productGender, setProductGender] = useState<string>(initialData?.gender || 'UNISEX');
+
+  // Combo Builder State
+  const [comboItems, setComboItems] = useState<ComboItem[]>(() => {
+    if (initialData?.combo_items && Array.isArray(initialData.combo_items)) {
+      return initialData.combo_items;
+    }
+    return [];
+  });
+
+  // Adding DB product to combo
+  const [selectedDbId, setSelectedDbId] = useState<string>('');
+  const [dbSearchQuery, setDbSearchQuery] = useState<string>('');
+  const [dbQuantity, setDbQuantity] = useState<number>(1);
+
+  // Adding Custom product to combo (not in DB)
+  const [customTitle, setCustomTitle] = useState<string>('');
+  const [customQuantity, setCustomQuantity] = useState<number>(1);
+  const [customPrice, setCustomPrice] = useState<string>('');
+
+  // Mode tab for adding combo items: 'db' | 'custom'
+  const [comboAddTab, setComboAddTab] = useState<'db' | 'custom'>('db');
+
+  const filteredAvailableProducts = availableProducts.filter((p) => {
+    if (initialData && p.id === initialData.id) return false;
+    if (!dbSearchQuery.trim()) return true;
+    return p.title.toLowerCase().includes(dbSearchQuery.toLowerCase());
+  });
+
+  const handleAddDbProduct = () => {
+    if (!selectedDbId) {
+      showToast.error('Selecciona un producto del catálogo', { position: 'top-center' });
+      return;
+    }
+    const found = availableProducts.find((p) => p.id === selectedDbId);
+    if (!found) return;
+
+    const existingIdx = comboItems.findIndex((item) => item.id === found.id);
+    if (existingIdx !== -1) {
+      const updated = [...comboItems];
+      updated[existingIdx].quantity += dbQuantity;
+      setComboItems(updated);
+      showToast.success(`Se aumentó la cantidad de "${found.title}"`, { position: 'top-center' });
+    } else {
+      setComboItems([
+        ...comboItems,
+        {
+          id: found.id,
+          title: found.title,
+          price: found.price,
+          image: found.image || undefined,
+          quantity: Math.max(1, dbQuantity),
+          custom: false,
+        },
+      ]);
+      showToast.success(`"${found.title}" agregado al combo`, { position: 'top-center' });
+    }
+
+    setSelectedDbId('');
+    setDbQuantity(1);
+    setDbSearchQuery('');
+  };
+
+  const handleAddCustomProduct = () => {
+    const trimmed = customTitle.trim();
+    if (!trimmed) {
+      showToast.error('Ingresa el nombre del producto o accesorio', { position: 'top-center' });
+      return;
+    }
+
+    const priceNum = customPrice ? parseFloat(customPrice) : undefined;
+
+    setComboItems([
+      ...comboItems,
+      {
+        title: trimmed,
+        quantity: Math.max(1, customQuantity),
+        price: priceNum && !isNaN(priceNum) ? priceNum : undefined,
+        custom: true,
+      },
+    ]);
+    showToast.success(`"${trimmed}" agregado al combo`, { position: 'top-center' });
+
+    setCustomTitle('');
+    setCustomQuantity(1);
+    setCustomPrice('');
+  };
+
+  const handleUpdateComboItemQty = (index: number, newQty: number) => {
+    if (newQty <= 0) {
+      handleRemoveComboItem(index);
+      return;
+    }
+    const updated = [...comboItems];
+    updated[index].quantity = newQty;
+    setComboItems(updated);
+  };
+
+  const handleRemoveComboItem = (index: number) => {
+    const updated = comboItems.filter((_, i) => i !== index);
+    setComboItems(updated);
+  };
+
+  const totalComboReferencePrice = comboItems.reduce((acc, item) => {
+    if (item.price && !isNaN(item.price)) {
+      return acc + item.price * item.quantity;
+    }
+    return acc;
+  }, 0);
+
+  const PRESET_FLAVORS = [
+    'Neutro/sin sabor',
+    'Chocolate',
+    'Vainilla Cream',
+    'Vainilla',
+    'Banana',
+    'Frutilla',
+    'Cookies And Cream',
+    'Frutos rojos',
+    'Limón',
+    'Manzana',
+    'Naranja',
+    'Ananá / Piña',
+    'Dulce de Leche',
+    'Café / Capuchino',
+  ];
+
+  const initialFlavor = initialData?.supplement_information?.flavor || '';
+  const [flavor, setFlavor] = useState<string>(initialFlavor);
+  const [customFlavorMode, setCustomFlavorMode] = useState<boolean>(() => {
+    if (!initialFlavor) return false;
+    return !PRESET_FLAVORS.includes(initialFlavor);
+  });
 
   // Stock, Entrada y Salida (Aumenta con entrada, disminuye con salida)
   const initialStockNum = initialData?.stock !== undefined && initialData?.stock !== null ? Number(initialData.stock) : 0;
@@ -230,6 +364,13 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
       }
     }
 
+    if (productType === 'COMBO') {
+      if (comboItems.length < 2) {
+        showToast.error('Un combo debe incluir al menos 2 productos (en base de datos o personalizados)', { position: 'top-center' });
+        return;
+      }
+    }
+
     const formData = new FormData(e.currentTarget);
     
     // Compress main image if exists
@@ -289,8 +430,324 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
         >
           <option value="CLOTHES">Ropa</option>
           <option value="SUPPLEMENT">Suplementos</option>
+          <option value="COMBO">Combos</option>
         </select>
       </div>
+
+      {/* CONFIGURADOR DE COMBOS (2 o más productos) */}
+      {productType === 'COMBO' && (
+        <div className="rounded-2xl border-2 border-amber-400/40 bg-gradient-to-br from-amber-500/5 via-amber-500/10 to-orange-500/5 p-5 md:p-6 shadow-sm space-y-6">
+          <input type="hidden" name="combo_items" value={JSON.stringify(comboItems)} />
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-200/60 pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 bg-amber-500 text-black rounded-lg">
+                  <Package className="w-5 h-5" />
+                </span>
+                <h3 className="text-lg font-black text-zinc-900 tracking-tight">
+                  Configurador de Combo (Pack de 2 o más productos)
+                </h3>
+              </div>
+              <p className="text-xs text-zinc-600 mt-1">
+                Une 2 o más artículos en este combo. Puedes elegir productos de tu base de datos y/o agregar artículos personalizados (shakers, toallas, accesorios, etc.).
+              </p>
+            </div>
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              {comboItems.length >= 2 ? (
+                <span className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full border border-emerald-300">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  {comboItems.length} productos en el combo
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 text-xs font-bold px-3 py-1.5 rounded-full border border-amber-300">
+                  <AlertCircle className="w-4 h-4 text-amber-600" />
+                  {comboItems.length} de 2 requeridos
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Selector de modo para agregar productos */}
+          <div className="bg-white rounded-xl p-4 border border-zinc-200 shadow-sm space-y-4">
+            <div className="flex gap-2 border-b border-zinc-100 pb-2">
+              <button
+                type="button"
+                onClick={() => setComboAddTab('db')}
+                className={`flex items-center gap-2 pb-2 px-3 text-xs font-bold transition-colors border-b-2 cursor-pointer ${
+                  comboAddTab === 'db'
+                    ? 'border-zinc-900 text-zinc-900'
+                    : 'border-transparent text-zinc-400 hover:text-zinc-600'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                Desde la Base de Datos ({availableProducts.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setComboAddTab('custom')}
+                className={`flex items-center gap-2 pb-2 px-3 text-xs font-bold transition-colors border-b-2 cursor-pointer ${
+                  comboAddTab === 'custom'
+                    ? 'border-amber-600 text-amber-700'
+                    : 'border-transparent text-zinc-400 hover:text-zinc-600'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Producto Personalizado (Fuera de la BD)
+              </button>
+            </div>
+
+            {/* TAB: Desde la BD */}
+            {comboAddTab === 'db' && (
+              <div className="space-y-3">
+                <div className="grid gap-3 sm:grid-cols-12 items-end">
+                  <div className="sm:col-span-8 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-zinc-700">Seleccionar Producto del Catálogo</label>
+                      <span className="text-[11px] text-zinc-400">Filtrar por nombre:</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          value={dbSearchQuery}
+                          onChange={(e) => setDbSearchQuery(e.target.value)}
+                          placeholder="Buscar producto existente..."
+                          className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                        />
+                      </div>
+                      <select
+                        value={selectedDbId}
+                        onChange={(e) => setSelectedDbId(e.target.value)}
+                        className="w-full rounded-xl border border-zinc-300 p-2.5 text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-zinc-50"
+                      >
+                        <option value="">-- Elige un producto de la base de datos --</option>
+                        {filteredAvailableProducts.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.title} - {formatCurrency(p.price)} ({p.type})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <label className="text-xs font-bold text-zinc-700">Cantidad</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={dbQuantity}
+                      onChange={(e) => setDbQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-full rounded-xl border border-zinc-300 p-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-zinc-900 text-center"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <button
+                      type="button"
+                      onClick={handleAddDbProduct}
+                      className="w-full flex items-center justify-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-colors cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Agregar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB: Personalizado (Fuera de la BD) */}
+            {comboAddTab === 'custom' && (
+              <div className="space-y-3">
+                <div className="grid gap-3 sm:grid-cols-12 items-end">
+                  <div className="sm:col-span-6 space-y-1.5">
+                    <label className="text-xs font-bold text-zinc-700">Nombre del artículo o accesorio</label>
+                    <input
+                      type="text"
+                      value={customTitle}
+                      onChange={(e) => setCustomTitle(e.target.value)}
+                      placeholder="Ej: Shaker Mezclador 700ml, Toalla de entrenamiento..."
+                      className="w-full rounded-xl border border-zinc-300 p-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <label className="text-xs font-bold text-zinc-700">Cantidad</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={customQuantity}
+                      onChange={(e) => setCustomQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-full rounded-xl border border-zinc-300 p-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 text-center"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <label className="text-xs font-bold text-zinc-700">Precio Ref. ($ opcional)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={customPrice}
+                      onChange={(e) => setCustomPrice(e.target.value)}
+                      placeholder="0"
+                      className="w-full rounded-xl border border-zinc-300 p-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <button
+                      type="button"
+                      onClick={handleAddCustomProduct}
+                      className="w-full flex items-center justify-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-colors cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Agregar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* LISTA DE PRODUCTOS INCLUIDOS EN EL COMBO */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-zinc-700">
+                Productos Seleccionados en este Combo ({comboItems.length})
+              </h4>
+              {comboItems.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setComboItems([])}
+                  className="text-[11px] text-red-500 hover:text-red-700 font-semibold cursor-pointer underline"
+                >
+                  Vaciar combo
+                </button>
+              )}
+            </div>
+
+            {comboItems.length === 0 ? (
+              <div className="text-center py-8 px-4 rounded-xl border-2 border-dashed border-amber-300/80 bg-white/70 space-y-2">
+                <Package className="w-8 h-8 text-amber-400 mx-auto" />
+                <p className="text-sm font-bold text-zinc-800">Todavía no agregaste productos al combo</p>
+                <p className="text-xs text-zinc-500 max-w-md mx-auto">
+                  Utiliza los selectores de arriba para incluir al menos 2 productos (de tu base de datos o personalizados).
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-2.5">
+                {comboItems.map((item, idx) => (
+                  <div
+                    key={`${item.id || 'custom'}-${idx}`}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white rounded-xl border border-zinc-200 shadow-xs hover:border-zinc-300 transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-12 h-12 rounded-lg bg-zinc-100 overflow-hidden shrink-0 border border-zinc-200 flex items-center justify-center">
+                        {item.image ? (
+                          <Image src={item.image} alt={item.title} fill unoptimized className="object-cover" />
+                        ) : (
+                          <Package className="w-5 h-5 text-zinc-400" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold text-zinc-900">{item.title}</span>
+                          {item.custom ? (
+                            <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200">
+                              Personalizado / No en BD
+                            </span>
+                          ) : (
+                            <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-200">
+                              En Base de Datos
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-zinc-500 flex items-center gap-2 mt-0.5">
+                          {item.price ? (
+                            <span>{formatCurrency(item.price)} c/u</span>
+                          ) : (
+                            <span className="italic text-zinc-400">Sin precio ref.</span>
+                          )}
+                          {item.price && item.quantity > 1 && (
+                            <>
+                              <span>•</span>
+                              <span className="font-semibold text-zinc-700">
+                                Subtotal: {formatCurrency(item.price * item.quantity)}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between sm:justify-end gap-3 self-end sm:self-auto border-t sm:border-t-0 pt-2 sm:pt-0 w-full sm:w-auto">
+                      <div className="flex items-center border border-zinc-200 rounded-lg bg-zinc-50 overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateComboItemQty(idx, item.quantity - 1)}
+                          className="px-2.5 py-1 text-xs font-bold text-zinc-600 hover:bg-zinc-200 transition-colors cursor-pointer"
+                          title="Restar unidad"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="px-3 py-1 text-xs font-black text-zinc-900 bg-white">
+                          {item.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateComboItemQty(idx, item.quantity + 1)}
+                          className="px-2.5 py-1 text-xs font-bold text-zinc-600 hover:bg-zinc-200 transition-colors cursor-pointer"
+                          title="Sumar unidad"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveComboItem(idx)}
+                        className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                        title="Quitar del combo"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Resumen del Combo */}
+            {comboItems.length > 0 && (
+              <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                    <span>💡 Resumen del Combo</span>
+                  </div>
+                  <div className="text-xs text-zinc-600">
+                    Suma del valor individual de los artículos:{' '}
+                    <strong className="text-zinc-900 text-sm">
+                      {formatCurrency(totalComboReferencePrice)}
+                    </strong>
+                  </div>
+                </div>
+                <div>
+                  {comboItems.length < 2 ? (
+                    <span className="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-300 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4 text-amber-600" /> Agrega al menos 1 producto más
+                    </span>
+                  ) : (
+                    <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-300 flex items-center gap-1">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Requisito cumplido (2+ productos)
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2">
         
@@ -324,7 +781,7 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
           name="title" 
           required 
           defaultValue={initialData?.title} 
-          placeholder={productType === 'CLOTHES' ? 'Ej: Remera sport' : 'Ej: WHEY PROTEIN VITAL'} 
+          placeholder={productType === 'CLOTHES' ? 'Ej: Remera sport' : productType === 'COMBO' ? 'Ej: Combo Creatina + Proteína + Shaker' : 'Ej: WHEY PROTEIN VITAL'} 
         />
         
         <div className="space-y-2">
@@ -640,18 +1097,58 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
               </div>
             </div>
             <div className="mt-4 space-y-2">
-              <label className="block text-sm font-bold text-zinc-900">Sabor</label>
-              <select name="supp_flavor" defaultValue={initialData?.supplement_information?.flavor || ''} className="w-full rounded-xl border border-zinc-300 p-2.5 text-sm font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="">Seleccionar Sabor...</option>
-                <option value="Neutro/sin sabor">Neutro/sin sabor</option>
-                <option value="Chocolate">Chocolate</option>
-                <option value="Vainilla Cream">Vainilla Cream</option>
-                <option value="Banana">Banana</option>
-                <option value="Frutilla">Frutilla</option>
-                <option value="Cookies And Cream">Cookies And Cream</option>
-                <option value="Frutos rojos">Frutos rojos</option>
-                <option value="Limón">Limón</option>
-              </select>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-bold text-zinc-900">Sabor</label>
+                <button
+                  type="button"
+                  onClick={() => setCustomFlavorMode(!customFlavorMode)}
+                  className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 underline cursor-pointer"
+                >
+                  {customFlavorMode ? 'Ver lista de sabores predefinidos' : '✏️ Escribir otro sabor personalizado'}
+                </button>
+              </div>
+
+              {customFlavorMode ? (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={flavor}
+                    onChange={(e) => setFlavor(e.target.value)}
+                    placeholder="Ej: Triple Chocolate, Mango Tropical, etc."
+                    className="flex-1 rounded-xl border border-zinc-300 p-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-zinc-900"
+                  />
+                  <input type="hidden" name="supp_flavor" value={flavor} />
+                </div>
+              ) : (
+                <select
+                  name="supp_flavor"
+                  value={flavor}
+                  onChange={(e) => {
+                    if (e.target.value === '__custom__') {
+                      setCustomFlavorMode(true);
+                    } else {
+                      setFlavor(e.target.value);
+                    }
+                  }}
+                  className="w-full rounded-xl border border-zinc-300 p-2.5 text-sm font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-zinc-900"
+                >
+                  <option value="">Seleccionar Sabor...</option>
+                  {initialFlavor && !PRESET_FLAVORS.includes(initialFlavor) && (
+                    <option value={initialFlavor}>{initialFlavor} (Guardado)</option>
+                  )}
+                  {PRESET_FLAVORS.map((f) => (
+                    <option key={f} value={f}>
+                      {f}
+                    </option>
+                  ))}
+                  <option value="__custom__">✏️ Otro sabor personalizado...</option>
+                </select>
+              )}
+              {flavor && (
+                <p className="text-xs text-zinc-500">
+                  Sabor registrado: <strong className="text-zinc-800">{flavor}</strong>
+                </p>
+              )}
             </div>
           </div>
         )}

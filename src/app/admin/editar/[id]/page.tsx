@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase-server';
 import { ProductForm } from '@/components/ProductForm';
-import { updateProduct } from '@/actions/products';
+import { updateProduct, getProductsForComboSelection } from '@/actions/products';
 import { notFound } from 'next/navigation';
 import { Product } from '@/types/product';
 import { getBrands } from '@/actions/brands';
@@ -19,13 +19,26 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     notFound();
   }
 
-  const brands = await getBrands();
-  const categories = await getCategories();
-  const subcategories = await getSubcategories();
+  const [brands, categories, subcategories, availableProducts] = await Promise.all([
+    getBrands(),
+    getCategories(),
+    getSubcategories(),
+    getProductsForComboSelection(),
+  ]);
+
+  let suppInfo = Array.isArray(product.supplement_information) ? product.supplement_information[0] : product.supplement_information;
+
+  // Si el join no trajo la información del suplemento o devolvió null, consultamos directamente
+  if (!suppInfo && product.type === 'SUPPLEMENT') {
+    const { data: directSupp } = await supabase.from('supplement_information').select('*').eq('product_id', id).maybeSingle();
+    if (directSupp) {
+      suppInfo = directSupp;
+    }
+  }
 
   const productData = {
     ...product,
-    supplement_information: Array.isArray(product.supplement_information) ? product.supplement_information[0] : product.supplement_information
+    supplement_information: suppInfo || null,
   };
 
   return (
@@ -38,6 +51,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
           brands={brands}
           categories={categories}
           subcategories={subcategories}
+          availableProducts={availableProducts}
         />
       </div>
     </div>

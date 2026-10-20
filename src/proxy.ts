@@ -47,25 +47,32 @@ export default async function proxy(request: NextRequest) {
     }
   );
 
-  // 3. IMPORTANTE: Refrescar sesión y obtener usuario actual
-  // Al llamar a getUser(), si el token estaba expirado, Supabase lo renueva automáticamente
-  // gracias al método setAll que configuramos arriba
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   // 4. Obtenemos la URL actual que el usuario está intentando visitar
   const pathname = request.nextUrl.pathname;
 
   // 5. RUTAS PROTEGIDAS
-  // Definimos qué rutas requieren qué nivel de permisos
   const isProtectedAdminRoute = pathname.startsWith('/admin'); // Solo admins
   const isProtectedUserRoute = pathname.startsWith('/perfil') || pathname.startsWith('/checkout'); // Usuarios registrados
   const isAuthRoute = pathname === '/login' || pathname === '/register' || pathname === '/recuperar-contrasena'; // Solo usuarios NO registrados
 
+  // Optimización de rendimiento: Si no hay cookie de auth, evitamos roundtrip innecesario a Supabase
+  const hasAuthCookie = request.cookies.getAll().some(c => c.name.includes('-auth-token'));
+  if (!hasAuthCookie) {
+    if (isProtectedAdminRoute || isProtectedUserRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
+  // 3. Refrescar sesión y obtener usuario actual (solo cuando hay cookie de sesión)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   // 6. Si no hay usuario y trata de acceder a cualquier ruta protegida
   if (!user && (isProtectedAdminRoute || isProtectedUserRoute)) {
-    // Lo redirigimos a iniciar sesión clonando la URL y cambiando el destino
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
