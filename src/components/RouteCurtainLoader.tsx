@@ -50,9 +50,15 @@ export function RouteCurtainLoader({ brandName = "KLONFARK" }: RouteCurtainLoade
   const openCurtain = (delay = 80) => {
     const timer = setTimeout(() => {
       setIsOpen(true);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('curtain-opening'));
+      }
       // Ocultar totalmente del DOM tras completar el desplazamiento lateral suave de 500ms
       const hideTimer = setTimeout(() => {
         setIsVisible(false);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('curtain-opened'));
+        }
       }, 550);
       return () => clearTimeout(hideTimer);
     }, delay);

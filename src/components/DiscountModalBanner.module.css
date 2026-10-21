@@ -1,0 +1,138 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-color: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: overlayEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.overlayClosing {
+  animation: overlayExit 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+.modalCard {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: radial-gradient(circle at 50% 0%, #1c1917 0%, #0c0a09 70%, #000000 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 28px 24px;
+  color: #ffffff;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9);
+  animation: modalEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center top;
+}
+
+.modalCardClosing {
+  animation: modalExitToTop 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes overlayEnter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlayExit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes modalEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalExitToTop {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  40% {
+    opacity: 0.85;
+    transform: scale(0.8) translateY(-50px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) translateY(-140px);
+  }
+}
+
+/* Banner superior exactamente como estaba antes (color y tipografía idénticos a Navbar.module.css) */
+.banner {
+  background-color: var(--shop-black);
+  color: var(--shop-white);
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.banner a {
+  text-decoration: underline;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.bannerEntering {
+  animation: bannerSlideDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes bannerSlideDown {
+  0% {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-100%);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  100% {
+    max-height: 60px;
+    opacity: 1;
+    transform: translateY(0);
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+
+.bannerClose {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+.bannerClose:hover {
+  opacity: 1;
+}

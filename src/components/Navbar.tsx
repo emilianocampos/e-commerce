@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getSupplementBrands } from '@/actions/brands';
 import { Brand } from '@/types/product';
 import { NotificationBell } from './NotificationBell';
+import { DiscountModalBanner } from './DiscountModalBanner';
 import styles from './Navbar.module.css';
 
 interface NavbarProps {
@@ -59,14 +60,7 @@ export function Navbar({ user, role, settings }: NavbarProps) {
 
   return (
     <>
-      {showBanner && (
-        <div className={styles.banner}>
-          {settings?.top_banner_text || 'Sign up and get 20% off to your first order.'}
-          <button className={styles.bannerClose} onClick={() => setShowBanner(false)}>
-            <X size={16} />
-          </button>
-        </div>
-      )}
+      <DiscountModalBanner bannerText={settings?.top_banner_text} />
       <header className={`${styles.header} ${isScrolled ? styles.headerScrolled : ''}`}>
         <div className={styles.container}>
 
