@@ -132,7 +132,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     name: product.title,
     image: allImages.length > 0 ? allImages : (product.image ? [product.image] : []),
     description: product.description || product.title,
-    sku: product.id,
+    sku: product.sku || product.id,
+    ...(product.barcode ? { gtin: product.barcode } : { mpn: product.sku || product.id }),
     brand: {
       '@type': 'Brand',
       name: product.brands?.name || 'KLONFARK',
@@ -142,12 +143,50 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       url: productUrl,
       priceCurrency: 'ARS',
       price: currentPrice,
-      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      priceValidUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      validFrom: product.created_at ? new Date(product.created_at).toISOString().split('T')[0] : '2026-01-01',
       itemCondition: 'https://schema.org/NewCondition',
       availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       seller: {
         '@type': 'Organization',
         name: 'KLONFARK',
+      },
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'AR',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+        merchantReturnDays: 10,
+        returnMethod: 'https://schema.org/ReturnByMail',
+        returnFees: 'https://schema.org/FreeReturn',
+        refundType: 'https://schema.org/FullRefund',
+        merchantReturnLink: `${baseUrl}/ayuda/terminos`,
+      },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: '0',
+          currency: 'ARS',
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'AR',
+        },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 1,
+            maxValue: 2,
+            unitCode: 'DAY',
+          },
+          transitTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 2,
+            maxValue: 5,
+            unitCode: 'DAY',
+          },
+        },
       },
     },
     ...(reviewsList.length > 0
@@ -260,8 +299,13 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                           )}
                         </div>
                         <div>
-                          <div className="text-sm font-bold text-zinc-100 flex items-center gap-2">
-                            {item.title}
+                          <div className="text-sm font-bold text-zinc-100 flex items-center gap-2 flex-wrap">
+                            <span>{item.title}</span>
+                            {item.flavor && (
+                              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                Sabor: {item.flavor}
+                              </span>
+                            )}
                           </div>
                           <div className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2">
                             <span className="text-amber-400 font-semibold">Cantidad: {item.quantity}</span>

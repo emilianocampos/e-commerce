@@ -1225,7 +1225,7 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
       </div>
 
       <div className="flex justify-end gap-4 border-t pt-6">
-        <Button type="button" variant="outline" onClick={() => window.history.back()}>Cancelar</Button>
+        <Button type="button" variant="outline" className="text-zinc-900 font-bold hover:text-black" onClick={() => window.history.back()}>Cancelar</Button>
         <Button type="submit" disabled={isPending}>{isPending ? 'Guardando...' : initialData ? 'Actualizar Producto' : 'Crear Producto'}</Button>
       </div>
     </form>

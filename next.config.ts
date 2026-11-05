@@ -56,6 +56,22 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: '/merchant-feed.xml',
+        destination: '/api/merchant-feed',
+      },
+      {
+        source: '/feed.xml',
+        destination: '/api/merchant-feed',
+      },
+      {
+        source: '/merchant-feed.txt',
+        destination: '/api/merchant-feed?format=txt',
+      },
+    ];
+  },
   async headers() {
     return [
       {

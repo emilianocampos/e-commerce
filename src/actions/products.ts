@@ -24,10 +24,55 @@ export async function getProductsForComboSelection() {
   const supabase = await createClient();
   const { data } = await supabase
     .from('products')
-    .select('id, title, price, image, type')
+    .select('id, title, price, image, type, description, sku, supplement_information(flavor)')
     .neq('type', 'COMBO')
     .order('title', { ascending: true });
-  return data || [];
+
+  if (!data) return [];
+
+  const KNOWN_FLAVORS = [
+    'cream and cookies', 'cookies & cream', 'cookies and cream', 'dulce de leche',
+    'frutos rojos', 'sin sabor', 'chocolate blanco', 'chocolate', 'vainilla', 
+    'frutilla', 'banana', 'limón', 'limon', 'naranja', 'uva', 'coco', 'manzana', 'sandía', 'sandia', 'neutro'
+  ];
+
+  return data.map((p: any) => {
+    let flavor: string | null = null;
+
+    if (p.supplement_information) {
+      const supp = Array.isArray(p.supplement_information) ? p.supplement_information[0] : p.supplement_information;
+      if (supp?.flavor?.trim()) {
+        flavor = supp.flavor.trim();
+      }
+    }
+
+    if (!flavor && p.description) {
+      const regexMatch = p.description.match(/(?:sabor|flavor)\s*(?:gourmet)?\s*[:—\-]?\s*([A-Za-zÀ-ÿ\s]+?)(?:\r|\n|,|\.|;|\*|\d|🥛|🍦|💪|🥤|💡|—|$)/i);
+      if (regexMatch && regexMatch[1] && regexMatch[1].trim().length > 1 && regexMatch[1].trim().length < 30) {
+        flavor = regexMatch[1].trim();
+      }
+    }
+
+    if (!flavor) {
+      const combined = ((p.title || '') + ' ' + (p.description || '')).toLowerCase();
+      for (const k of KNOWN_FLAVORS) {
+        if (combined.includes(k)) {
+          flavor = k.charAt(0).toUpperCase() + k.slice(1);
+          break;
+        }
+      }
+    }
+
+    return {
+      id: p.id,
+      title: p.title,
+      price: p.price,
+      image: p.image,
+      type: p.type,
+      sku: p.sku || null,
+      flavor: flavor || null,
+    };
+  });
 }
 
 export async function createProduct(_prevState: any, formData: FormData) {
@@ -224,6 +269,7 @@ export async function createProduct(_prevState: any, formData: FormData) {
 
   revalidatePath('/', 'layout');
   revalidatePath('/admin/productos');
+  revalidatePath('/combos');
   revalidatePath(`/producto/${newProduct.id}`);
 
   return { success: true };
@@ -452,6 +498,8 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
 
   revalidatePath('/', 'layout');
   revalidatePath('/admin/productos');
+  revalidatePath(`/admin/editar/${id}`);
+  revalidatePath('/combos');
   revalidatePath(`/producto/${id}`);
 
   return { success: true };

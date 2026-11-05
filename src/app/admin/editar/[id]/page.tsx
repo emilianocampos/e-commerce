@@ -6,6 +6,9 @@ import { Product } from '@/types/product';
 import { getBrands } from '@/actions/brands';
 import { getCategories, getSubcategories } from '@/actions/categories';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata = {
   title: 'Editar Producto | Admin',
 };
@@ -36,8 +39,18 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     }
   }
 
+  let comboItems = product.combo_items;
+  if (typeof comboItems === 'string') {
+    try {
+      comboItems = JSON.parse(comboItems);
+    } catch {
+      comboItems = null;
+    }
+  }
+
   const productData = {
     ...product,
+    combo_items: comboItems,
     supplement_information: suppInfo || null,
   };
 

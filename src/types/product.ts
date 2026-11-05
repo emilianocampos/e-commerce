@@ -107,6 +107,7 @@ export interface ComboItem {
   image?: string | null;
   price?: number | null;
   custom?: boolean;
+  flavor?: string | null;
 }
 
 export interface CartItem {
