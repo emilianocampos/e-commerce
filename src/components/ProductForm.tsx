@@ -35,6 +35,7 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
 
   // Main Image
   const [previewImage, setPreviewImage] = useState<string | null>(initialData?.image ?? null);
+  const [deletedMainImage, setDeletedMainImage] = useState<boolean>(false);
   
   // Optional Images
   const initialOptImages = [null, null, null] as (string | null)[];
@@ -289,7 +290,19 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
 
   const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setPreviewImage(URL.createObjectURL(file));
+    if (file) {
+      setPreviewImage(URL.createObjectURL(file));
+      setDeletedMainImage(false);
+    }
+  };
+
+  const handleRemoveMainImage = () => {
+    setPreviewImage(null);
+    setDeletedMainImage(true);
+    const inputElem = document.getElementById('image_main') as HTMLInputElement | null;
+    if (inputElem) {
+      inputElem.value = '';
+    }
   };
 
   const [deletedOptImages, setDeletedOptImages] = useState<boolean[]>([false, false, false]);
@@ -1166,15 +1179,44 @@ export function ProductForm({ action, initialData, brands, categories, subcatego
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {/* Main Image */}
           <div className="space-y-2">
-            <label className="block text-xs font-medium text-zinc-500">Principal (Obligatoria)</label>
-            <div className="relative h-32 w-full overflow-hidden rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50 hover:bg-zinc-100 transition-colors">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-medium text-zinc-500">Principal (Obligatoria)</label>
+              {previewImage && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveMainImage();
+                  }}
+                  className="text-[11px] text-red-500 hover:text-red-700 font-semibold flex items-center gap-0.5 transition-colors z-20 cursor-pointer"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Eliminar
+                </button>
+              )}
+            </div>
+            <div className="relative h-32 w-full overflow-hidden rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50 hover:bg-zinc-100 transition-colors group">
               {previewImage ? (
-                <Image src={previewImage} alt="Vista previa principal" fill unoptimized className="object-cover" />
+                <>
+                  <Image src={previewImage} alt="Vista previa principal" fill unoptimized className="object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pointer-events-none">
+                    <span className="text-[11px] text-white font-medium bg-black/60 px-2 py-1 rounded">Cambiar foto</span>
+                  </div>
+                </>
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center text-xs text-zinc-400">Principal</div>
               )}
-              <input type="file" name="image_main" accept="image/*" onChange={handleMainImageChange} required={!initialData} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+              <input
+                type="file"
+                id="image_main"
+                name="image_main"
+                accept="image/*"
+                onChange={handleMainImageChange}
+                required={!initialData && !deletedMainImage}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
             </div>
+            <input type="hidden" name="delete_main" value={deletedMainImage ? 'true' : 'false'} />
           </div>
 
           {/* Optional Images */}

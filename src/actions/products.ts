@@ -324,8 +324,10 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     }
   }
 
+  const isDeletedMain = formData.get('delete_main') === 'true';
   const imageMainFile = formData.get('image_main') as File | null;
-  let imageUrl = undefined;
+  let imageUrl: string | null | undefined = undefined;
+
   if (imageMainFile && imageMainFile.size > 0) {
     try {
       imageUrl = await uploadProductImage(imageMainFile);
@@ -336,6 +338,16 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     } catch (e: any) {
       return { error: e.message };
     }
+  } else if (isDeletedMain) {
+    try {
+      const { data: oldProduct } = await supabase.from('products').select('image').eq('id', id).single();
+      if (oldProduct?.image) {
+        await deleteProductImage(oldProduct.image);
+      }
+    } catch (e: any) {
+      console.error('Error deleting old main image:', e);
+    }
+    imageUrl = null;
   }
 
   // Handle optional images (upload, replace, or delete)
@@ -353,25 +365,28 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     // If marked for deletion or replacing with a new file
     if (isDeleted || (file && file.size > 0)) {
       try {
-        const { data: oldOptImage } = await supabase
+        const { data: oldImages } = await supabase
           .from('product_images')
-          .select('url')
+          .select('id, url')
           .eq('product_id', id)
-          .eq('order', orderNum)
-          .maybeSingle();
+          .eq('order', orderNum);
 
-        if (oldOptImage?.url) {
-          try {
-            await deleteProductImage(oldOptImage.url);
-          } catch (delError) {
-            console.error(`Error deleting storage file for optional image ${orderNum}:`, delError);
+        if (oldImages && oldImages.length > 0) {
+          for (const oldImg of oldImages) {
+            if (oldImg.url) {
+              try {
+                await deleteProductImage(oldImg.url);
+              } catch (delError) {
+                console.error(`Error deleting storage file for optional image ${orderNum}:`, delError);
+              }
+            }
           }
-          await supabase
-            .from('product_images')
-            .delete()
-            .eq('product_id', id)
-            .eq('order', orderNum);
         }
+        await supabase
+          .from('product_images')
+          .delete()
+          .eq('product_id', id)
+          .eq('order', orderNum);
       } catch (delErr) {
         console.error(`Error removing old optional image ${orderNum}:`, delErr);
       }
@@ -380,6 +395,12 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     // If uploading a new file
     if (file && file.size > 0) {
       try {
+        await supabase
+          .from('product_images')
+          .delete()
+          .eq('product_id', id)
+          .eq('order', orderNum);
+
         const url = await uploadProductImage(file);
         await supabase.from('product_images').insert({
           product_id: id,
@@ -419,7 +440,7 @@ export async function updateProduct(id: string, _prevState: any, formData: FormD
     updated_at: new Date().toISOString(),
   };
 
-  if (imageUrl) {
+  if (imageUrl !== undefined) {
     updateData.image = imageUrl;
   }
 
