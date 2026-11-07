@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  compress: true,
   images: {
+    formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 2678400, // 31 días de caché en el CDN de Vercel para no re-descargar de Supabase a Compute
     remotePatterns: [
       {
@@ -59,6 +61,23 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: '/devoluciones',
+        destination: '/ayuda/devoluciones',
+      },
+      {
+        source: '/cambios-y-devoluciones',
+        destination: '/ayuda/devoluciones',
+      },
+      {
+        source: '/politica-de-devolucion',
+        destination: '/ayuda/devoluciones',
+      },
+      {
+        source: '/politicas-de-devolucion',
+        destination: '/ayuda/devoluciones',
+      },
+
+      {
         source: '/merchant-feed.xml',
         destination: '/api/merchant-feed',
       },
@@ -74,6 +93,25 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=604800',
+          },
+        ],
+      },
+
       {
         source: '/:path*',
         has: [

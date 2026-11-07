@@ -46,6 +46,7 @@ export function Footer({ settings }: { settings?: any }) {
             <ul className={styles.linkList}>
               <li><Link href="/ayuda/soporte" className={styles.link}>Soporte al Cliente</Link></li>
               <li><Link href="/ayuda/envios" className={styles.link}>Detalles de Envío</Link></li>
+              <li><Link href="/ayuda/devoluciones" className={styles.link}>Cambios y Devoluciones</Link></li>
               <li><Link href="/ayuda/terminos" className={styles.link}>Términos y Condiciones</Link></li>
               <li><Link href="/ayuda/privacidad" className={styles.link}>Política de Privacidad</Link></li>
             </ul>
@@ -64,8 +65,14 @@ export function Footer({ settings }: { settings?: any }) {
           </div>
         </div>
 
-        <div className={styles.bottom}>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-zinc-200/60 text-xs text-zinc-500">
           <p className={styles.copyright}>Klonfark © 2000-2026, Todos los derechos reservados</p>
+          <Link
+            href="/arrepentimiento"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-zinc-300 hover:border-zinc-900 bg-white text-zinc-800 hover:text-black font-bold text-xs uppercase tracking-wider transition-all shadow-xs"
+          >
+            Botón de Arrepentimiento
+          </Link>
         </div>
       </div>
     </footer>

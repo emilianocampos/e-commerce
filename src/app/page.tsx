@@ -4,8 +4,13 @@ import { BrandsBanner } from '@/components/BrandsBanner';
 import { ProductSection } from '@/components/ProductSection';
 import { BrowseStyle } from '@/components/BrowseStyle';
 import { SiteReviewsSection } from '@/components/SiteReviewsSection';
-
+import { Metadata } from 'next';
 import { getStoreSettings } from '@/actions/settings';
+
+export const metadata: Metadata = {
+  title: "KLONFARK | Suplementos, Ropa Deportiva y Urbana",
+  description: "Descubrí KLONFARK: tienda online de suplementos deportivos, creatina, proteínas, ropa deportiva e indumentaria urbana. Calidad, estilo y variedad para acompañar tu entrenamiento y tu día a día. Comprá online",
+};
 
 export const revalidate = 60;
 

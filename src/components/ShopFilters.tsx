@@ -212,6 +212,7 @@ export function ShopFilters() {
                     type="button"
                     onClick={() => toggleColor(c.name)}
                     title={c.name}
+                    aria-label={`Filtrar por color ${c.name}`}
                     className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer relative ${
                       isSelected 
                         ? 'ring-2 ring-offset-2 ring-white scale-110 shadow-md' 
@@ -244,6 +245,7 @@ export function ShopFilters() {
                       type="button" 
                       onClick={() => toggleColor(colorName)}
                       className="hover:text-red-400 cursor-pointer ml-0.5"
+                      aria-label={`Quitar filtro de color ${colorName}`}
                     >
                       ×
                     </button>

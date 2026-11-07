@@ -159,7 +159,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         returnMethod: 'https://schema.org/ReturnByMail',
         returnFees: 'https://schema.org/FreeReturn',
         refundType: 'https://schema.org/FullRefund',
-        merchantReturnLink: `${baseUrl}/ayuda/terminos`,
+        merchantReturnLink: `${baseUrl}/ayuda/devoluciones`,
       },
       shippingDetails: {
         '@type': 'OfferShippingDetails',
@@ -293,7 +293,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                       <div className="flex items-center gap-3">
                         <div className="relative w-12 h-12 rounded-lg bg-zinc-900 overflow-hidden shrink-0 border border-zinc-800 flex items-center justify-center">
                           {item.image ? (
-                            <Image src={item.image} alt={item.title} fill unoptimized className="object-cover" />
+                            <Image src={item.image} alt={item.title || 'Producto del combo'} fill sizes="48px" className="object-cover" />
                           ) : (
                             <Package className="w-5 h-5 text-zinc-500" />
                           )}

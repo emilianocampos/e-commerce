@@ -79,10 +79,10 @@ export function ReviewCarousel({ reviews, isLoggedIn, createReviewAction }: Revi
         </div>
         <div className="hidden md:flex items-center gap-4">
           <div className={styles.navBtns}>
-            <button className={styles.navBtn} onClick={() => scroll('left')}>
+            <button className={styles.navBtn} onClick={() => scroll('left')} aria-label="Ver reseñas anteriores">
               <ArrowLeft size={24} />
             </button>
-            <button className={styles.navBtn} onClick={() => scroll('right')}>
+            <button className={styles.navBtn} onClick={() => scroll('right')} aria-label="Ver reseñas siguientes">
               <ArrowRight size={24} />
             </button>
           </div>
@@ -118,6 +118,7 @@ export function ReviewCarousel({ reviews, isLoggedIn, createReviewAction }: Revi
             <button 
               onClick={() => setIsModalOpen(false)}
               className="absolute right-4 top-4 text-zinc-400 hover:text-zinc-600"
+              aria-label="Cerrar modal de reseña"
             >
               <X size={24} />
             </button>
@@ -138,6 +139,7 @@ export function ReviewCarousel({ reviews, isLoggedIn, createReviewAction }: Revi
                       key={star}
                       type="button"
                       onClick={() => setRating(star)}
+                      aria-label={`Calificar con ${star} estrellas`}
                       className={`${rating >= star ? 'text-yellow-400' : 'text-zinc-300'} transition-colors`}
                     >
                       <Star size={32} fill="currentColor" />

@@ -43,7 +43,7 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <Link href={`/producto/${product.id}`} className={styles.card}>
+    <Link href={`/producto/${product.id}`} className={styles.card} aria-label={`Ver producto ${product.title || 'KLONFARK'}`}>
       <div className={styles.imageWrapper}>
         {product.type === 'COMBO' && (
           <span className="absolute top-2.5 left-2.5 z-10 bg-amber-500 text-black font-black text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-md shadow-md flex items-center gap-1">
@@ -53,11 +53,10 @@ export function ProductCard({ product }: ProductCardProps) {
         {product.image ? (
           <Image
             src={product.image}
-            alt={product.title}
+            alt={product.title || 'Producto KLONFARK'}
             fill
-            unoptimized
             className={styles.image}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         ) : (
           <div style={{ color: '#999' }}>No Image</div>

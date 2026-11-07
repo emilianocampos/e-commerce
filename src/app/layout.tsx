@@ -22,12 +22,14 @@ import NextTopLoader from 'nextjs-toploader';
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const archivoBlack = Archivo_Black({
   variable: "--font-display",
   weight: "400",
   subsets: ["latin"],
+  display: "swap",
 });
 
 import { getSiteUrl, OFFICIAL_SITE_URL } from "@/lib/site-url";
@@ -40,15 +42,15 @@ export const metadata: Metadata = {
   },
   title: {
     template: "%s | KLONFARK",
-    default: "KLONFARK | Tu estilo, tu esencia",
+    default: "KLONFARK | Suplementos, Ropa Deportiva y Urbana",
   },
-  description: "Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida. KLONFARK ofrece ropa de alta calidad para hombres y mujeres.",
-  keywords: ["ropa", "indumentaria", "moda", "klonfark", "ecommerce", "argentina", "suplementos", "ropa urbana", "estilo"],
+  description: "Descubrí KLONFARK: tienda online de suplementos deportivos, creatina, proteínas, ropa deportiva e indumentaria urbana. Calidad, estilo y variedad para acompañar tu entrenamiento y tu día a día. Comprá online",
+  keywords: ["suplementos", "ropa deportiva", "indumentaria urbana", "creatina", "proteinas", "klonfark", "ecommerce", "argentina", "fitness", "entrenamiento", "moda"],
   authors: [{ name: "KLONFARK" }],
   creator: "KLONFARK",
   openGraph: {
-    title: "KLONFARK | Tu estilo, tu esencia",
-    description: "Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida.",
+    title: "KLONFARK | Suplementos, Ropa Deportiva y Urbana",
+    description: "Descubrí KLONFARK: tienda online de suplementos deportivos, creatina, proteínas, ropa deportiva e indumentaria urbana. Calidad, estilo y variedad para acompañar tu entrenamiento y tu día a día. Comprá online",
     url: OFFICIAL_SITE_URL,
     siteName: "KLONFARK",
     locale: "es_AR",
@@ -56,8 +58,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "KLONFARK | Tu estilo, tu esencia",
-    description: "Explora nuestra diversa gama de productos cuidadosamente seleccionados, diseñados para resaltar tu individualidad y adaptarse a tu estilo de vida.",
+    title: "KLONFARK | Suplementos, Ropa Deportiva y Urbana",
+    description: "Descubrí KLONFARK: tienda online de suplementos deportivos, creatina, proteínas, ropa deportiva e indumentaria urbana. Calidad, estilo y variedad para acompañar tu entrenamiento y tu día a día. Comprá online",
   },
   icons: {
     icon: [

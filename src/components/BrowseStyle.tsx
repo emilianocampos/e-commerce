@@ -57,14 +57,14 @@ export function BrowseStyle({ settings }: { settings?: any }) {
           {activeStyles.map((style, index) => {
             const spanClass = getSpanClass(index, activeStyles.length);
             return (
-              <Link key={index} href={style.link} className={`${styles.card} ${spanClass}`}>
+              <Link key={index} href={style.link} className={`${styles.card} ${spanClass}`} aria-label={`Explorar colección de estilo: ${style.title}`}>
                 <span className={styles.cardTitle}>{style.title}</span>
                 
                 {style.image ? (
                   <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}>
                     <Image 
                       src={style.image} 
-                      alt={style.title} 
+                      alt={`Estilo ${style.title}`} 
                       fill 
                       sizes="(max-width: 768px) 100vw, 50vw"
                       className={styles.image} 

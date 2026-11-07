@@ -51,6 +51,7 @@ export function CartDrawer() {
                       type="button"
                       className="relative -m-2 p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
                       onClick={closeCart}
+                      aria-label="Cerrar panel del carrito"
                     >
                       <span className="absolute -inset-0.5" />
                       <span className="sr-only">Cerrar panel</span>
@@ -118,6 +119,7 @@ export function CartDrawer() {
                                   onClick={() => decreaseQuantity(item.product.id, item.selectedSize, item.selectedColor)}
                                   className="rounded-md p-1 hover:bg-zinc-100 disabled:opacity-50 transition-colors"
                                   disabled={item.quantity <= 1}
+                                  aria-label="Disminuir cantidad"
                                 >
                                   <Minus className="h-3 w-3 text-zinc-600" />
                                 </button>
@@ -126,6 +128,7 @@ export function CartDrawer() {
                                   onClick={() => increaseQuantity(item.product.id, item.selectedSize, item.selectedColor)}
                                   className="rounded-md p-1 hover:bg-zinc-100 disabled:opacity-50 transition-colors"
                                   disabled={item.quantity >= item.product.stock}
+                                  aria-label="Aumentar cantidad"
                                 >
                                   <Plus className="h-3 w-3 text-zinc-600" />
                                 </button>
@@ -138,6 +141,7 @@ export function CartDrawer() {
                                     removeItem(item.product.id, item.selectedSize, item.selectedColor);
                                     showToast.error('Producto eliminado', { position: 'top-center', duration: 3000 });
                                   }}
+                                  aria-label="Eliminar producto del carrito"
                                   className="font-medium text-red-500 hover:text-red-600 flex items-center gap-1 transition-colors"
                                 >
                                   <Trash2 className="h-4 w-4" />

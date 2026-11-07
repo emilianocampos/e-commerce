@@ -53,6 +53,7 @@ export function ShopSearchBar() {
               onClick={handleClear}
               className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white rounded-full hover:bg-zinc-700 transition"
               title="Borrar búsqueda"
+              aria-label="Borrar texto de búsqueda"
             >
               <X className="w-4 h-4" />
             </button>
@@ -78,6 +79,7 @@ export function ShopSearchBar() {
               onClick={handleClear}
               className="hover:text-red-300 ml-0.5"
               title="Quitar búsqueda"
+              aria-label="Quitar filtro de búsqueda"
             >
               <X className="w-3 h-3" />
             </button>

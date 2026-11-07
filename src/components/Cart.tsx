@@ -269,6 +269,7 @@ export function Cart() {
                       className={styles.quantityBtn}
                       onClick={() => decreaseQuantity(item.product.id, item.selectedSize, item.selectedColor)}
                       disabled={item.quantity <= 1}
+                      aria-label="Disminuir cantidad"
                     >
                       <Minus size={16} strokeWidth={3} />
                     </button>
@@ -277,6 +278,7 @@ export function Cart() {
                       className={styles.quantityBtn}
                       onClick={() => increaseQuantity(item.product.id, item.selectedSize, item.selectedColor)}
                       disabled={item.quantity >= item.product.stock}
+                      aria-label="Aumentar cantidad"
                     >
                       <Plus size={16} strokeWidth={3} />
                     </button>

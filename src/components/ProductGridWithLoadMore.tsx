@@ -102,6 +102,7 @@ export function ProductGridWithLoadMore({
               onClick={handleLoadMore}
               disabled={isLoadingMore}
               className={styles.loadMoreButton}
+              aria-label="Cargar más productos"
             >
               {isLoadingMore ? (
                 <>

@@ -90,6 +90,7 @@ export function ProductReviews({ productId, reviews, user }: ProductReviewsProps
                       key={star}
                       type="button"
                       onClick={() => setRating(star)}
+                      aria-label={`Calificar con ${star} estrellas`}
                       className="text-2xl transition-colors focus:outline-none"
                     >
                       <Star fill={star <= rating ? "#FFC633" : "transparent"} color={star <= rating ? "#FFC633" : "#D4D4D8"} size={28} />

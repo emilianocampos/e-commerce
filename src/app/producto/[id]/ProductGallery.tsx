@@ -61,6 +61,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
               key={i} 
               type="button"
               onClick={() => setCurrentIndex(i)}
+              aria-label={`Ver imagen ${i + 1} de ${title}`}
               style={currentIndex === i ? {
                 borderColor: 'var(--card-glow-color, #10b981)',
                 boxShadow: '0 0 12px rgba(var(--card-glow-rgb, 16, 185, 129), 0.35)',
@@ -69,7 +70,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
                 currentIndex === i ? 'scale-105' : 'border-zinc-200 hover:border-zinc-400 opacity-70 hover:opacity-100'
               }`}
             >
-              <Image src={img} alt={`${title} - miniatura ${i + 1}`} fill unoptimized className="object-contain p-2" />
+              <Image src={img} alt={`${title} - miniatura ${i + 1}`} fill sizes="120px" className="object-contain p-2" />
             </button>
           ))}
         </div>
@@ -88,7 +89,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
             src={currentImage} 
             alt={`${title} - imagen ${currentIndex + 1}`} 
             fill 
-            unoptimized 
+            sizes="(max-width: 1024px) 100vw, 50vw"
             className="object-contain p-4 lg:p-6 transition-all duration-300 animate-in fade-in" 
             priority 
           />

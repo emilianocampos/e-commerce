@@ -153,7 +153,7 @@ export function Navbar({ user, role, settings }: NavbarProps) {
             </button>
 
             {role === 'admin' && (
-              <Link href="/admin" className={styles.actionBtn} style={{ color: 'var(--shop-red)' }}>
+              <Link href="/admin" className={styles.actionBtn} style={{ color: 'var(--shop-red)' }} aria-label="Panel de Administrador">
                 <ShieldAlert size={24} />
               </Link>
             )}
@@ -165,6 +165,7 @@ export function Navbar({ user, role, settings }: NavbarProps) {
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     className={styles.actionBtn}
+                    aria-label="Menú de usuario"
                   >
                     <UserIcon size={24} />
                   </button>
@@ -196,7 +197,7 @@ export function Navbar({ user, role, settings }: NavbarProps) {
                 </div>
               </div>
             ) : (
-              <Link href="/login" className={styles.actionBtn}>
+              <Link href="/login" className={styles.actionBtn} aria-label="Iniciar sesión o mi cuenta">
                 <UserIcon size={24} />
               </Link>
             )}
@@ -239,6 +240,7 @@ export function Navbar({ user, role, settings }: NavbarProps) {
               <button
                 onClick={() => setShowMobileSearch(false)}
                 className="absolute right-3 p-1 text-zinc-400 hover:text-zinc-700"
+                aria-label="Cerrar búsqueda"
               >
                 <X size={16} />
               </button>
