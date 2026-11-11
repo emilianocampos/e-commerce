@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase-server';
-import { notFound } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 import Image from 'next/image';
 import { formatCurrency } from '@/lib/utils';
 import { Metadata } from 'next';
@@ -19,15 +19,30 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const supabase = await createClient();
   const { data: product } = await supabase.from('products').select('title, description, image').eq('id', resolvedParams.id).maybeSingle();
 
-  const title = product ? product.title : 'Producto no encontrado';
-  const description = product?.description || 'Detalles del producto en KLONFARK';
-  const image = product?.image || '';
+  if (!product) {
+    permanentRedirect('/shop');
+  }
+
+  const title = product.title;
+  const description = product.description || 'Detalles del producto en KLONFARK';
+  const image = product.image || '';
   const baseUrl = getSiteUrl();
   const canonicalUrl = `${baseUrl}/producto/${resolvedParams.id}`;
 
   return {
     title,
     description,
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     alternates: {
       canonical: canonicalUrl,
     },
@@ -60,7 +75,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   if (productData) {
     product = productData;
   } else if (!productError) {
-    notFound();
+    permanentRedirect('/shop');
   } else {
     console.error("Error al consultar producto con relaciones, ejecutando fallback:", productError);
 
@@ -71,7 +86,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       .maybeSingle();
 
     if (!baseProduct) {
-      notFound();
+      permanentRedirect('/shop');
     }
 
     const [brandsRes, suppRes, imagesRes, variantsRes] = await Promise.all([

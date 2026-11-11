@@ -76,7 +76,6 @@ const nextConfig: NextConfig = {
         source: '/politicas-de-devolucion',
         destination: '/ayuda/devoluciones',
       },
-
       {
         source: '/merchant-feed.xml',
         destination: '/api/merchant-feed',
@@ -111,25 +110,8 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: '.*\\.vercel\\.app',
-          },
-        ],
-        headers: [
-          {
-            key: 'X-Robots-Tag',
-            value: 'noindex, nofollow',
-          },
-        ],
-      },
     ];
   },
 };
 
 export default nextConfig;
-

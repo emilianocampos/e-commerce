@@ -6,6 +6,8 @@ import { formatCurrency } from '@/lib/utils';
 import { CheckCircle2, ShoppingBag, ArrowLeft, PackageCheck, Bell, ShieldCheck } from 'lucide-react';
 import { ClearCartOnSuccess } from '@/components/ClearCartOnSuccess';
 import { GoogleAdsConversionTracker } from '@/components/GoogleAdsConversionTracker';
+import { GoogleCustomerReviewsOptIn } from '@/components/GoogleCustomerReviewsOptIn';
+import { getUser } from '@/lib/auth';
 
 export const metadata = {
   title: '¡Compra Exitosa! | Klonfark',
@@ -64,6 +66,16 @@ export default async function PagosExitoPage({ searchParams }: SuccessPageProps)
 
   const whatsappUrl = `https://wa.me/${ownerPhone}?text=${encodeURIComponent(whatsappMessage)}`;
 
+  const currentUser = await getUser();
+  const customerEmail = (order as any)?.customer_email || currentUser?.email || '';
+  const baseDate = order?.created_at ? new Date(order.created_at) : new Date();
+  const estimatedDeliveryDate = new Date(baseDate.getTime() + 5 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
+  const orderGtins: string[] = (order?.order_items || [])
+    .map((item: any) => item.product?.barcode)
+    .filter(Boolean);
+
   return (
     <div className="min-h-[80vh] bg-zinc-950 text-white flex items-center justify-center py-12 px-4">
       {/* Resetea el carrito local */}
@@ -74,6 +86,15 @@ export default async function PagosExitoPage({ searchParams }: SuccessPageProps)
         transactionId={orderId || mpPaymentId}
         value={order?.total_amount}
         currency="ARS"
+      />
+
+      {/* Integración de Reseñas de Clientes en Google (Google Customer Reviews) */}
+      <GoogleCustomerReviewsOptIn
+        orderId={String(order?.id || orderId || mpPaymentId || 'ORDER_ID')}
+        email={customerEmail}
+        deliveryCountry="AR"
+        estimatedDeliveryDate={estimatedDeliveryDate}
+        gtins={orderGtins}
       />
 
       <div className="w-full max-w-2xl bg-zinc-900/80 border border-zinc-800 backdrop-blur-xl rounded-3xl p-6 sm:p-10 shadow-2xl shadow-emerald-950/20 relative overflow-hidden">

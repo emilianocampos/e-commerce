@@ -40,6 +40,17 @@ export const metadata: Metadata = {
   alternates: {
     canonical: './',
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   title: {
     template: "%s | KLONFARK",
     default: "KLONFARK | Suplementos, Ropa Deportiva y Urbana",
@@ -143,6 +154,31 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
+        <script
+          id="merchantWidgetScript"
+          src="https://www.gstatic.com/shopping/merchant/merchantwidget.js"
+          defer
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var widgetScript = document.getElementById('merchantWidgetScript');
+                if (widgetScript) {
+                  widgetScript.addEventListener('load', function () {
+                    if (window.merchantwidget) {
+                      window.merchantwidget.start({
+                        merchant_id: 5884819397,
+                        position: 'BOTTOM_LEFT',
+                        region: 'AR'
+                      });
+                    }
+                  });
+                }
+              })();
+            `,
+          }}
         />
         {googleTagId && (
           <>

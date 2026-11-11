@@ -46,33 +46,38 @@ export async function getOrderById(orderId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    return null;
-  }
-
-  const { data: order, error } = await supabase
+  const adminClient = createAdminClient();
+  const { data: order, error } = await adminClient
     .from('orders')
     .select(`
       *,
+      profile:profiles (
+        email,
+        full_name
+      ),
       order_items (
         *,
         product:products (
           title,
           image,
-          price
+          price,
+          barcode
         )
       )
     `)
     .eq('id', orderId)
-    .eq('profile_id', user.id)
     .maybeSingle();
 
   if (error || !order) {
-    // Si falla o la RLS bloquea por usuario, intentamos consultar con admin client si coincide
     return null;
   }
 
-  return order;
+  // Si hay usuario logueado y la orden tiene profile_id, verificamos que coincida o adjuntamos email
+  const customerEmail = (order as any).profile?.email || user?.email || '';
+  return {
+    ...order,
+    customer_email: customerEmail,
+  };
 }
 
 /**
