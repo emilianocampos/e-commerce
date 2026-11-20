@@ -7,6 +7,7 @@ import { CheckCircle2, ShoppingBag, ArrowLeft, PackageCheck, Bell, ShieldCheck }
 import { ClearCartOnSuccess } from '@/components/ClearCartOnSuccess';
 import { GoogleAdsConversionTracker } from '@/components/GoogleAdsConversionTracker';
 import { GoogleCustomerReviewsOptIn } from '@/components/GoogleCustomerReviewsOptIn';
+import { MetaPurchaseTracker } from '@/components/MetaEcommerceTrackers';
 import { getUser } from '@/lib/auth';
 
 export const metadata = {
@@ -75,6 +76,11 @@ export default async function PagosExitoPage({ searchParams }: SuccessPageProps)
   const orderGtins: string[] = (order?.order_items || [])
     .map((item: any) => item.product?.barcode)
     .filter(Boolean);
+  const metaPurchaseItems = (order?.order_items || []).map((item: any) => ({
+    id: String(item.product_id),
+    quantity: Number(item.quantity || 1),
+    item_price: Number(item.unit_price || 0),
+  }));
 
   return (
     <div className="min-h-[80vh] bg-zinc-950 text-white flex items-center justify-center py-12 px-4">
@@ -86,6 +92,16 @@ export default async function PagosExitoPage({ searchParams }: SuccessPageProps)
         transactionId={orderId || mpPaymentId}
         value={order?.total_amount}
         currency="ARS"
+      />
+
+      {/* Dispara evento Purchase a Meta Pixel + CAPI con deduplicación */}
+      <MetaPurchaseTracker
+        orderId={String(order?.id || orderId || mpPaymentId || '')}
+        value={order?.total_amount ? Number(order.total_amount) : undefined}
+        currency="ARS"
+        items={metaPurchaseItems}
+        email={customerEmail}
+        phone={(order as any)?.shipping_phone || undefined}
       />
 
       {/* Integración de Reseñas de Clientes en Google (Google Customer Reviews) */}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/Button';
 import { createCheckoutPreference } from '@/actions/mercadopago';
 import { showToast } from 'nextjs-toast-notify';
+import { trackMetaEvent } from '@/lib/meta-pixel';
 
 interface BuyNowButtonProps {
   productId: string;
@@ -13,6 +14,14 @@ export function BuyNowButton({ productId }: BuyNowButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleBuy = async (overridePhone?: string) => {
+    if (!overridePhone) {
+      trackMetaEvent('InitiateCheckout', {
+        content_ids: [productId],
+        content_type: 'product',
+        num_items: 1,
+        currency: 'ARS',
+      });
+    }
     setIsLoading(true);
     try {
       const response = await createCheckoutPreference([{ productId, quantity: 1 }], {

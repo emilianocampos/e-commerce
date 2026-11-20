@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { Payment } from 'mercadopago';
 import { mpClient } from '@/lib/mercadopago';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { sendMetaCapiEvent } from '@/lib/meta-capi';
+import { getSiteUrl } from '@/lib/site-url';
 
 /**
  * Este archivo implementa el Webhook de Mercado Pago.
@@ -93,6 +95,7 @@ export async function POST(request: Request) {
           const { data: orderItems } = await supabase
             .from('order_items')
             .select('product_id, quantity')
+            .select('product_id, quantity, unit_price')
             .eq('order_id', orderId);
 
           if (orderItems && orderItems.length > 0) {
@@ -108,6 +111,54 @@ export async function POST(request: Request) {
                 await supabase.from('products').update({ stock: newStock }).eq('id', item.product_id);
               }
             }
+          }
+
+          // 7. Enviar evento Purchase a Meta Conversions API (server-side, deduplicado con purchase_${orderId})
+          try {
+            const { data: fullOrder } = await supabase
+              .from('orders')
+              .select('id, total_amount, shipping_phone, shipping_city, shipping_zip, profile:profiles(email, full_name)')
+              .eq('id', orderId)
+              .single();
+
+            const profileData: any = Array.isArray((fullOrder as any)?.profile)
+              ? (fullOrder as any).profile[0]
+              : (fullOrder as any)?.profile;
+            const fullName: string = profileData?.full_name || '';
+            const [firstName, ...restName] = fullName.trim().split(/\s+/);
+            const lastName = restName.join(' ');
+
+            const contents = (orderItems || []).map((item: any) => ({
+              id: String(item.product_id),
+              quantity: Number(item.quantity || 1),
+              item_price: Number(item.unit_price || 0),
+            }));
+
+            await sendMetaCapiEvent({
+              eventName: 'Purchase',
+              eventId: `purchase_${orderId}`,
+              eventSourceUrl: `${getSiteUrl()}/pago/exito?external_reference=${orderId}`,
+              userData: {
+                email: profileData?.email || paymentData.payer?.email || undefined,
+                phone: (fullOrder as any)?.shipping_phone || undefined,
+                firstName: firstName || undefined,
+                lastName: lastName || undefined,
+                city: (fullOrder as any)?.shipping_city || undefined,
+                zip: (fullOrder as any)?.shipping_zip || undefined,
+                country: 'ar',
+              },
+              customData: {
+                content_ids: contents.map((c) => c.id),
+                contents,
+                content_type: 'product',
+                num_items: contents.reduce((acc, c) => acc + c.quantity, 0) || 1,
+                value: Number((fullOrder as any)?.total_amount || paymentData.transaction_amount || 0),
+                currency: 'ARS',
+                order_id: orderId,
+              },
+            });
+          } catch (capiErr) {
+            console.error('[Webhook MP] Error enviando Purchase a Meta CAPI:', capiErr);
           }
 
           console.log(`[Webhook MP] Productos procesados y stock actualizado exitosamente.`);

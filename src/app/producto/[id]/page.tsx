@@ -11,6 +11,7 @@ import { ProductReviews } from '@/components/ProductReviews';
 import { ProductGallery } from './ProductGallery';
 import { ProductPurchaseSection } from './ProductPurchaseSection';
 import { getSiteUrl } from '@/lib/site-url';
+import { MetaViewContentTracker } from '@/components/MetaEcommerceTrackers';
 
 export const revalidate = 60;
 
@@ -64,7 +65,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
   const supabase = await createClient();
-  
+
   let product: any = null;
   const { data: productData, error: productError } = await supabase
     .from('products')
@@ -106,7 +107,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   }
 
   const user = await getUser();
-  
+
   const { data: reviews } = await supabase
     .from('reviews')
     .select('*, profiles(email)')
@@ -122,19 +123,19 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   }
 
   const reviewsList = reviews || [];
-  const avgRating = reviewsList.length > 0 
+  const avgRating = reviewsList.length > 0
     ? (reviewsList.reduce((acc, r) => acc + r.rating, 0) / reviewsList.length)
     : 0;
 
-  const suppInfo = product.supplement_information 
-    ? (Array.isArray(product.supplement_information) ? product.supplement_information[0] : product.supplement_information) 
+  const suppInfo = product.supplement_information
+    ? (Array.isArray(product.supplement_information) ? product.supplement_information[0] : product.supplement_information)
     : null;
 
   const hasDiscount = Boolean(product.sale_price && product.sale_price < product.price);
-  const discountPercent = hasDiscount && product.sale_price 
-    ? Math.round(((product.price - product.sale_price) / product.price) * 100) 
+  const discountPercent = hasDiscount && product.sale_price
+    ? Math.round(((product.price - product.sale_price) / product.price) * 100)
     : 0;
-  
+
   const currentPrice = hasDiscount && product.sale_price ? product.sale_price : product.price;
   const originalPrice = hasDiscount ? product.price : null;
 
@@ -206,17 +207,26 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     },
     ...(reviewsList.length > 0
       ? {
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: avgRating.toFixed(1),
-            reviewCount: reviewsList.length,
-          },
-        }
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: avgRating.toFixed(1),
+          reviewCount: reviewsList.length,
+        },
+      }
       : {}),
   };
 
   return (
     <div className="w-full">
+      {/* Meta Pixel + CAPI: ViewContent */}
+      <MetaViewContentTracker
+        productId={product.id}
+        title={product.title}
+        category={product.categories?.name || product.category || 'Productos'}
+        price={Number(currentPrice || 0)}
+        currency="ARS"
+      />
+
       {/* Schema.org JSON-LD Structured Data for Google Shopping & Search Console */}
       <script
         type="application/ld+json"
@@ -240,7 +250,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
       <div className="container mx-auto px-4 pb-24 max-w-7xl">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-          
+
           {/* Left: Images */}
           <ProductGallery images={allImages} title={product.title} />
 
@@ -249,15 +259,15 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <h1 className="text-3xl lg:text-[40px] font-black tracking-tighter text-zinc-900 dark-title leading-tight mb-3 uppercase">
               {product.title}
             </h1>
-            
+
             <div className="flex items-center gap-4 mb-4">
               <div className="flex gap-1 text-[#FFC633]">
                 {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    fill={i + 1 <= avgRating ? "currentColor" : (i + 0.5 <= avgRating ? "url(#half-grad)" : "transparent")} 
-                    color={i + 1 <= Math.ceil(avgRating) ? "currentColor" : "#71717a"} 
-                    size={20} 
+                  <Star
+                    key={i}
+                    fill={i + 1 <= avgRating ? "currentColor" : (i + 0.5 <= avgRating ? "url(#half-grad)" : "transparent")}
+                    color={i + 1 <= Math.ceil(avgRating) ? "currentColor" : "#71717a"}
+                    size={20}
                   />
                 ))}
                 <svg width="0" height="0">
@@ -273,15 +283,15 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                 {avgRating.toFixed(1)}/5 <span className="text-zinc-400 font-normal">({reviewsList.length} reseñas)</span>
               </span>
             </div>
-            
-            <ProductPurchaseSection 
-              product={product} 
-              initialCurrentPrice={currentPrice} 
-              initialOriginalPrice={originalPrice} 
-              initialHasDiscount={hasDiscount} 
-              initialDiscountPercent={discountPercent} 
+
+            <ProductPurchaseSection
+              product={product}
+              initialCurrentPrice={currentPrice}
+              initialOriginalPrice={originalPrice}
+              initialHasDiscount={hasDiscount}
+              initialDiscountPercent={discountPercent}
             />
-            
+
             <p className="text-zinc-300 mb-6 leading-relaxed pb-6 border-b border-zinc-200/20">
               {product.description || 'Producto de alta calidad seleccionado especialmente para acompañar tu rendimiento y estilo.'}
             </p>
@@ -397,7 +407,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               Reseñas y Opiniones
             </button>
           </div>
-          
+
           <ProductReviews productId={product.id} reviews={reviewsList as any} user={user} />
         </div>
       </div>

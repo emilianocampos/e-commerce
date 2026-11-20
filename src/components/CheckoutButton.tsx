@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { showToast } from 'nextjs-toast-notify';
 import { ArrowRight } from 'lucide-react';
 import styles from './Cart.module.css';
+import { trackMetaEvent } from '@/lib/meta-pixel';
 
 interface CheckoutButtonProps {
   vipCardCode?: string;
@@ -22,6 +23,30 @@ export function CheckoutButton({ vipCardCode, isTransferPromo, promoCode }: Chec
 
   const handleBuy = async (overridePhone?: string) => {
     if (items.length === 0) return;
+
+    if (!overridePhone) {
+      const contents = items.map((item) => {
+        const unitPrice = item.product.sale_price && item.product.sale_price < item.product.price
+          ? item.product.sale_price
+          : item.product.price;
+        return {
+          id: item.product.id,
+          quantity: item.quantity,
+          item_price: Number(unitPrice),
+        };
+      });
+      const totalValue = contents.reduce((acc, c) => acc + c.item_price * c.quantity, 0);
+      const numItems = contents.reduce((acc, c) => acc + c.quantity, 0);
+
+      trackMetaEvent('InitiateCheckout', {
+        content_ids: contents.map((c) => c.id),
+        contents,
+        content_type: 'product',
+        num_items: numItems,
+        value: totalValue,
+        currency: 'ARS',
+      });
+    }
     
     setIsLoading(true);
     try {

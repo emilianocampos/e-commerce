@@ -5,6 +5,7 @@ import { Product } from '@/types/product';
 import { ShoppingCart, Flame, Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { showToast } from 'nextjs-toast-notify';
+import { trackMetaEvent } from '@/lib/meta-pixel';
 
 interface AddToCartButtonProps {
   product: Product;
@@ -71,6 +72,18 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     }
 
     addItem(product, sizeToUse, quantity, selectedColor || undefined);
+
+    const unitPrice = product.sale_price && product.sale_price < product.price
+      ? product.sale_price
+      : product.price;
+    trackMetaEvent('AddToCart', {
+      content_ids: [product.id],
+      content_name: product.title,
+      content_type: 'product',
+      contents: [{ id: product.id, quantity, item_price: Number(unitPrice) }],
+      value: Number(unitPrice) * quantity,
+      currency: 'ARS',
+    });
     
     showToast.success('Producto agregado al carrito', {
       position: 'bottom-right',
