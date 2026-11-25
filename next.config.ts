@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   compress: true,
   images: {
+    unoptimized: true,
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 2678400, // 31 días de caché en el CDN de Vercel para no re-descargar de Supabase a Compute
     remotePatterns: [
