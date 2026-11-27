@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Star, StarHalf, User } from 'lucide-react';
 import { createReview } from '@/actions/reviews';
 import { showToast } from 'nextjs-toast-notify';
+import { createClient } from '@/lib/supabase-client';
 
 interface Review {
   id: string;
@@ -18,14 +19,24 @@ interface Review {
 interface ProductReviewsProps {
   productId: string;
   reviews: Review[];
-  user: any; // Supabase user
+  user?: any; // Supabase user (opcional, se resuelve en cliente si no se pasa)
 }
 
-export function ProductReviews({ productId, reviews, user }: ProductReviewsProps) {
+export function ProductReviews({ productId, reviews, user: initialUser }: ProductReviewsProps) {
+  const [user, setUser] = useState<any>(initialUser ?? null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    if (initialUser !== undefined) return;
+    if (typeof document === 'undefined' || !document.cookie.includes('-auth-token')) return;
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) setUser(data.user);
+    });
+  }, [initialUser]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

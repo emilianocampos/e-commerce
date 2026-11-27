@@ -119,13 +119,15 @@ export default async function proxy(request: NextRequest) {
 
 // 9. Configuración adicional de Next.js
 export const config = {
-  // Le decimos a Next.js en qué rutas queremos que se ejecute este proxy
+  // Solo ejecutar el proxy en rutas que requieren protección de sesión o redirección por rol.
+  // Excluye páginas públicas (/ , /shop, /producto/*, /hombre, /mujer, /combos, /suplementos, /ayuda/*, /api/*)
+  // para evitar consumo innecesario de Fluid Active CPU en Vercel.
   matcher: [
-    /*
-     * Matcher para excluir archivos estáticos y de imagen.
-     * No tiene sentido gastar recursos revisando si hay sesión en cada
-     * imagen o archivo .css que se descarga.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/admin/:path*',
+    '/perfil/:path*',
+    '/checkout/:path*',
+    '/login',
+    '/register',
+    '/recuperar-contrasena',
   ],
 };

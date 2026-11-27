@@ -9,8 +9,8 @@ import "./globals.css";
 import { NavbarWrapper } from "@/components/NavbarWrapper";
 import { CartDrawer } from "@/components/CartDrawer";
 import { FooterWrapper } from "@/components/FooterWrapper";
-import { getUser, getProfile } from "@/lib/auth";
 import { getStoreSettings } from "@/actions/settings";
+import { getSupplementBrands } from "@/actions/brands";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { hexToRgb } from "@/lib/utils";
 import { Suspense } from "react";
@@ -93,12 +93,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // a. Consultamos autenticación y configuración en paralelo (ahorra hasta 400ms por petición)
-  const [user, settings] = await Promise.all([
-    getUser(),
+  // a. Consultamos configuración y marcas públicas cacheadas (sin cookies para habilitar ISR en toda la tienda)
+  const [settings, supplementBrands] = await Promise.all([
     getStoreSettings(),
+    getSupplementBrands(),
   ]);
-  const profile = user ? await getProfile() : null;
 
   const rawGoogleVerification = settings?.google_site_verification || process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
   const googleSiteVerification = (() => {
@@ -234,8 +233,8 @@ export default async function RootLayout({
         <Suspense fallback={null}>
           <MetaPixel />
         </Suspense>
-        {/* Renderizamos el Navbar pasando los datos del usuario como props para que sepa quién es y qué rol tiene */}
-        <NavbarWrapper user={user} role={profile?.role || null} settings={settings} />
+        {/* Renderizamos el Navbar pasando configuración y marcas cacheadas; el usuario se resuelve en cliente si hay sesión */}
+        <NavbarWrapper settings={settings} brands={supplementBrands} />
         
         {/* Renderizamos el contenido central de la página (el hijo) */}
         <main className="flex-1 flex flex-col">{children}</main>

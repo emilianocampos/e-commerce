@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase-server';
+import { createPublicClient } from '@/lib/supabase-public';
 import { permanentRedirect } from 'next/navigation';
 import Image from 'next/image';
 import { formatCurrency } from '@/lib/utils';
@@ -6,7 +6,6 @@ import { Metadata } from 'next';
 import { Star, Tag, Package } from 'lucide-react';
 import Link from 'next/link';
 
-import { getUser } from '@/lib/auth';
 import { ProductReviews } from '@/components/ProductReviews';
 import { ProductGallery } from './ProductGallery';
 import { ProductPurchaseSection } from './ProductPurchaseSection';
@@ -17,7 +16,7 @@ export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data: product } = await supabase.from('products').select('title, description, image').eq('id', resolvedParams.id).maybeSingle();
 
   if (!product) {
@@ -64,7 +63,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   let product: any = null;
   const { data: productData, error: productError } = await supabase
@@ -105,8 +104,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       product_variants: variantsRes.data || []
     };
   }
-
-  const user = await getUser();
 
   const { data: reviews } = await supabase
     .from('reviews')
@@ -408,7 +405,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             </button>
           </div>
 
-          <ProductReviews productId={product.id} reviews={reviewsList as any} user={user} />
+          <ProductReviews productId={product.id} reviews={reviewsList as any} />
         </div>
       </div>
     </div>

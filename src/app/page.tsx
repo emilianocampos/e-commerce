@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase-server';
+import { createPublicClient } from '@/lib/supabase-public';
 import { Hero } from '@/components/Hero';
 import { BrandsBanner } from '@/components/BrandsBanner';
 import { ProductSection } from '@/components/ProductSection';
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function Home() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const settings = await getStoreSettings();
   
   const { data: products, error } = await supabase

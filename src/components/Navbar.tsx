@@ -16,9 +16,10 @@ interface NavbarProps {
   user: User | null;
   role: string | null;
   settings?: any;
+  initialBrands?: Brand[];
 }
 
-export function Navbar({ user, role, settings }: NavbarProps) {
+export function Navbar({ user, role, settings, initialBrands }: NavbarProps) {
   const cartItems = useCartStore((state) => state.items);
   const openCart = useCartStore((state) => state.openCart);
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -30,13 +31,14 @@ export function Navbar({ user, role, settings }: NavbarProps) {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   
-  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brands, setBrands] = useState<Brand[]>(initialBrands || []);
   const [mobileSuplementosOpen, setMobileSuplementosOpen] = useState(false);
   const [mobileUrbanoOpen, setMobileUrbanoOpen] = useState(false);
 
   useEffect(() => {
+    if (initialBrands && initialBrands.length > 0) return;
     getSupplementBrands().then(setBrands);
-  }, []);
+  }, [initialBrands]);
 
   // Handle scroll effect
   useEffect(() => {

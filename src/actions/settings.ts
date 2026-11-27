@@ -1,22 +1,30 @@
 'use server';
 
 import { createClient } from '@/lib/supabase-server';
+import { createPublicClient } from '@/lib/supabase-public';
 import { getUser, getProfile } from '@/lib/auth';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
+
+const fetchCachedStoreSettings = unstable_cache(
+  async () => {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from('store_settings')
+      .select('*')
+      .eq('id', 1)
+      .single();
+
+    if (error) {
+      return null;
+    }
+    return data;
+  },
+  ['store-settings'],
+  { revalidate: 300, tags: ['store-settings'] }
+);
 
 export async function getStoreSettings() {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('store_settings')
-    .select('*')
-    .eq('id', 1)
-    .single();
-
-  if (error) {
-    // Silently return null if table doesn't exist yet
-    return null;
-  }
-  return data;
+  return fetchCachedStoreSettings();
 }
 
 export async function updateStoreSettings(prevState: any, formData: FormData) {
